@@ -1,9 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
-import { AddBalanceForm } from '@/components/AddBalanceForm'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { format } from 'date-fns'
+import { AddBalanceForm } from '@/modules/finance/components'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge, Card, CardContent, CardHeader, CardTitle } from '@/modules/shared/components/ui'
+import { formatDate } from '@/modules/shared/utils'
 
 export const dynamic = 'force-dynamic'
 

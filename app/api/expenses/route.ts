@@ -9,7 +9,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from('expenses')
-      .select(`*, category:categories(*)`)
+      .select(`*, category:categories(*), account:accounts(*)`)
       .eq('user_id', user.id)
       .order('date', { ascending: false })
 
@@ -27,15 +27,39 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const json = await request.json()
-    const { amount, note, date, category_id } = json
+    const { amount, note, date, category_id, account_id } = json
 
     const { data, error } = await supabase
       .from('expenses')
-      .insert({ amount, note, date, category_id, user_id: user.id })
+      .insert({ amount, note, date, category_id, account_id, user_id: user.id })
       .select()
       .single()
 
     if (error) throw error
+
+    // Get category for icon and color
+    const { data: category } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('id', category_id)
+      .eq('user_id', user.id)
+      .single()
+
+    // Create timeline event
+    await supabase
+      .from('timeline_events')
+      .insert({
+        user_id: user.id,
+        timestamp: date,
+        type: 'expense',
+        title: note || category?.name || 'Expense',
+        description: `₹${amount.toLocaleString('en-IN')}`,
+        source_module: 'finance',
+        icon: category?.icon || 'credit-card',
+        color: category?.color || 'bg-blue-500',
+        metadata: { expenseId: data.id, amount },
+      });
+
     return NextResponse.json(data)
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })

@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/Sidebar";
-import { FloatingDock } from "@/components/FloatingDock";
+import { Sidebar, FloatingDock } from "@/modules/shared/components/layout";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ThemeProvider } from "@/modules/shared/components/providers/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

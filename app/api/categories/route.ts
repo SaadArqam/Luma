@@ -11,7 +11,9 @@ export async function GET() {
       .from('categories')
       .select('*')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: true })
+      .eq('archived', false)
+      .order('ordering', { ascending: true })
+      .order('name', { ascending: true })
 
     if (error) throw error
     return NextResponse.json(data)
@@ -26,12 +28,19 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const json = await request.json()
-    const { name, icon } = json
+    const { name, icon, type, color, daily_budget, parent_id } = await request.json()
 
     const { data, error } = await supabase
       .from('categories')
-      .insert({ name, icon, user_id: user.id })
+      .insert({ 
+        name, 
+        icon, 
+        user_id: user.id,
+        type: type || 'expense',
+        color,
+        daily_budget,
+        parent_id,
+      })
       .select()
       .single()
 

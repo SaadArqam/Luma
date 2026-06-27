@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
-import { CategoryList } from '@/components/CategoryList'
-import { AddCategoryForm } from '@/components/AddCategoryForm'
+import { CategoryList, AddCategoryForm } from '@/modules/finance/components'
 
 export const dynamic = 'force-dynamic'
 

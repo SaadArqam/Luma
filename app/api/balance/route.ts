@@ -8,9 +8,9 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const json = await request.json()
-    const { amount, note, type, date } = json
+    const { amount, note, type, date, account_id } = json
 
-    const insertData: Record<string, any> = { amount, note, type, user_id: user.id }
+    const insertData: Record<string, any> = { amount, note, type, account_id, user_id: user.id }
     if (date) {
       insertData.created_at = new Date(date).toISOString()
     }

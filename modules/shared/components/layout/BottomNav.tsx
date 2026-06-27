@@ -1,12 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Wallet, Receipt, BarChart2, Settings } from 'lucide-react'
+import { Home, Wallet, Receipt, BarChart2, Settings, CreditCard, Clock } from 'lucide-react'
 
 const links = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/balance', icon: Wallet, label: 'Balance' },
+  { href: '/today', icon: Home, label: 'Today' },
+  { href: '/accounts', icon: CreditCard, label: 'Accounts' },
   { href: '/expenses', icon: Receipt, label: 'Expenses' },
+  { href: '/timeline', icon: Clock, label: 'Timeline' },
   { href: '/reports', icon: BarChart2, label: 'Reports' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
@@ -15,7 +16,7 @@ export default function BottomNav() {
   const path = usePathname()
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 border-t border-border bg-background"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t border-border bg-background"
       style={{ height: '64px', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {links.map(({ href, icon: Icon, label }) => {
