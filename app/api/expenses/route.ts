@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
+import { emitEvent } from '@/modules/rules'
+import { lifeGraphService } from '@/modules/life-graph'
 
 export async function GET() {
   try {
@@ -46,7 +48,7 @@ export async function POST(request: Request) {
       .single()
 
     // Create timeline event
-    await supabase
+    const { data: timelineEvent } = await supabase
       .from('timeline_events')
       .insert({
         user_id: user.id,
@@ -58,7 +60,37 @@ export async function POST(request: Request) {
         icon: category?.icon || 'credit-card',
         color: category?.color || 'bg-blue-500',
         metadata: { expenseId: data.id, amount },
+      })
+      .select()
+      .single();
+
+    // Create transaction graph node
+    const transactionNode = await lifeGraphService.createNode(user.id, 'transaction', data.id, {
+      amount,
+      note,
+      categoryId: category_id,
+    });
+
+    // Create timeline event graph node if available
+    if (timelineEvent) {
+      const timelineNode = await lifeGraphService.createNode(user.id, 'timeline_event', timelineEvent.id, {
+        type: timelineEvent.type,
+        title: timelineEvent.title,
       });
+
+      await lifeGraphService.createEdge(user.id, transactionNode.id, timelineNode.id, 'generated_by');
+    }
+
+    // Emit event for rules engine
+    emitEvent('transaction.created', user.id, {
+      id: data.id,
+      amount,
+      note,
+      date,
+      categoryId: category_id,
+      accountId: account_id,
+      category
+    });
 
     return NextResponse.json(data)
   } catch (error: any) {

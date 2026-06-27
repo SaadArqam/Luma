@@ -45,4 +45,6 @@ next-env.d.ts
 
 .claude
 
+# Database migrations
+migrations/
 *.sql

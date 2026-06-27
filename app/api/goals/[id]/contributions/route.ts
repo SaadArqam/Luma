@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
+import { emitEvent } from '@/modules/rules';
+import { lifeGraphService } from '@/modules/life-graph';
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
@@ -50,7 +52,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       .single();
 
     // Create contribution timeline event
-    await supabase
+    const { data: contributionTimelineEvent } = await supabase
       .from('timeline_events')
       .insert({
         user_id: user.id,
@@ -62,11 +64,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
         icon: 'piggy-bank',
         color: fullGoal?.color || 'bg-blue-500',
         metadata: { contributionId: contribution.id, goalId: contribution.goal_id, amount },
-      });
+      })
+      .select()
+      .single();
 
+    let completedTimelineEvent: any = null;
     // Create goal completed event if status changed
     if (newStatus === 'completed' && goal?.status !== 'completed') {
-      await supabase
+      const { data } = await supabase
         .from('timeline_events')
         .insert({
           user_id: user.id,
@@ -78,8 +83,47 @@ export async function POST(request: Request, { params }: { params: { id: string 
           icon: 'trophy',
           color: 'bg-yellow-500',
           metadata: { goalId: params.id },
-        });
+        })
+        .select()
+        .single();
+      completedTimelineEvent = data;
     }
+
+    // Get or create goal node
+    let goalNode = await lifeGraphService.getNode(user.id, 'goal', params.id);
+    if (!goalNode) {
+      goalNode = await lifeGraphService.createNode(user.id, 'goal', params.id, {
+        title: fullGoal?.title,
+      });
+    }
+
+    // Handle contribution timeline event
+    if (contributionTimelineEvent) {
+      const contributionTimelineNode = await lifeGraphService.createNode(user.id, 'timeline_event', contributionTimelineEvent.id, {
+        type: contributionTimelineEvent.type,
+        title: contributionTimelineEvent.title,
+      });
+      await lifeGraphService.createEdge(user.id, goalNode.id, contributionTimelineNode.id, 'generated_by');
+    }
+
+    // Handle completed timeline event
+    if (completedTimelineEvent) {
+      const completedTimelineNode = await lifeGraphService.createNode(user.id, 'timeline_event', completedTimelineEvent.id, {
+        type: completedTimelineEvent.type,
+        title: completedTimelineEvent.title,
+      });
+      await lifeGraphService.createEdge(user.id, goalNode.id, completedTimelineNode.id, 'generated_by');
+    }
+
+    // Emit event for rules engine
+    emitEvent('goal.contribution', user.id, {
+      id: contribution.id,
+      goalId: contribution.goal_id,
+      amount,
+      note,
+      date: contribution.date,
+      goal: fullGoal
+    });
 
     return NextResponse.json(contribution);
   } catch (error: any) {

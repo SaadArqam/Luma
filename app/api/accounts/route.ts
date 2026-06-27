@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
+import { emitEvent } from '@/modules/rules';
 
 export async function GET() {
   try {
@@ -84,6 +85,16 @@ export async function POST(request: Request) {
       .single();
 
     if (error) throw error;
+
+    // Emit event for rules engine
+    emitEvent('account.created', user.id, {
+      id: account.id,
+      name: account.name,
+      type: account.type,
+      icon: account.icon,
+      color: account.color,
+      openingBalance: account.opening_balance
+    });
 
     return NextResponse.json(account);
   } catch (error: any) {

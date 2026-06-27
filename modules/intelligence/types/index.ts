@@ -42,10 +42,13 @@ export interface BaseAgent {
 export interface Insight {
   id: string;
   title: string;
-  description: string;
+  summary: string;
   type: 'positive' | 'warning' | 'info' | 'suggestion';
   priority: 'low' | 'medium' | 'high';
+  category: 'spending' | 'budgets' | 'goals' | 'savings' | 'recurring';
   source: 'finance' | 'goals' | 'timeline';
+  confidence: 'low' | 'medium' | 'high';
+  suggestedActions?: string[];
   metadata?: Record<string, unknown>;
   createdAt: Date;
 }

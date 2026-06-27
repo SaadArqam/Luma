@@ -1,18 +1,30 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 
-export async function GET() {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const json = await request.json()
+    const { next_due_date, is_active } = json
+
+    const updateData: any = {}
+    if (next_due_date !== undefined) updateData.next_due_date = next_due_date
+    if (is_active !== undefined) updateData.is_active = is_active
+
     const { data, error } = await supabase
-      .from('recurring_expenses')
-      .select(`*, categories(name, icon)`)
+      .from('recurring_transactions')
+      .update(updateData)
+      .eq('id', id)
       .eq('user_id', user.id)
-      .eq('is_active', true)
-      .order('next_due_date', { ascending: true })
+      .select()
+      .single()
 
     if (error) throw error
     return NextResponse.json(data)
@@ -21,31 +33,26 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const json = await request.json()
-    const { name, amount, category_id, frequency, custom_days, next_due_date } = json
-
     const { data, error } = await supabase
-      .from('recurring_expenses')
-      .insert({
-        name,
-        amount,
-        category_id,
-        frequency: frequency || 'monthly',
-        custom_days: frequency === 'custom' ? (custom_days || 30) : null,
-        next_due_date,
-        user_id: user.id,
-      })
+      .from('recurring_transactions')
+      .update({ is_active: false })
+      .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
     if (error) throw error
-    return NextResponse.json(data)
+    return NextResponse.json({ success: true, data })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

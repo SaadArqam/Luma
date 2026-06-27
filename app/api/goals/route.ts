@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 import { addMonths, format } from 'date-fns';
+import { emitEvent } from '@/modules/rules';
+import { lifeGraphService } from '@/modules/life-graph';
 
 export async function GET() {
   try {
@@ -64,7 +66,7 @@ export async function POST(request: Request) {
     if (error) throw error;
 
     // Create timeline event
-    await supabase
+    const { data: timelineEvent } = await supabase
       .from('timeline_events')
       .insert({
         user_id: user.id,
@@ -76,7 +78,36 @@ export async function POST(request: Request) {
         icon: goal.icon,
         color: goal.color,
         metadata: { goalId: goal.id, targetAmount: goal.target_amount },
+      })
+      .select()
+      .single();
+
+    // Create graph nodes
+    const goalNode = await lifeGraphService.createNode(user.id, 'goal', goal.id, {
+      title: goal.title,
+      description: goal.description,
+    });
+
+    if (timelineEvent) {
+      const timelineNode = await lifeGraphService.createNode(user.id, 'timeline_event', timelineEvent.id, {
+        type: timelineEvent.type,
+        title: timelineEvent.title,
       });
+
+      // Connect goal to timeline event
+      await lifeGraphService.createEdge(user.id, goalNode.id, timelineNode.id, 'generated_by');
+    }
+
+    // Emit event for rules engine
+    emitEvent('goal.created', user.id, {
+      id: goal.id,
+      title: goal.title,
+      description: goal.description,
+      targetAmount: goal.target_amount,
+      targetDate: goal.target_date,
+      icon: goal.icon,
+      color: goal.color
+    });
 
     return NextResponse.json(goal);
   } catch (error: any) {
