@@ -37,14 +37,14 @@ export function Sidebar() {
     cn(
       'w-10 h-10 rounded-xl flex items-center justify-center mx-auto transition-all duration-150 cursor-pointer',
       isActive
-        ? 'text-[#E8B84B] bg-[#1C1600]'
-        : 'text-[#2E2E2E] hover:text-[#555555] hover:bg-[#161616]'
+        ? 'text-accent bg-accent/10'
+        : 'text-muted-foreground hover:text-text hover:bg-surface'
     )
 
   return (
-    <aside className="hidden md:flex flex-col w-14 min-h-screen sticky top-0 shrink-0 border-r border-[#1E1E1E] bg-[#0C0C0C]">
+    <aside className="hidden md:flex flex-col w-14 min-h-screen sticky top-0 shrink-0 border-r border-border bg-background">
       <div className="py-5 mb-2 flex items-center justify-center">
-        <span className="font-bold text-sm text-[#E8B84B]">P</span>
+        <span className="font-bold text-sm text-accent">L</span>
       </div>
 
       <nav className="flex-1 flex flex-col gap-1 px-2">
@@ -77,7 +77,7 @@ export function Sidebar() {
           <Link
             href="/settings"
             title="Account"
-            className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto bg-[#1C1600] text-[#E8B84B] text-xs font-bold hover:bg-[#251E00] transition-colors"
+            className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto bg-accent/10 text-accent text-xs font-bold hover:bg-accent/20 transition-colors"
           >
             {userInitial}
           </Link>

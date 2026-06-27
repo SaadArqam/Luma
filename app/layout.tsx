@@ -2,8 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
-import BottomNav from '@/components/BottomNav';
+import { FloatingDock } from "@/components/FloatingDock";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,8 +18,8 @@ const geistMono = Geist_Mono({
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0C0C0C" },
-    { media: "(prefers-color-scheme: light)", color: "#0C0C0C" },
+    { media: "(prefers-color-scheme: dark)", color: "oklch(0.12 0.008 85)" },
+    { media: "(prefers-color-scheme: light)", color: "oklch(0.98 0.005 85)" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -28,30 +29,30 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "PaisaTrack",
-    template: "%s | PaisaTrack",
+    default: "Luma",
+    template: "%s | Luma",
   },
   description:
-    "Track your daily expenses, manage your balance, set budgets, and stay on top of recurring payments.",
-  applicationName: "PaisaTrack",
-  authors: [{ name: "PaisaTrack" }],
-  keywords: ["expense tracker", "budget", "finance", "personal finance", "spending tracker"],
+    "Luma - Your modular personal operating system. Track expenses, manage goals, build habits, and stay organized.",
+  applicationName: "Luma",
+  authors: [{ name: "Luma" }],
+  keywords: ["personal os", "expense tracker", "budget", "finance", "goals", "habits", "planner"],
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "PaisaTrack",
+    title: "Luma",
     startupImage: ["/apple-touch-icon.png"],
   },
   openGraph: {
     type: "website",
-    siteName: "PaisaTrack",
-    title: "PaisaTrack - Personal Expense Manager",
-    description: "Track expenses, manage balance, and stay on budget.",
+    siteName: "Luma",
+    title: "Luma - Your Personal Operating System",
+    description: "Track expenses, manage goals, build habits, and stay organized.",
   },
   twitter: {
     card: "summary",
-    title: "PaisaTrack",
-    description: "Track expenses, manage balance, and stay on budget.",
+    title: "Luma",
+    description: "Track expenses, manage goals, build habits, and stay organized.",
   },
   icons: {
     icon: [
@@ -76,15 +77,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col md:flex-row bg-background text-foreground">
-        <Sidebar />
-        <main className="flex-1 min-w-0 pb-16 md:pb-0 overflow-y-auto">
-          {children}
-        </main>
-        <Toaster />
-        <BottomNav />
+        <ThemeProvider defaultTheme="dark" storageKey="luma-theme">
+          <Sidebar />
+          <main className="flex-1 min-w-0 pb-24 md:pb-0 overflow-y-auto">
+            {children}
+          </main>
+          <Toaster />
+          <FloatingDock />
+        </ThemeProvider>
       </body>
     </html>
   );
