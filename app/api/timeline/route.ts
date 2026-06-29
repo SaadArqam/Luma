@@ -27,6 +27,8 @@ export async function GET() {
       icon: event.icon,
       color: event.color,
       metadata: event.metadata,
+      deepLink: event.deep_link,
+      entityId: event.entity_id,
     }));
 
     return NextResponse.json(typedEvents);

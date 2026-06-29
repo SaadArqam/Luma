@@ -4,10 +4,12 @@ export interface TimelineEvent {
   type: string;
   title: string;
   description?: string;
-  sourceModule: 'finance' | 'goals' | 'planner' | 'habits' | 'journal' | 'health' | 'ai' | 'notifications';
+  sourceModule: 'finance' | 'goals' | 'planner' | 'habits' | 'journal' | 'health' | 'ai' | 'notifications' | 'capture';
   icon: string;
   color: string;
   metadata?: Record<string, unknown>;
+  deepLink?: string;
+  entityId?: string;
 }
 
 export interface TimelineGroup {

@@ -1,36 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { WidgetContainer } from '@/components/ui/widget-container';
-import { MetricCard } from '@/components/ui/metric-card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Wallet, CheckSquare, Sparkles, Clock, TrendingUp } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
-import { formatCurrency } from '@/modules/shared/utils';
-import { startOfDay, endOfDay, startOfMonth, endOfMonth, format } from 'date-fns';
-import { TodayGoalWidget } from '@/modules/goals/components/TodayGoalWidget';
-import { TimelineWidget } from '@/modules/timeline/components';
-import { InsightCard, LoadingInsight } from '@/modules/intelligence/components';
-import { InsightService } from '@/modules/intelligence/services';
-import { DailyBriefCard } from '@/modules/daily-brief/components';
-import { UpcomingBillsWidget } from '@/modules/recurring-transactions/components/UpcomingBillsWidget';
-import type { Insight } from '@/modules/intelligence/types';
+import { startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
+import { TodaySection } from '@/modules/today/components';
+import { todayContextService } from '@/modules/today/services';
+import { contextEngine, todayProvider, timelineProvider, financeProvider, goalsProvider, captureProvider } from '@/modules/context';
+import type { TodayData, TodayContext } from '@/modules/today/types';
 
-interface FinanceData {
-  user: any;
-  todayExpenseTotal: number;
-  budgetRemaining: number;
-  monthExpenseTotal: number;
-  currentBalance: number;
-  recentExpenses: any[];
-  pendingRecurring: any[];
-  totalDailyBudget: number;
-  todayExpenses: any[];
-  goals: any[];
-  timelineEvents: any[];
-  accounts: any[];
-  budgets: any[];
-  recurringPayments: any[];
+interface FinanceData extends TodayData {
+  insights: any[];
 }
 
 async function fetchData(): Promise<FinanceData | null> {
@@ -132,15 +112,14 @@ async function fetchData(): Promise<FinanceData | null> {
     accounts: formattedAccounts,
     budgets,
     recurringPayments: formattedRecurring,
+    insights: [],
   };
 }
 
 export default function TodayPage() {
   const [data, setData] = useState<FinanceData | null>(null);
-  const [insights, setInsights] = useState<Insight[]>([]);
+  const [context, setContext] = useState<TodayContext | null>(null);
   const [loading, setLoading] = useState(true);
-  const [insightsLoading, setInsightsLoading] = useState(true);
-  const now = new Date();
 
   useEffect(() => {
     async function loadData() {
@@ -149,21 +128,24 @@ export default function TodayPage() {
         setData(financeData);
         
         if (financeData) {
-          const insightService = new InsightService();
-          const userInsights = await insightService.getDailyInsights({
-            accounts: financeData.accounts,
-            expenses: financeData.recentExpenses,
-            budgets: financeData.budgets,
-            goals: financeData.goals,
-            recurringPayments: financeData.recurringPayments,
-          });
-          setInsights(userInsights);
+          // Register Context Engine providers
+          contextEngine.registerProvider(todayProvider);
+          contextEngine.registerProvider(timelineProvider);
+          contextEngine.registerProvider(financeProvider);
+          contextEngine.registerProvider(goalsProvider);
+          contextEngine.registerProvider(captureProvider);
+          
+          // Use Context Engine for enhanced context
+          const dailyContext = await contextEngine.getCurrentContext(financeData.user.id);
+          
+          // Fall back to existing Today context service for now
+          const todayContext = todayContextService.buildContext(financeData);
+          setContext(todayContext);
         }
       } catch (error) {
         console.error('Failed to load data:', error);
       } finally {
         setLoading(false);
-        setInsightsLoading(false);
       }
     }
 
@@ -174,94 +156,49 @@ export default function TodayPage() {
     return (
       <div className="space-y-6">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-32 bg-card border border-border rounded-2xl animate-pulse" />
+          <div key={i} className="h-32 bg-card border border-border/50 rounded-2xl animate-pulse" />
         ))}
+      </div>
+    );
+  }
+
+  if (!data || !context) {
+    return (
+      <EmptyState
+        title="No data available"
+        description="Unable to load your financial data. Please try again later."
+      />
+    );
+  }
+
+  // Empty state for new users
+  if (!context.hasData) {
+    return (
+      <div className="space-y-6">
+        <TodaySection 
+          section={{ type: 'greeting', priority: 100, visible: true, data: { timeOfDay: context.timeOfDay } }} 
+          data={data} 
+        />
+        <EmptyState
+          title="Welcome to PaisaTrack"
+          description="Start your financial journey by adding your first expense or setting up a budget."
+        />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <DailyBriefCard />
-
-      <WidgetContainer title="Upcoming Bills">
-        <UpcomingBillsWidget />
-      </WidgetContainer>
-
-      <WidgetContainer title="Daily Summary">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            title="Today's Spending"
-            value={formatCurrency(data?.todayExpenseTotal || 0)}
-            icon={<Wallet className="w-5 h-5 text-accent" />}
+      {context.sections.map((section) => (
+        section.visible && (
+          <TodaySection 
+            key={section.type} 
+            section={section} 
+            data={data}
+            onRecommendationAction={(action) => console.log('Action:', action)}
           />
-          <MetricCard
-            title="Budget Remaining"
-            value={formatCurrency(data?.budgetRemaining || 0)}
-            icon={<TrendingUp className="w-5 h-5 text-accent" />}
-          />
-          <MetricCard
-            title="Pending Bills"
-            value={data?.pendingRecurring?.length || 0}
-            icon={<Clock className="w-5 h-5 text-accent" />}
-          />
-          <MetricCard
-            title="Transactions Today"
-            value={data?.todayExpenses?.length || 0}
-            icon={<Wallet className="w-5 h-5 text-accent" />}
-          />
-        </div>
-      </WidgetContainer>
-
-      <WidgetContainer title="Money Snapshot">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <MetricCard
-            title="Current Balance"
-            value={formatCurrency(data?.currentBalance || 0)}
-            icon={<Wallet className="w-5 h-5 text-accent" />}
-          />
-          <MetricCard
-            title="This Month"
-            value={formatCurrency(data?.monthExpenseTotal || 0)}
-            icon={<TrendingUp className="w-5 h-5 text-accent" />}
-          />
-          <MetricCard
-            title="Daily Budget"
-            value={formatCurrency(data?.totalDailyBudget || 0)}
-            icon={<Wallet className="w-5 h-5 text-accent" />}
-          />
-        </div>
-      </WidgetContainer>
-
-      <WidgetContainer title="AI Insights">
-        {insightsLoading ? (
-          <LoadingInsight />
-        ) : insights.length > 0 ? (
-          <div className="space-y-4">
-            {insights.map((insight) => (
-              <InsightCard key={insight.id} insight={insight} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={<Sparkles className="h-8 w-8" />}
-            title="No insights yet"
-            description="Add more transactions and goals to get personalized AI insights"
-          />
-        )}
-      </WidgetContainer>
-
-      <TodayGoalWidget goals={data?.goals || []} />
-
-      <WidgetContainer title="Tasks">
-        <EmptyState
-          icon={<CheckSquare className="h-8 w-8" />}
-          title="No tasks today"
-          description="Add tasks to track your daily progress"
-        />
-      </WidgetContainer>
-
-      <TimelineWidget events={data?.timelineEvents || []} limit={5} />
+        )
+      ))}
     </div>
   );
 }

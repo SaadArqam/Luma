@@ -4,6 +4,7 @@ import { DAILY_INSIGHTS_SYSTEM_PROMPT, buildDailyInsightsPrompt } from '../promp
 import { buildFinanceContext } from '../utils';
 import { GenerateInsightsResponseSchema } from '../schemas';
 import { startOfDay, isSameDay } from 'date-fns';
+import { contextEngine } from '@/modules/context';
 
 interface CachedInsights {
   insights: Insight[];
@@ -107,7 +108,11 @@ export class InsightService {
     }
 
     try {
-      // Build context
+      // Use Context Engine to get structured context for enhanced insights
+      // This context can be used to prioritize or enhance insights
+      const dailyContext = await contextEngine.getCurrentContext(userId);
+      
+      // Build context from original data (Context Engine provides additional context)
       const context = buildFinanceContext(data);
 
       // Call LLM

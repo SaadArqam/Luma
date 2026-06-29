@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Sidebar, FloatingDock } from "@/modules/shared/components/layout";
+import { ExperienceNavigation, ExperienceFloatingDock } from "@/modules/shared/components/layout";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/modules/shared/components/providers/ThemeProvider";
 
@@ -78,14 +78,14 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col md:flex-row bg-background text-foreground">
+      <body className="min-h-full flex flex-col md:flex-row bg-background text-text-primary">
         <ThemeProvider defaultTheme="dark" storageKey="luma-theme">
-          <Sidebar />
+          <ExperienceNavigation />
           <main className="flex-1 min-w-0 pb-24 md:pb-0 overflow-y-auto">
             {children}
           </main>
           <Toaster />
-          <FloatingDock />
+          <ExperienceFloatingDock />
         </ThemeProvider>
       </body>
     </html>

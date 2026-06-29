@@ -42,7 +42,7 @@ export default function TimelinePage() {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-card border border-border rounded-2xl animate-pulse" />
+            <div key={i} className="h-24 bg-card border border-border/50 rounded-2xl animate-pulse" />
           ))}
         </div>
       ) : (

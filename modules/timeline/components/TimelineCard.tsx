@@ -1,6 +1,7 @@
 'use client';
 
-import { Calendar, Clock, CreditCard, TrendingUp, TrendingDown, Repeat, Target, PiggyBank, Trophy, Ellipsis } from 'lucide-react';
+import Link from 'next/link';
+import { Calendar, Clock, CreditCard, TrendingUp, TrendingDown, Repeat, Target, PiggyBank, Trophy, Ellipsis, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import type { TimelineEvent } from '../types';
 import { cn } from '@/modules/shared/utils';
@@ -21,12 +22,14 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   'trophy': Trophy,
   'clock': Clock,
   'ellipsis': Ellipsis,
+  'mic': Clock,
 };
 
 export function TimelineCard({ event, isFirst, isLast }: TimelineCardProps) {
   const Icon = iconMap[event.icon] || Ellipsis;
+  const hasDeepLink = event.deepLink && event.entityId;
 
-  return (
+  const content = (
     <div className="relative flex gap-4 pb-8">
       {/* Timeline line */}
       {!isLast && (
@@ -51,13 +54,27 @@ export function TimelineCard({ event, isFirst, isLast }: TimelineCardProps) {
         {event.description && (
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{event.description}</p>
         )}
-        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-          <Calendar className="h-3 w-3" />
-          <span>{format(event.timestamp, 'MMM d, yyyy')}</span>
-          <span className="text-gray-300 dark:text-gray-600">•</span>
-          <span className="capitalize">{event.sourceModule}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+            <Calendar className="h-3 w-3" />
+            <span>{format(event.timestamp, 'MMM d, yyyy')}</span>
+            <span className="text-gray-300 dark:text-gray-600">•</span>
+            <span className="capitalize">{event.sourceModule}</span>
+          </div>
+          {hasDeepLink && (
+            <div className="flex items-center gap-1 text-xs text-accent">
+              <span>View Details</span>
+              <ArrowRight className="h-3 w-3" />
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+
+  if (hasDeepLink) {
+    return <Link href={event.deepLink!}>{content}</Link>;
+  }
+
+  return content;
 }
