@@ -220,10 +220,41 @@ Luma/
 │   │   ├── components/
 │   │   ├── services/
 │   │   └── types/
-│   └── goals/                 # Goals module
-│       ├── components/
+│   ├── goals/                 # Goals module
+│   │   ├── components/
+│   │   ├── services/
+│   │   └── types/
+│   └── today/                 # Today experience module
+│       ├── components/        # Today-specific components
+│       │   ├── TodayHeader.tsx
+│       │   ├── DailyBriefCard.tsx
+│       │   ├── FocusSection.tsx
+│       │   ├── InsightCard.tsx
+│       │   ├── InsightSection.tsx
+│       │   ├── UpcomingSection.tsx
+│       │   ├── ContinueSection.tsx
+│       │   ├── RecentTimelinePreview.tsx
+│       │   ├── FloatingCaptureButton.tsx
+│       │   ├── TodayPageSkeleton.tsx
+│       │   └── index.ts
 │       ├── services/
-│       └── types/
+│       ├── types/
+│       └── utils/
+├── capture/               # Universal capture experience module
+│   ├── components/        # Capture-specific components
+│   │   ├── CaptureSheet.tsx
+│   │   ├── CaptureInput.tsx
+│   │   ├── CaptureTypeSelector.tsx
+│   │   ├── VoiceCapture.tsx
+│   │   ├── AISuggestionList.tsx
+│   │   ├── MetadataSection.tsx
+│   │   ├── ProcessingIndicator.tsx
+│   │   ├── EntityCard.tsx
+│   │   ├── CaptureReview.tsx
+│   │   └── index.ts
+│   ├── services/
+│   ├── types/
+│   └── utils/
 ├── public/                     # Static assets
 │   ├── apple-icon.png
 │   ├── apple-touch-icon.png

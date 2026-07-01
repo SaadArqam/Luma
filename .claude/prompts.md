@@ -81,100 +81,334 @@ Synthesize their strengths into Luma's own design language.
 
 
 
-# Update `.claude/BRAIN.md`
+# Milestone M1.2 — Comprehensive Product & UX Audit
 
-Read the entire codebase and every document inside:
+## Context
 
-* `.claude/`
-* `docs/`
+Before making any changes, read and treat the following documents as the source of truth.
 
-Then completely review `.claude/BRAIN.md`.
+### Project Brain
 
-## Objective
+- `.claude/BRAIN.md`
 
-The current `BRAIN.md` still contains outdated context from the old PaisaTrack expense manager.
+### Design Language
 
-Refactor it so it accurately represents the current state of **Luma**.
+- `.claude/DESIGN-luma.md`
+- `.claude/DESIGN-apple.md`
+- `.claude/DESIGN-linear.app.md`
+- `.claude/DESIGN-raycast.md`
+- `.claude/DESIGN-claude.md`
+- `.claude/DESIGN-notion.md`
+- `.claude/DESIGN-airtable.md`
 
-Do not simply append new information.
+### Product Documentation
 
-Rewrite and reorganize the document where necessary.
+Read all documentation inside `docs/`.
 
-## Remove
+### Validation Framework
 
-Delete all outdated or obsolete information, including:
+Read every document inside `validation/`.
 
-* PaisaTrack branding
-* Old navigation
-* Old architecture
-* Deprecated features
-* Replaced design decisions
-* Superseded implementation details
-* Any duplicated information
+The validation framework defines the audit criteria. Do not invent new standards during the audit.
 
-Keep the document focused on the current product only.
+---
+
+# Objective
+
+Perform a complete audit of the current Luma MVP without making implementation changes.
+
+The purpose is to identify every issue, inconsistency, weakness, and improvement opportunity before any fixes begin.
+
+This milestone produces reports—not code.
+
+---
+
+# Audit Scope
+
+Audit every implemented experience:
+
+- Today
+- Capture
+- Timeline
+- Navigation
+- Shared Components
+- Design System usage
+
+Review the application exactly as a first-time user would experience it.
+
+---
+
+# Audit Perspectives
+
+Every screen must be reviewed independently from the following perspectives.
+
+---
+
+## 1. Product Review
+
+Questions:
+
+- Does this solve a real user problem?
+- Is this feature necessary for MVP?
+- Does it reduce cognitive load?
+- Would users understand its value?
+- Is anything unnecessary?
+
+Deliverable:
+
+`validation/REPORTS/product-audit.md`
+
+---
+
+## 2. UX Review
+
+Questions:
+
+- Is navigation obvious?
+- Are interactions predictable?
+- Is there unnecessary friction?
+- Are users forced to think?
+- Are labels clear?
+- Are empty states helpful?
+- Are success/error messages meaningful?
+
+Deliverable:
+
+`validation/UX_AUDITS/ux-audit.md`
+
+---
+
+## 3. UI Review
+
+Evaluate:
+
+- Visual hierarchy
+- Typography
+- Spacing
+- Alignment
+- Color usage
+- Card consistency
+- Shadows
+- Borders
+- Motion
+- Whitespace
+
+Compare against the Luma Design Language.
+
+Deliverable:
+
+`validation/UX_AUDITS/ui-audit.md`
+
+---
+
+## 4. Design Language Compliance
+
+Verify that every component follows:
+
+- Design tokens
+- Spacing scale
+- Typography scale
+- Color philosophy
+- Motion principles
+- Component conventions
+
+List every violation.
+
+Deliverable:
+
+`validation/REPORTS/design-compliance.md`
+
+---
+
+## 5. First-Time User Review
+
+Pretend you have never seen Luma.
+
+Attempt to answer:
+
+- What is this app?
+- What should I do first?
+- What happens after Capture?
+- What is Timeline?
+- Why should I return tomorrow?
+
+Document every point of confusion.
+
+Deliverable:
+
+`validation/USER_TESTS/first-time-user.md`
+
+---
+
+## 6. Skeptic Review
+
+Compare Luma mentally against:
+
+- Apple Notes
+- Google Keep
+- Notion
+- Apple Journal
+- Any finance app
+
+Ask:
+
+"Why would I switch?"
+
+If Luma cannot clearly answer this question, document the gap.
+
+Deliverable:
+
+`validation/REPORTS/competitive-review.md`
+
+---
+
+## 7. Consistency Audit
+
+Inspect:
+
+- Buttons
+- Icons
+- Navigation
+- Cards
+- Typography
+- Inputs
+- Empty states
+- Loading states
+- Motion
+
+Look for inconsistencies.
+
+Deliverable:
+
+`validation/REPORTS/consistency-audit.md`
+
+---
+
+# Issue Logging
+
+Every finding must include:
+
+- Unique ID
+- Title
+- Description
+- Location
+- Severity
+- Evidence
+- Suggested Solution
+- Status
+
+Severity:
+
+- Critical
+- High
+- Medium
+- Low
+
+Store all findings in:
+
+`validation/BUG_REPORTS/`
+
+Create one consolidated issue log:
+
+`validation/BUG_REPORTS/master-issue-log.md`
+
+---
+
+# Evidence Collection
+
+For every issue, collect evidence where possible.
+
+Include:
+
+- Screenshots
+- Screen recordings
+- Notes
+- Before state
+- Expected behavior
+
+Store assets inside:
+
+- `validation/SCREEN_RECORDINGS/`
+- `validation/REPORTS/`
+
+---
+
+# Do Not Fix Anything
+
+During this milestone:
+
+- Do not redesign.
+- Do not refactor.
+- Do not optimize.
+- Do not change code.
+
+Only observe, document, and classify.
+
+The objective is to understand the current state completely before making changes.
+
+---
+
+# Deliverables
+
+Produce at minimum:
+
+- Product Audit
+- UX Audit
+- UI Audit
+- Design Compliance Report
+- First-Time User Review
+- Competitive Review
+- Consistency Audit
+- Master Issue Log
+
+All reports should reference issue IDs where applicable.
+
+---
+
+# Documentation Updates
+
+After the audit:
+
+## Update `.claude/BRAIN.md`
+
+Document:
+
+- M1.2 completed.
+- Audit scope.
+- Number of findings by severity.
+- Major themes identified.
+- Next milestone.
+
+---
 
 ## Update
 
-Ensure the Brain reflects:
+- `docs/DECISIONS.md` (if audit changes future priorities)
+- `docs/TODO.md` (convert findings into actionable work)
 
-* Luma vision
-* Current architecture
-* Current folder structure
-* Design language
-* Product philosophy
-* Core experiences (Today, Capture, Timeline)
-* Intelligence layer
-* Context Engine
-* Life Graph
-* Rules Engine
-* Current modules
-* Design system
-* Important conventions
-* Active roadmap
-* Coding conventions
-* UI conventions
-* AI conventions
-* Current tech stack
-* Important dependencies
-* Current implementation status
+No implementation documentation should change during this milestone.
 
-## Structure
+---
 
-Reorganize the document into clear sections.
+# Definition of Done
 
-Example:
+This milestone is complete only when:
 
-* Project Overview
-* Vision
-* Product Philosophy
-* Architecture
-* Folder Structure
-* Design Language
-* Tech Stack
-* Core Experiences
-* Modules
-* Intelligence
-* Current Progress
-* Active Roadmap
-* Development Conventions
-* Important Decisions
-* Known Limitations
-* Next Priorities
+- Every implemented experience has been audited.
+- All findings are documented.
+- Every issue has a severity level.
+- Evidence has been collected.
+- A master issue log exists.
+- `.claude/BRAIN.md` has been updated.
 
-Improve the structure if necessary.
+No fixes should be implemented during this milestone.
 
-## Constraints
+---
 
-* Keep the Brain concise.
-* Remove historical clutter.
-* Do not document implementation details that are obvious from the code.
-* Prefer architectural context over low-level code explanations.
-* Avoid duplicate information already covered by files in `docs/`.
-* The Brain should optimize future AI context, not serve as product documentation.
+# Next Milestone
 
-## Final Goal
+Proceed to:
 
-The updated `BRAIN.md` should allow a new AI model to understand the entire Luma project within a few minutes without being distracted by outdated PaisaTrack information.
+**M1.3 — Prioritize Findings & Create Validation Backlog**
 
-Provide a summary of everything that was removed, updated and reorganized.
+The goal of M1.3 is to transform the audit results into a prioritized execution plan before writing any code.

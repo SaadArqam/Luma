@@ -1,23 +1,23 @@
-import type { TimelineEvent } from '../types';
-import { groupTimelineEvents } from '../utils';
+import type { TimelineItem } from '../types';
+import { groupTimelineItems } from '../utils';
 import { TimelineGroup } from './TimelineGroup';
-import { EmptyState } from '@/components/ui';
+import { TimelineEmptyState } from './TimelineEmptyState';
+import { TimelineSkeletonState } from './TimelineSkeletonState';
 
 interface TimelineProps {
-  events: TimelineEvent[];
+  items: TimelineItem[];
+  loading?: boolean;
 }
 
-export function Timeline({ events }: TimelineProps) {
-  const groups = groupTimelineEvents(events);
+export function Timeline({ items, loading = false }: TimelineProps) {
+  if (loading) {
+    return <TimelineSkeletonState />;
+  }
+
+  const groups = groupTimelineItems(items);
 
   if (groups.length === 0) {
-    return (
-      <EmptyState
-        icon="clock"
-        title="No events yet"
-        description="Your timeline will show all your activity from Finance and Goals."
-      />
-    );
+    return <TimelineEmptyState />;
   }
 
   return (

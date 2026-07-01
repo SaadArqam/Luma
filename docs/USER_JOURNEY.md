@@ -102,48 +102,64 @@ This document describes the user journeys through Luma, from onboarding to daily
 **User Action:** User opens Luma in the morning
 
 **System Response:**
-- Show Today page with morning context
-- Display today's tasks and priorities
-- Show spending insights for today
-- Highlight goal progress
+- Show Today page with morning greeting and contextual subtitle
+- Display Daily Brief with AI-generated summary
+- Show Focus section with 2-3 most important items
+- Display Insights section with relevant observations
+- Show Upcoming section with chronological items
+- Display Continue section for unfinished activities
+- Show Recent Timeline Preview with recent activity
+- Display Floating Capture Button for quick entry
 
 **User Experience:**
-- Calm, focused morning view
-- Clear priorities for the day
-- Relevant information only
-- Single primary action (quick add)
+- Calm, warm morning view with time-aware greeting
+- Clear priorities in Focus section
+- Conversational Daily Brief (not chatbot-style)
+- Relevant information only, no overwhelm
+- Single primary action (Floating Capture Button)
+- Warm empty states if no data
 
 ### Capture Throughout Day
 
 **User Action:** User captures expense, task, or note
 
 **System Response:**
-- Open quick add sheet
-- Smart defaults based on context
-- Save with minimal input
-- Show success confirmation
+- Open universal capture sheet
+- Text or voice mode selection
+- Auto-save draft as user types
+- AI suggestions appear as content is entered
+- Optional metadata available behind "Add details"
+- Subtle processing indicator on save
+- Navigate to review or timeline
 
 **User Experience:**
-- Fast capture from anywhere
-- Smart suggestions
+- Effortless capture from anywhere
+- No module selection required
+- Draft persistence survives accidental closes
+- Warm, encouraging empty states
+- Passive AI suggestions (no confirmation required)
 - Minimal friction
-- Clear feedback
+- Clear feedback without interruption
 
 ### Evening Review
 
 **User Action:** User reviews day in the evening
 
 **System Response:**
-- Show day's summary
-- Display spending patterns
-- Show task completion
-- Highlight goal progress
+- Show Today page with evening greeting and contextual subtitle
+- Display Daily Brief with day's summary
+- Show Focus section with any remaining priorities
+- Display Insights section with day's observations
+- Show Recent Timeline Preview with day's activity
+- Display Floating Capture Button for quick entry
 
 **User Experience:**
-- Calm evening view
-- Summary of accomplishments
+- Calm, warm evening view with time-aware greeting
+- Conversational Daily Brief summarizing the day
+- Summary of accomplishments in timeline
 - Insights from today's data
 - Preparation for tomorrow
+- Warm, reassuring empty states if quiet day
 
 ## Key User Flows
 

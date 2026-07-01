@@ -14,12 +14,12 @@ interface MetricCardProps {
 
 export function MetricCard({ title, value, change, icon, className }: MetricCardProps) {
   return (
-    <div className={cn('bg-card border border-border rounded-2xl p-6 space-y-2', className)}>
+    <div className={cn('bg-card border border-border/50 rounded-2xl p-6 space-y-2 elevation-subtle motion-fast motion-ease-out card-hover', className)}>
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-muted-foreground">{title}</span>
+        <span className="text-sm font-medium text-text-muted">{title}</span>
         {icon}
       </div>
-      <div className="text-2xl font-bold text-text">{value}</div>
+      <div className="text-amount-xl text-text-primary">{value}</div>
       {change && (
         <div className={cn(
           'text-sm font-medium',

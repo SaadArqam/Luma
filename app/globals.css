@@ -23,6 +23,15 @@
   --color-danger: var(--danger);
   --color-danger-foreground: var(--danger-foreground);
   
+  /* Material-based color tokens (semantic aliases) */
+  --color-paper: var(--background);
+  --color-linen: var(--surface);
+  --color-mist: var(--card);
+  --color-fog: var(--muted-surface);
+  --color-ink: var(--text-primary);
+  --color-pencil: var(--text-secondary);
+  --color-graphite: var(--text-muted);
+  
   /* Legacy tokens for compatibility */
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
@@ -71,6 +80,34 @@
   --radius-2xl: calc(var(--radius) * 1.5);
   --radius-3xl: calc(var(--radius) * 2);
   --radius-full: 9999px;
+  
+  /* Border Width */
+  --border-thin: 1px;
+  --border-medium: 1.5px;
+  --border-thick: 2px;
+  
+  /* Border Style */
+  --border-style-solid: solid;
+  --border-style-dashed: dashed;
+  --border-style-dotted: dotted;
+  
+  /* Z-Index Scale */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+  
+  /* Opacity Scale */
+  --opacity-transparent: 0;
+  --opacity-faint: 0.1;
+  --opacity-subtle: 0.25;
+  --opacity-soft: 0.5;
+  --opacity-medium: 0.75;
+  --opacity-opaque: 1;
   
   /* Motion System */
   --motion-duration-instant: 100ms;

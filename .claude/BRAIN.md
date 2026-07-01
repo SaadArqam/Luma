@@ -26,10 +26,14 @@ Luma is an AI-powered Personal Operating System designed to help users understan
 
 **Design System:**
 - OKLCH color space with semantic tokens
+- Material-based color naming (paper, linen, mist, fog, ink, pencil, graphite)
 - Geist Sans and Geist Mono fonts
 - 8px spacing system
 - Motion system with reduced motion support
 - Glass effects for navigation
+- Extended token system: z-index, opacity, border width/style scales
+- Premium floating bottom navigation for mobile
+- Card hover effects with subtle elevation
 
 ### Module Architecture
 
@@ -56,24 +60,47 @@ modules/
 ### Core Experiences
 
 **Today** (`app/today/`)
-- Primary landing experience
+- Primary landing experience with calm, warm design
 - Context-driven content prioritization
-- Time-aware greetings and recommendations
-- Celebration moments for achievements
-- Dynamic section composition
+- Time-aware greetings and contextual subtitles
+- Daily Brief as visual centerpiece with AI streaming support
+- Focus section for prioritized items (bills, goals, events)
+- Insights section for AI-powered observations
+- Upcoming section for unified chronological items
+- Continue section for resuming unfinished activities
+- Recent Timeline Preview for unified activity display
+- Floating Capture Button for quick data entry
+- Modular component architecture for reusability
+- Loading and empty states with skeleton UI
 
 **Capture** (`app/capture/`)
-- Universal data entry point
+- Universal data entry point with effortless, calm design
 - Multi-stage pipeline (Capture → Normalize → Analyze → Extract → Route → Create)
 - Pattern-based entity extraction
 - Review-first workflow
 - Modular handler registration
+- CaptureSheet with bottom sheet/modal responsive design
+- Text and voice capture modes with full UI
+- Auto-growing textarea with character count
+- Draft management with localStorage persistence
+- AI suggestion area for future integration
+- Metadata section for tags, location, reminders, attachments
+- Subtle processing indicator for capture completion
+- Floating Capture Button for quick access
 
 **Timeline** (`app/timeline/`)
-- Universal activity history
-- Events from all connected modules
+- Universal activity history - the memory of the user's life
+- Events from all connected modules (Finance, Goals, Habits, Journal, Health, AI, Capture)
 - Deep linking to source entities
-- Chronological grouping
+- Chronological grouping (Today, Yesterday, This Week, Last Week, Months, Earlier)
+- Reusable TimelineItem types (Transaction, Capture, Journal Entry, Goal Progress, Habit Completion, Planner Event, Health Record, AI Insight, Reminder, Milestone, Achievement)
+- TimelineItemRegistry for extensible item type registration
+- Daily Summary cards for AI-generated day summaries
+- Reflection cards for future AI-powered insights
+- TimelineItemCard with icon, title, context, timestamp, preview, and actions
+- Empty states with calming guidance
+- Skeleton loading states matching final UI
+- Calm, reflective design following Luma philosophy
 
 ### Intelligence Layer
 
@@ -249,11 +276,41 @@ modules/
 - Design system v2 (premium aesthetics)
 - Module architecture
 - PWA support
+- Today Experience v2 (calm, warm, intentional design)
+- Modular Today components (Header, DailyBrief, Focus, Insights, Upcoming, Continue, Timeline)
+- Floating Capture Button
+- Skeleton loading states
+- Enhanced design tokens (z-index, opacity, border styles)
+- Timeline Experience v2 (Epic 13 complete)
+  - Comprehensive TimelineItem types supporting all modules
+  - TimelineItemRegistry for extensible item registration
+  - Enhanced chronological grouping (Today, Yesterday, This Week, Last Week, Months, Earlier)
+  - Daily Summary cards for AI-generated day summaries
+  - Reflection cards for future AI-powered insights
+  - TimelineItemCard with full card layout (icon, title, context, timestamp, preview, actions)
+  - Calm empty states with encouraging guidance
+  - Skeleton loading states matching final UI
+  - TimelineHeader with search and filter buttons
+  - Modular, reusable component architecture
+  - Future-ready architecture for AI integration
+- Validation Framework (Milestone M1.1 complete)
+  - Product Manifesto defining core beliefs
+  - Product Scorecard with measurable quality metrics
+  - MVP Checklist for launch requirements
+  - Review Guidelines with multiple perspectives
+  - Release Criteria defining release blockers
+  - Decision Framework for feature evaluation
+  - Validation Process for recursive quality improvement
+  - Validation README as system overview
 
 **In Progress:**
 - Enhanced search functionality
 - Rules engine integration
 - Additional capture types (images, receipts)
+- AI-powered Daily Brief generation
+- Context Engine integration with Today Experience
+- Voice transcription backend integration
+- AI classification pipeline for capture
 
 **Known Limitations:**
 - No comprehensive test suite

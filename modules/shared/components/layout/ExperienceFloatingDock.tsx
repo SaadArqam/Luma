@@ -17,34 +17,36 @@ export function ExperienceFloatingDock() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-      <div className="glass-strong flex items-center gap-1 px-3 py-2 rounded-full border border-border/50 elevation-medium">
-        {experienceNavItems.map(({ href, icon: Icon, label }) => {
-          const isActive = pathname === href || (href !== '/today' && pathname.startsWith(href))
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "relative flex flex-col items-center justify-center w-12 h-12 rounded-2xl motion-fast motion-ease-out",
-                "hover:bg-surface/50",
-                isActive && "bg-accent/10"
-              )}
-            >
-              {isActive && (
-                <div className="absolute -top-1.5 w-1.5 h-1.5 rounded-full bg-accent motion-bounce" />
-              )}
-              <Icon
-                size={20}
-                strokeWidth={1.5}
+    <nav className="md:hidden fixed bottom-6 left-4 right-4 z-[var(--z-fixed)]">
+      <div className="glass-strong rounded-2xl border border-border/30 shadow-lg px-2 py-3">
+        <div className="flex items-center justify-around">
+          {experienceNavItems.map(({ href, icon: Icon, label }) => {
+            const isActive = pathname === href || (href !== '/today' && pathname.startsWith(href))
+            return (
+              <Link
+                key={href}
+                href={href}
                 className={cn(
-                  "transition-colors motion-fast",
-                  isActive ? "text-accent" : "text-muted-foreground"
+                  "flex flex-col items-center justify-center gap-1 min-w-0 motion-fast motion-ease-out cursor-pointer",
+                  "min-h-[48px] min-w-[48px]",
+                  isActive ? "text-accent" : "text-muted-foreground hover:text-text-primary"
                 )}
-              />
-            </Link>
-          )
-        })}
+                style={{ flex: 1 }}
+              >
+                <div className={cn(
+                  "transition-transform motion-fast motion-ease-out",
+                  isActive ? "scale-110" : "hover:scale-105"
+                )}>
+                  <Icon
+                    size={22}
+                    strokeWidth={1.5}
+                  />
+                </div>
+                <span className="text-[10px] font-medium tracking-tight">{label}</span>
+              </Link>
+            )
+          })}
+        </div>
       </div>
     </nav>
   )

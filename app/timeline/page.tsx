@@ -1,52 +1,45 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PageHeader, PageTitle, PageDescription } from '@/components/ui/page-header';
 import { Timeline } from '@/modules/timeline/components';
-import type { TimelineEvent } from '@/modules/timeline/types';
-import { createClient } from '@/lib/supabase';
+import { TimelineHeader } from '@/modules/timeline/components';
+import { TimelineSkeletonState } from '@/modules/timeline/components';
+import type { TimelineItem } from '@/modules/timeline/types';
 
 export default function TimelinePage() {
-  const [events, setEvents] = useState<TimelineEvent[]>([]);
+  const [items, setItems] = useState<TimelineItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchEvents = async () => {
+  const fetchItems = async () => {
     try {
       const response = await fetch('/api/timeline');
-      if (!response.ok) throw new Error('Failed to fetch timeline events');
+      if (!response.ok) throw new Error('Failed to fetch timeline items');
       const data = await response.json();
       // Convert string timestamps to Date objects
-      const typedEvents = data.map((event: any) => ({
-        ...event,
-        timestamp: new Date(event.timestamp),
+      const typedItems = data.map((item: any) => ({
+        ...item,
+        timestamp: new Date(item.timestamp),
       }));
-      setEvents(typedEvents);
+      setItems(typedItems);
     } catch (error) {
-      console.error('Error fetching timeline events:', error);
+      console.error('Error fetching timeline items:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchEvents();
+    fetchItems();
   }, []);
 
   return (
     <div className="space-y-6">
-      <PageHeader>
-        <PageTitle>Timeline</PageTitle>
-        <PageDescription>View all your activities in one place</PageDescription>
-      </PageHeader>
-
+      <TimelineHeader />
+      
       {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-card border border-border/50 rounded-2xl animate-pulse" />
-          ))}
-        </div>
+        <TimelineSkeletonState />
       ) : (
-        <Timeline events={events} />
+        <Timeline items={items} />
       )}
     </div>
   );

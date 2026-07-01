@@ -31,25 +31,36 @@ Luma is designed around three primary experiences:
 
 ### 1. Capture
 
-The fastest way to add information to Luma. Users can quickly add expenses, goals, tasks, or notes from anywhere in the app using the quick add sheet.
+The fastest way to add information to Luma. Users can quickly add expenses, goals, tasks, or notes from anywhere in the app using the universal capture experience. The interface feels effortless and nearly invisible—users capture information and continue with their day.
 
 **Key Features:**
-- Quick add sheet accessible from any screen
-- Smart defaults based on context
-- Keyboard shortcuts for power users
-- Voice input support (future)
+- Universal capture sheet with bottom sheet/modal responsive design
+- Text and voice capture modes
+- Auto-growing textarea with character count
+- Draft management with automatic save and restore
+- AI suggestion area for future intelligent classification
+- Optional metadata (tags, location, reminders, attachments)
+- Subtle processing indicator for capture completion
+- Floating Capture Button for quick access from anywhere
+- Warm empty states with encouraging language
+- Future-ready architecture for images, receipts, PDFs, and more
 
 ### 2. Today
 
-The primary landing experience. Today shows users what matters right now—upcoming tasks, spending insights, goal progress, and contextual information based on time and behavior.
+The primary landing experience with a calm, warm, intentional design. Today shows users what matters right now—upcoming tasks, spending insights, goal progress, and contextual information based on time and behavior. The interface feels like sitting down at a clean wooden desk where everything important has already been prepared.
 
 **Key Features:**
-- Daily overview of what matters
-- Contextual information prioritized by AI
-- Spending insights for today
-- Task priorities and deadlines
-- Goal progress updates
-- Time-aware content (morning vs evening)
+- Time-aware greetings and contextual subtitles
+- Daily Brief as visual centerpiece with AI streaming support
+- Focus section for 2-3 most important items (bills, goals, events)
+- Insights section for AI-powered observations
+- Upcoming section for unified chronological items (bills, calendar, habits, goals)
+- Continue section for resuming unfinished activities
+- Recent Timeline Preview for unified activity display
+- Floating Capture Button for quick data entry
+- Warm empty states with calming language
+- Skeleton loading states matching actual layout
+- Modular, reusable component architecture
 
 ### 3. Timeline
 

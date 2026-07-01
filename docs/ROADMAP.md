@@ -45,6 +45,31 @@ This document outlines the planned development roadmap for Luma. The roadmap is 
 - Improved user engagement
 - Foundation for future AI features
 
+### Epic 13: Timeline Experience v2 (July 2026)
+
+**Status:** Completed
+
+**Deliverables:**
+- Comprehensive TimelineItem types supporting all modules (Transaction, Capture, Journal Entry, Goal Progress, Habit Completion, Planner Event, Health Record, AI Insight, Reminder, Milestone, Achievement)
+- TimelineItemRegistry for extensible item type registration with icon and color mapping
+- Enhanced chronological grouping (Today, Yesterday, This Week, Last Week, Months, Earlier)
+- DailySummaryCard component for AI-generated day summaries
+- ReflectionCard component for future AI-powered insights
+- TimelineItemCard component with full card layout (icon, title, context, timestamp, preview, actions)
+- TimelineEmptyState component with calming guidance
+- TimelineSkeletonState component with loading states matching final UI
+- TimelineHeader component with search and filter buttons
+- Modular, reusable timeline component architecture
+- Calm, reflective design following Luma philosophy
+
+**Impact:**
+- Timeline represents the user's life as memory, not just activity logs
+- Entries grouped chronologically for easy reflection
+- Future-ready architecture for AI integration
+- Daily summaries and reflections support
+- Scalable to all future modules
+- Improved user understanding of their life patterns
+
 ### Core Features (2025-2026)
 
 **Status:** Completed

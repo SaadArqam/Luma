@@ -13,12 +13,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Context engine for AI-powered insights
 - Enhanced accessibility features
 - PWA support with Serwist
+- Extended design token system with z-index, opacity, border width/style scales
+- Material-based color naming (paper, linen, mist, fog, ink, pencil, graphite)
+- Premium floating bottom navigation for mobile with glass effects and smooth animations
+- Card hover effects with subtle elevation transitions
+- Today Experience v2 with calm, warm, intentional design
+- TodayHeader component with time-based greetings and contextual subtitles
+- DailyBriefCard component with loading, empty, and AI streaming states
+- FocusSection component for prioritized items (bills, goals, events)
+- InsightSection and InsightCard components for AI-powered insights
+- UpcomingSection component for unified chronological upcoming items
+- ContinueSection component for resuming unfinished activities
+- RecentTimelinePreview component for unified activity timeline
+- FloatingCaptureButton component for quick data capture
+- TodayPageSkeleton component for loading states
+- Skeleton UI component for reusable loading states
+- Universal Capture Experience v2 with effortless, calm design
+- CaptureSheet component with bottom sheet/modal responsive design
+- CaptureInput component with auto-growing textarea and character count
+- CaptureTypeSelector component for text/voice mode switching
+- VoiceCapture component with recording, pause, resume, and timer
+- AISuggestionList component for AI-powered capture suggestions
+- MetadataSection component for tags, location, reminders, and attachments
+- ProcessingIndicator component for subtle capture completion feedback
+- Draft management with localStorage persistence
+- Timeline Experience v2 (Epic 13) with comprehensive item types and calm design
+- TimelineItem types supporting all modules (Transaction, Capture, Journal Entry, Goal Progress, Habit Completion, Planner Event, Health Record, AI Insight, Reminder, Milestone, Achievement)
+- TimelineItemRegistry for extensible item type registration with icon and color mapping
+- Enhanced chronological grouping (Today, Yesterday, This Week, Last Week, Months, Earlier)
+- DailySummaryCard component for AI-generated day summaries
+- ReflectionCard component for future AI-powered insights
+- TimelineItemCard component with full card layout (icon, title, context, timestamp, preview, actions)
+- TimelineEmptyState component with calming guidance
+- TimelineSkeletonState component with loading states matching final UI
+- TimelineHeader component with search and filter buttons
+- Modular, reusable timeline component architecture
 
 ### Changed
 - Redesigned navigation with glass effects
-- Updated component library
+- Updated component library to use enhanced design tokens
 - Improved responsive design
-- Enhanced mobile experience
+- Enhanced mobile experience with floating dock navigation
+- Refactored Card, MetricCard, and EmptyState components for consistency
+- Standardized touch targets (48px minimum) for mobile navigation
+- Rebuilt Today page with modular, reusable components
+- Replaced dashboard-style layout with calm, content-first design
+- Unified timeline display across all activity types
+- Separated concerns between layout and business logic
+- Rebuilt Capture page with new Universal Capture components
+- Redesigned capture flow with draft management and AI suggestions
 
 ### Fixed
 - Session expiration handling

@@ -10,7 +10,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'mx-4 mb-3 rounded-2xl overflow-hidden bg-card border border-border/50 elevation-subtle motion-fast motion-ease-out',
+        'mx-4 mb-3 rounded-2xl overflow-hidden bg-card border border-border/50 elevation-subtle motion-fast motion-ease-out card-hover',
         className
       )}
     >

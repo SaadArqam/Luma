@@ -2,18 +2,39 @@
 
 import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
+import { 
+  TodayHeader, 
+  DailyBriefCard, 
+  FocusSection, 
+  InsightSection, 
+  UpcomingSection, 
+  ContinueSection, 
+  RecentTimelinePreview, 
+  FloatingCaptureButton,
+  TodayPageSkeleton 
+} from '@/modules/today/components';
 import { createClient } from '@/lib/supabase';
 import { startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
-import { TodaySection } from '@/modules/today/components';
-import { todayContextService } from '@/modules/today/services';
-import { contextEngine, todayProvider, timelineProvider, financeProvider, goalsProvider, captureProvider } from '@/modules/context';
-import type { TodayData, TodayContext } from '@/modules/today/types';
 
-interface FinanceData extends TodayData {
+interface TodayData {
+  user: any;
+  todayExpenseTotal: number;
+  budgetRemaining: number;
+  monthExpenseTotal: number;
+  currentBalance: number;
+  recentExpenses: any[];
+  pendingRecurring: any[];
+  totalDailyBudget: number;
+  todayExpenses: any[];
+  goals: any[];
+  timelineEvents: any[];
+  accounts: any[];
+  budgets: any[];
+  recurringPayments: any[];
   insights: any[];
 }
 
-async function fetchData(): Promise<FinanceData | null> {
+async function fetchData(): Promise<TodayData | null> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -67,34 +88,31 @@ async function fetchData(): Promise<FinanceData | null> {
 
   const expensesWithCategories = (recentExpenses || []).map((expense: any) => ({
     id: expense.id,
+    title: expense.note || 'Expense',
     amount: Number(expense.amount),
-    category: expense.category || { name: 'Other', icon: 'Wallet' },
-    date: expense.date,
+    type: 'transaction' as const,
+    timestamp: new Date(expense.date),
   }));
 
   const formattedGoals = (goals || []).map((goal: any) => ({
     id: goal.id,
     title: goal.title,
-    currentAmount: Number(goal.current_amount),
-    targetAmount: Number(goal.target_amount),
-  }));
-
-  const formattedAccounts = (accounts || []).map((account: any) => ({
-    id: account.id,
-    name: account.name,
-    balance: 10000,
+    subtitle: `${Math.round((Number(goal.current_amount) / Number(goal.target_amount)) * 100)}% complete`,
+    type: 'goal' as const,
   }));
 
   const formattedRecurring = (recurringExpenses || []).map((rp: any) => ({
     id: rp.id,
-    name: rp.name,
-    amount: Number(rp.amount),
-    nextDueDate: rp.next_due_date,
+    title: rp.name,
+    date: rp.next_due_date,
+    type: 'bill' as const,
   }));
 
   const typedTimelineEvents = (timelineEvents || []).map((event: any) => ({
-    ...event,
+    id: event.id,
+    title: event.title || 'Activity',
     timestamp: new Date(event.timestamp),
+    type: event.type || 'ai' as const,
   }));
 
   return {
@@ -109,7 +127,7 @@ async function fetchData(): Promise<FinanceData | null> {
     todayExpenses: todayExpenses || [],
     goals: formattedGoals,
     timelineEvents: typedTimelineEvents,
-    accounts: formattedAccounts,
+    accounts: formattedRecurring,
     budgets,
     recurringPayments: formattedRecurring,
     insights: [],
@@ -117,8 +135,7 @@ async function fetchData(): Promise<FinanceData | null> {
 }
 
 export default function TodayPage() {
-  const [data, setData] = useState<FinanceData | null>(null);
-  const [context, setContext] = useState<TodayContext | null>(null);
+  const [data, setData] = useState<TodayData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -126,22 +143,6 @@ export default function TodayPage() {
       try {
         const financeData = await fetchData();
         setData(financeData);
-        
-        if (financeData) {
-          // Register Context Engine providers
-          contextEngine.registerProvider(todayProvider);
-          contextEngine.registerProvider(timelineProvider);
-          contextEngine.registerProvider(financeProvider);
-          contextEngine.registerProvider(goalsProvider);
-          contextEngine.registerProvider(captureProvider);
-          
-          // Use Context Engine for enhanced context
-          const dailyContext = await contextEngine.getCurrentContext(financeData.user.id);
-          
-          // Fall back to existing Today context service for now
-          const todayContext = todayContextService.buildContext(financeData);
-          setContext(todayContext);
-        }
       } catch (error) {
         console.error('Failed to load data:', error);
       } finally {
@@ -153,16 +154,10 @@ export default function TodayPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-32 bg-card border border-border/50 rounded-2xl animate-pulse" />
-        ))}
-      </div>
-    );
+    return <TodayPageSkeleton />;
   }
 
-  if (!data || !context) {
+  if (!data) {
     return (
       <EmptyState
         title="No data available"
@@ -171,34 +166,41 @@ export default function TodayPage() {
     );
   }
 
-  // Empty state for new users
-  if (!context.hasData) {
+  const hasData = data.recentExpenses.length > 0 || data.goals.length > 0 || data.recurringPayments.length > 0;
+
+  if (!hasData) {
     return (
       <div className="space-y-6">
-        <TodaySection 
-          section={{ type: 'greeting', priority: 100, visible: true, data: { timeOfDay: context.timeOfDay } }} 
-          data={data} 
-        />
+        <TodayHeader />
         <EmptyState
-          title="Welcome to PaisaTrack"
-          description="Start your financial journey by adding your first expense or setting up a budget."
+          title="Welcome to Luma"
+          description="Start your journey by adding your first expense or setting a goal."
         />
       </div>
     );
   }
 
+  const focusItems = data.pendingRecurring.map((item: any) => ({
+    id: item.id,
+    title: item.name,
+    description: `Due ${new Date(item.next_due_date).toLocaleDateString()}`,
+    priority: 'high' as const,
+  }));
+
+  const upcomingItems = [...data.recurringPayments, ...data.goals].slice(0, 5);
+
+  const timelineItems = [...data.recentExpenses, ...data.timelineEvents].slice(0, 5);
+
   return (
-    <div className="space-y-6">
-      {context.sections.map((section) => (
-        section.visible && (
-          <TodaySection 
-            key={section.type} 
-            section={section} 
-            data={data}
-            onRecommendationAction={(action) => console.log('Action:', action)}
-          />
-        )
-      ))}
+    <div className="space-y-6 pb-32">
+      <TodayHeader />
+      <DailyBriefCard isEmpty={!data.insights || data.insights.length === 0} />
+      <FocusSection items={focusItems} />
+      <InsightSection insights={data.insights} />
+      <UpcomingSection items={upcomingItems} />
+      <ContinueSection items={data.goals.slice(0, 3)} />
+      <RecentTimelinePreview items={timelineItems} />
+      <FloatingCaptureButton />
     </div>
   );
 }
