@@ -62,11 +62,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Separated concerns between layout and business logic
 - Rebuilt Capture page with new Universal Capture components
 - Redesigned capture flow with draft management and AI suggestions
+- **Converted Today page to Server Component with Suspense for better performance**
+- **Converted Timeline page to Server Component with Suspense**
+- **Updated TodayHeader to accept and display user name from Supabase auth**
 
 ### Fixed
 - Session expiration handling
 - Database query optimization
 - Performance improvements
+- **Fixed hardcoded user name in Today page greeting**
+- **Fixed data fetching pattern in Today and Timeline pages to use Server Components**
 
 ## [1.0.0] - 2026-06-15
 

@@ -4,9 +4,10 @@ import { cn } from '@/lib/utils'
 
 interface TodayHeaderProps {
   className?: string
+  userName?: string
 }
 
-export function TodayHeader({ className }: TodayHeaderProps) {
+export function TodayHeader({ className, userName = 'there' }: TodayHeaderProps) {
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 12) return 'Good morning'
@@ -32,7 +33,7 @@ export function TodayHeader({ className }: TodayHeaderProps) {
   return (
     <header className={cn('px-4 pt-6 pb-4 space-y-1', className)}>
       <h1 className="text-display text-text-primary tracking-tight">
-        {getGreeting()}, Saad.
+        {getGreeting()}, {userName}.
       </h1>
       <p className="text-body text-text-secondary">
         {formatDate()}

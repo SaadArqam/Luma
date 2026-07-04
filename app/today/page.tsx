@@ -1,6 +1,3 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { 
   TodayHeader, 
@@ -13,8 +10,9 @@ import {
   FloatingCaptureButton,
   TodayPageSkeleton 
 } from '@/modules/today/components';
-import { createClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
 import { startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
+import { Suspense } from 'react';
 
 interface TodayData {
   user: any;
@@ -35,7 +33,7 @@ interface TodayData {
 }
 
 async function fetchData(): Promise<TodayData | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
@@ -134,28 +132,8 @@ async function fetchData(): Promise<TodayData | null> {
   };
 }
 
-export default function TodayPage() {
-  const [data, setData] = useState<TodayData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const financeData = await fetchData();
-        setData(financeData);
-      } catch (error) {
-        console.error('Failed to load data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
-
-  if (loading) {
-    return <TodayPageSkeleton />;
-  }
+async function TodayContent() {
+  const data = await fetchData();
 
   if (!data) {
     return (
@@ -167,11 +145,12 @@ export default function TodayPage() {
   }
 
   const hasData = data.recentExpenses.length > 0 || data.goals.length > 0 || data.recurringPayments.length > 0;
+  const userName = data.user?.user_metadata?.full_name || data.user?.email?.split('@')[0] || 'there';
 
   if (!hasData) {
     return (
       <div className="space-y-6">
-        <TodayHeader />
+        <TodayHeader userName={userName} />
         <EmptyState
           title="Welcome to Luma"
           description="Start your journey by adding your first expense or setting a goal."
@@ -193,7 +172,7 @@ export default function TodayPage() {
 
   return (
     <div className="space-y-6 pb-32">
-      <TodayHeader />
+      <TodayHeader userName={userName} />
       <DailyBriefCard isEmpty={!data.insights || data.insights.length === 0} />
       <FocusSection items={focusItems} />
       <InsightSection insights={data.insights} />
@@ -202,5 +181,13 @@ export default function TodayPage() {
       <RecentTimelinePreview items={timelineItems} />
       <FloatingCaptureButton />
     </div>
+  );
+}
+
+export default function TodayPage() {
+  return (
+    <Suspense fallback={<TodayPageSkeleton />}>
+      <TodayContent />
+    </Suspense>
   );
 }
