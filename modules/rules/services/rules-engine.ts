@@ -25,7 +25,7 @@ class RulesEngine {
           await this.executeRule(rule, event)
         } catch (error) {
           console.error(`Failed to execute rule ${rule.id}:`, error)
-          await this.logRuleExecution(rule.id, event.id, false, error instanceof Error ? error.message : 'Unknown error')
+          await this.logRuleExecution(rule.id, event.id, event.userId, false, error instanceof Error ? error.message : 'Unknown error')
         }
       }
     } catch (error) {
@@ -55,20 +55,20 @@ class RulesEngine {
 
   private async executeRule(rule: Rule, event: Event): Promise<void> {
     const conditionsMet = conditionEvaluator.evaluateAll(rule.conditions, event)
-    
+
     if (conditionsMet) {
       await actionExecutor.executeAll(rule.actions, event)
-      await this.logRuleExecution(rule.id, event.id, true)
+      await this.logRuleExecution(rule.id, event.id, event.userId, true)
     }
   }
 
-  private async logRuleExecution(ruleId: string, eventId: string, success: boolean, error?: string): Promise<void> {
+  private async logRuleExecution(ruleId: string, eventId: string, userId: string, success: boolean, error?: string): Promise<void> {
     const supabase = await createClient()
 
     await supabase.from('rule_execution_logs').insert({
       id: uuidv4(),
       rule_id: ruleId,
-      user_id: event.userId,
+      user_id: userId,
       event_id: eventId,
       success,
       error,

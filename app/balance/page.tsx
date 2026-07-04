@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { AddBalanceForm } from '@/modules/finance/components'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge, Card, CardContent, CardHeader, CardTitle } from '@/modules/shared/components/ui'
-import { formatDate } from '@/modules/shared/utils'
+import { format } from 'date-fns'
 
 export const dynamic = 'force-dynamic'
 

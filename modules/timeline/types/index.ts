@@ -1,9 +1,16 @@
 // Timeline Item Types
-export type TimelineItemType = 
+export type TimelineItemType =
   | 'transaction'
+  | 'expense'
+  | 'credit'
+  | 'debit'
+  | 'recurring'
   | 'capture'
   | 'journal-entry'
   | 'goal-progress'
+  | 'goal-created'
+  | 'goal-contribution'
+  | 'goal-completed'
   | 'habit-completion'
   | 'planner-event'
   | 'health-record'

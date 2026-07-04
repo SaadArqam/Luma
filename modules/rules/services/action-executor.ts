@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
 import { Action, Event } from '../types'
-import { TimelineEvent } from '@/modules/timeline/types'
 
 type ActionHandler = (action: Action, event: Event) => Promise<void>
 

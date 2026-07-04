@@ -61,7 +61,7 @@ async function fetchData(): Promise<TodayData | null> {
     supabase.from('expenses').select('id, amount, note, date, category:categories(name, icon)').eq('user_id', user.id).order('date', { ascending: false }).limit(30),
     supabase.from('recurring_transactions').select('id, name, amount, next_due_date').eq('user_id', user.id).eq('is_active', true).order('next_due_date', { ascending: true }).limit(5),
     supabase.from('categories').select('id, name, daily_budget').eq('user_id', user.id).not('daily_budget', 'is', null),
-    supabase.from('goals').select('id, title, current_amount, target_amount').eq('user_id', user.id).eq('archived', false).order('created_at', { ascending: false }),
+    supabase.from('goals').select('id, title, current_amount, target_amount, status').eq('user_id', user.id).eq('archived', false).order('created_at', { ascending: false }),
     supabase.from('timeline_events').select('*').eq('user_id', user.id).order('timestamp', { ascending: false }).limit(5),
     supabase.from('accounts').select('id, name').eq('user_id', user.id).eq('archived', false),
   ]);

@@ -1,14 +1,14 @@
 'use client';
 
-import type { TimelineEvent } from '../types';
-import { groupTimelineEvents } from '../utils';
+import type { TimelineItem } from '../types';
+import { groupTimelineItems } from '../utils';
 import { TimelineCard } from './TimelineCard';
 import { EmptyState, Section } from '@/components/ui';
 import { SectionHeader } from '@/modules/shared/components/layout';
 import Link from 'next/link';
 
 interface TimelineWidgetProps {
-  events: TimelineEvent[];
+  events: TimelineItem[];
   limit?: number;
 }
 
@@ -23,7 +23,6 @@ export function TimelineWidget({ events, limit = 5 }: TimelineWidgetProps) {
           icon="clock"
           title="No recent activity"
           description="Start tracking your goals and finances to see activity here."
-          small
         />
       </Section>
     );
@@ -33,11 +32,8 @@ export function TimelineWidget({ events, limit = 5 }: TimelineWidgetProps) {
     <Section>
       <SectionHeader
         title="Timeline"
-        action={
-          <Link href="/timeline" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
-            View all
-          </Link>
-        }
+        cta="View all"
+        href="/timeline"
       />
       <div className="space-y-4">
         {recentEvents.map((event, index) => (

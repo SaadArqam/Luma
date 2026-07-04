@@ -104,7 +104,7 @@ export function AddAccountForm({ open, onClose, onSuccess }: AddAccountFormProps
 
           <div className="space-y-2">
             <Label htmlFor="type">Account Type</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select value={type} onValueChange={(value) => value && setType(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

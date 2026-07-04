@@ -1,4 +1,4 @@
-import type { ExtractedEntity, RoutingDecision, EntityHandler } from '../types';
+import type { ExtractedEntity, RoutingDecision, EntityHandler, EntityType, ModuleDestination } from '../types';
 import { contextEngine } from '@/modules/context';
 
 class RoutingEngine {
@@ -66,8 +66,8 @@ class RoutingEngine {
     entities: ExtractedEntity[],
     decisions: RoutingDecision[],
     userId: string
-  ): Promise<Array<{ type: string; id: string; destination: string }>> {
-    const createdEntities: Array<{ type: string; id: string; destination: string }> = [];
+  ): Promise<Array<{ type: EntityType; id: string; destination: ModuleDestination }>> {
+    const createdEntities: Array<{ type: EntityType; id: string; destination: ModuleDestination }> = [];
 
     for (const decision of decisions) {
       const entity = entities.find(e => e.id === decision.entityId);

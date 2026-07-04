@@ -1,10 +1,10 @@
 // Helper functions to create timeline events from API routes
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { TimelineEvent } from '@/modules/timeline/types';
+import type { TimelineItem } from '@/modules/timeline/types';
 
 export async function createTimelineEvent(
   supabase: Awaited<ReturnType<typeof import('@/lib/supabase-server').createClient>>,
-  eventData: Omit<TimelineEvent, 'id'>
+  eventData: Omit<TimelineItem, 'id'>
 ): Promise<void> {
   await supabase
     .from('timeline_events')

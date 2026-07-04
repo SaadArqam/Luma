@@ -72,7 +72,7 @@ export function AddGoalForm({ onGoalAdded }: AddGoalFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           New Goal

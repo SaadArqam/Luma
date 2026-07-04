@@ -1,4 +1,4 @@
-export type EventType = 
+export type EventType =
   | 'transaction.created'
   | 'transaction.updated'
   | 'transaction.deleted'
@@ -9,6 +9,7 @@ export type EventType =
   | 'account.created'
   | 'account.updated'
   | 'account.deleted'
+  | 'balance.entry.created'
 
 export interface Event<T = any> {
   id: string

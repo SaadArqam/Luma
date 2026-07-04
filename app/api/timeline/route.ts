@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
-import type { TimelineEvent } from '@/modules/timeline/types';
+import type { TimelineItem } from '@/modules/timeline/types';
 
 export async function GET() {
   try {
@@ -17,7 +17,7 @@ export async function GET() {
     if (error) throw error;
 
     // Convert to our type
-    const typedEvents: TimelineEvent[] = events.map((event) => ({
+    const typedEvents: TimelineItem[] = events.map((event) => ({
       id: event.id,
       timestamp: new Date(event.timestamp),
       type: event.type,
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
-    const typedEvent: TimelineEvent = {
+    const typedEvent: TimelineItem = {
       id: event.id,
       timestamp: new Date(event.timestamp),
       type: event.type,

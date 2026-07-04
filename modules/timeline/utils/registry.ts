@@ -1,12 +1,19 @@
 import type { TimelineItem, TimelineItemType } from '../types';
-import { CreditCard, Mic, BookOpen, Target, CheckCircle, Calendar, Heart, Sparkles, Bell, Flag, Trophy } from 'lucide-react';
+import { CreditCard, Mic, BookOpen, Target, CheckCircle, Calendar, Heart, Sparkles, Bell, Flag, Trophy, TrendingUp, TrendingDown, Repeat, PiggyBank } from 'lucide-react';
 
 // Icon mapping for timeline item types
 const iconMap: Record<TimelineItemType, React.ComponentType<any>> = {
   'transaction': CreditCard,
+  'expense': CreditCard,
+  'credit': TrendingUp,
+  'debit': TrendingDown,
+  'recurring': Repeat,
   'capture': Mic,
   'journal-entry': BookOpen,
   'goal-progress': Target,
+  'goal-created': Target,
+  'goal-contribution': PiggyBank,
+  'goal-completed': Trophy,
   'habit-completion': CheckCircle,
   'planner-event': Calendar,
   'health-record': Heart,
@@ -19,9 +26,16 @@ const iconMap: Record<TimelineItemType, React.ComponentType<any>> = {
 // Color mapping for timeline item types
 const colorMap: Record<TimelineItemType, string> = {
   'transaction': 'bg-blue-500',
+  'expense': 'bg-red-500',
+  'credit': 'bg-green-500',
+  'debit': 'bg-red-500',
+  'recurring': 'bg-purple-500',
   'capture': 'bg-purple-500',
   'journal-entry': 'bg-amber-500',
   'goal-progress': 'bg-green-500',
+  'goal-created': 'bg-blue-500',
+  'goal-contribution': 'bg-green-500',
+  'goal-completed': 'bg-yellow-500',
   'habit-completion': 'bg-emerald-500',
   'planner-event': 'bg-indigo-500',
   'health-record': 'bg-rose-500',

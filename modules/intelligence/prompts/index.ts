@@ -39,6 +39,8 @@ Always return valid JSON in this exact structure:
 - Do not include any markdown or extra text outside the JSON
 `;
 
+export const INSIGHT_GENERATION_SYSTEM_PROMPT = DAILY_INSIGHTS_SYSTEM_PROMPT;
+
 export const buildDailyInsightsPrompt = (context: string): string => {
   return `${context}
 

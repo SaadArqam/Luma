@@ -10,13 +10,10 @@ export const InsightSchema = z.object({
   source: z.enum(['finance', 'goals', 'timeline']),
   confidence: z.enum(['low', 'medium', 'high']),
   suggestedActions: z.array(z.string()).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.coerce.date(),
 });
 
 export const GenerateInsightsResponseSchema = z.object({
   insights: z.array(InsightSchema),
 });
-
-export type Insight = z.infer<typeof InsightSchema>;
-export type GenerateInsightsResponse = z.infer<typeof GenerateInsightsResponseSchema>;

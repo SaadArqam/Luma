@@ -51,7 +51,7 @@ export function AddContributionForm({ goalId, onContributionAdded }: AddContribu
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           Add Contribution

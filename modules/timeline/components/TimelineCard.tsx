@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import { Calendar, Clock, CreditCard, TrendingUp, TrendingDown, Repeat, Target, PiggyBank, Trophy, Ellipsis, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
-import type { TimelineEvent } from '../types';
+import type { TimelineItem } from '../types';
 import { cn } from '@/modules/shared/utils';
 
 interface TimelineCardProps {
-  event: TimelineEvent;
+  event: TimelineItem;
   isFirst?: boolean;
   isLast?: boolean;
 }

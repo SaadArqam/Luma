@@ -114,7 +114,7 @@ export class DailyBriefService {
         return acc;
       }, {} as Record<string, number>);
 
-      const sortedCategories = Object.entries(topCategory).sort(([, a], [, b]) => b - a);
+      const sortedCategories = (Object.entries(topCategory) as [string, number][]).sort(([, a], [, b]) => b - a);
       if (sortedCategories.length > 0) {
         content += ` Most of your spending was on ${sortedCategories[0][0]}.`;
       }

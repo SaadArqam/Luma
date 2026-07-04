@@ -1,10 +1,10 @@
-import type { TimelineEvent } from '../types';
+import type { TimelineItem } from '../types';
 import type { ExpenseWithCategoryAndAccount, BalanceEntry, RecurringExpense } from '../../finance/types';
 import type { Goal, GoalContribution } from '../../goals/types';
 import { formatCurrency } from '@/modules/shared/utils';
 
 // Finance Adapters
-export function expenseToTimelineEvent(expense: ExpenseWithCategoryAndAccount): TimelineEvent {
+export function expenseToTimelineItem(expense: ExpenseWithCategoryAndAccount): TimelineItem {
   return {
     id: expense.id,
     timestamp: new Date(expense.date),
@@ -23,7 +23,7 @@ export function expenseToTimelineEvent(expense: ExpenseWithCategoryAndAccount): 
   };
 }
 
-export function balanceEntryToTimelineEvent(entry: BalanceEntry): TimelineEvent {
+export function balanceEntryToTimelineItem(entry: BalanceEntry): TimelineItem {
   const isCredit = entry.type === 'credit';
   return {
     id: entry.id,
@@ -42,7 +42,7 @@ export function balanceEntryToTimelineEvent(entry: BalanceEntry): TimelineEvent 
   };
 }
 
-export function recurringExpenseToTimelineEvent(recurring: RecurringExpense): TimelineEvent {
+export function recurringExpenseToTimelineItem(recurring: RecurringExpense): TimelineItem {
   return {
     id: recurring.id,
     timestamp: new Date(recurring.next_due_date),
@@ -61,7 +61,7 @@ export function recurringExpenseToTimelineEvent(recurring: RecurringExpense): Ti
 }
 
 // Goals Adapters
-export function goalToTimelineEvent(goal: Goal): TimelineEvent {
+export function goalToTimelineItem(goal: Goal): TimelineItem {
   return {
     id: goal.id,
     timestamp: new Date(goal.created_at),
@@ -79,7 +79,7 @@ export function goalToTimelineEvent(goal: Goal): TimelineEvent {
   };
 }
 
-export function contributionToTimelineEvent(contribution: GoalContribution, goal: Goal): TimelineEvent {
+export function contributionToTimelineItem(contribution: GoalContribution, goal: Goal): TimelineItem {
   return {
     id: contribution.id,
     timestamp: new Date(contribution.date),
@@ -97,7 +97,7 @@ export function contributionToTimelineEvent(contribution: GoalContribution, goal
   };
 }
 
-export function goalCompletedToTimelineEvent(goal: Goal): TimelineEvent {
+export function goalCompletedToTimelineItem(goal: Goal): TimelineItem {
   return {
     id: `${goal.id}-completed`,
     timestamp: new Date(),

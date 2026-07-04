@@ -32,12 +32,6 @@ export interface LLMProvider {
   ): Promise<ProviderChatResponse>;
 }
 
-// Agent types
-export interface BaseAgent {
-  name: string;
-  description: string;
-}
-
 // Insight types
 export interface Insight {
   id: string;
@@ -51,4 +45,8 @@ export interface Insight {
   suggestedActions?: string[];
   metadata?: Record<string, unknown>;
   createdAt: Date;
+}
+
+export interface GenerateInsightsResponse {
+  insights: Insight[];
 }

@@ -26,31 +26,24 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     if (error) throw error;
 
-    const { data: goal } = await supabase
-      .from('goals')
-      .select('current_amount, target_amount')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single();
-
-    let newStatus = 'active';
-    if (goal) {
-      const newCurrentAmount = goal.current_amount + amount;
-      newStatus = newCurrentAmount >= goal.target_amount ? 'completed' : 'active';
-
-      await supabase
-        .from('goals')
-        .update({ current_amount: newCurrentAmount, status: newStatus })
-        .eq('id', id);
-    }
-
-    // Get the full goal for timeline event
+    // Get the full goal first
     const { data: fullGoal } = await supabase
       .from('goals')
       .select('*')
       .eq('id', id)
       .eq('user_id', user.id)
       .single();
+
+    let newStatus = 'active';
+    if (fullGoal) {
+      const newCurrentAmount = fullGoal.current_amount + amount;
+      newStatus = newCurrentAmount >= fullGoal.target_amount ? 'completed' : 'active';
+
+      await supabase
+        .from('goals')
+        .update({ current_amount: newCurrentAmount, status: newStatus })
+        .eq('id', id);
+    }
 
     // Create contribution timeline event
     const { data: contributionTimelineEvent } = await supabase
@@ -71,7 +64,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     let completedTimelineEvent: any = null;
     // Create goal completed event if status changed
-    if (newStatus === 'completed' && goal?.status !== 'completed') {
+    if (newStatus === 'completed' && fullGoal?.status !== 'completed') {
       const { data } = await supabase
         .from('timeline_events')
         .insert({

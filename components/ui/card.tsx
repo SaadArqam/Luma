@@ -3,9 +3,11 @@ import { cn } from '@/lib/utils';
 export function Card({
   children,
   className,
+  style,
 }: {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }) {
   return (
     <div
@@ -13,6 +15,7 @@ export function Card({
         'mx-4 mb-3 rounded-2xl overflow-hidden bg-card border border-border/50 elevation-subtle motion-fast motion-ease-out card-hover',
         className
       )}
+      style={style}
     >
       {children}
     </div>

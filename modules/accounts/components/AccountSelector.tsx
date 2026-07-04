@@ -25,7 +25,7 @@ export function AccountSelector({
   return (
     <Select
       value={selectedAccountId || ''}
-      onValueChange={onSelect}
+      onValueChange={(value) => value && onSelect(value)}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />

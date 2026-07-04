@@ -30,7 +30,7 @@ export function calculateBudgetProgress(
 
   const spent = periodExpenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
   const remaining = budget.amount - spent;
-  const percentage = budget.amount > 0 ? Math.min(Math.round((spent / budget.amount) * 100 : 0;
+  const percentage = budget.amount > 0 ? Math.min(Math.round((spent / budget.amount) * 100), 100) : 0;
 
   let status: 'healthy' | 'warning' | 'exceeded' = 'healthy';
   if (percentage >= 100) {

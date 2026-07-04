@@ -1,9 +1,9 @@
 import { BaseAgent } from './base-agent';
-import type { LLMProvider, Insight } from '../types';
+import type { LLMProvider, Insight, GenerateInsightsResponse } from '../types';
 import { FinanceAgent } from './finance-agent';
 import { GoalsAgent } from './goals-agent';
 import { TimelineAgent } from './timeline-agent';
-import { GenerateInsightsResponseSchema, type GenerateInsightsResponse } from '../schemas';
+import { GenerateInsightsResponseSchema } from '../schemas';
 import { INSIGHT_GENERATION_SYSTEM_PROMPT } from '../prompts';
 
 export class InsightAgent extends BaseAgent {
