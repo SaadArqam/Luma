@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { CaptureReview } from '@/modules/capture/components';
 import { PageHeader, PageTitle, PageDescription } from '@/components/ui/page-header';
@@ -8,8 +8,9 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Loader2 } from 'lucide-react';
 import type { CaptureSession } from '@/modules/capture/types';
 
-export default function CaptureReviewPage({ params }: { params: { sessionId: string } }) {
+export default function CaptureReviewPage({ params }: { params: Promise<{ sessionId: string }> }) {
   const router = useRouter();
+  const { sessionId } = use(params);
   const [session, setSession] = useState<CaptureSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export default function CaptureReviewPage({ params }: { params: { sessionId: str
   useEffect(() => {
     async function fetchSession() {
       try {
-        const response = await fetch(`/api/capture/${params.sessionId}`);
+        const response = await fetch(`/api/capture/${sessionId}`);
         if (!response.ok) throw new Error('Failed to fetch session');
         const data = await response.json();
         setSession(data);
@@ -29,11 +30,11 @@ export default function CaptureReviewPage({ params }: { params: { sessionId: str
     }
 
     fetchSession();
-  }, [params.sessionId]);
+  }, [sessionId]);
 
   const handleConfirm = async () => {
     try {
-      const response = await fetch(`/api/capture/${params.sessionId}/confirm`, {
+      const response = await fetch(`/api/capture/${sessionId}/confirm`, {
         method: 'POST',
       });
 

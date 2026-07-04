@@ -72,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Performance improvements
 - **Fixed hardcoded user name in Today page greeting**
 - **Fixed data fetching pattern in Today and Timeline pages to use Server Components**
+- **Updated all dynamic route handlers and pages to accept params as Promises (Next.js 15+ compatibility)**
 
 ## [1.0.0] - 2026-06-15
 
