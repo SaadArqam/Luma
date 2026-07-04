@@ -3,8 +3,9 @@ import { createClient } from '@/lib/supabase-server';
 import { emitEvent } from '@/modules/rules';
 import { lifeGraphService } from '@/modules/life-graph';
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await context.params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -14,7 +15,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const { data: contribution, error } = await supabase
       .from('goal_contributions')
       .insert({
-        goal_id: params.id,
+        goal_id: id,
         user_id: user.id,
         amount,
         note,
@@ -28,7 +29,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const { data: goal } = await supabase
       .from('goals')
       .select('current_amount, target_amount')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single();
 
@@ -40,14 +41,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
       await supabase
         .from('goals')
         .update({ current_amount: newCurrentAmount, status: newStatus })
-        .eq('id', params.id);
+        .eq('id', id);
     }
 
     // Get the full goal for timeline event
     const { data: fullGoal } = await supabase
       .from('goals')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single();
 
@@ -82,7 +83,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
           source_module: 'goals',
           icon: 'trophy',
           color: 'bg-yellow-500',
-          metadata: { goalId: params.id },
+          metadata: { goalId: id },
         })
         .select()
         .single();
@@ -90,9 +91,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 
     // Get or create goal node
-    let goalNode = await lifeGraphService.getNode(user.id, 'goal', params.id);
+    let goalNode = await lifeGraphService.getNode(user.id, 'goal', id);
     if (!goalNode) {
-      goalNode = await lifeGraphService.createNode(user.id, 'goal', params.id, {
+      goalNode = await lifeGraphService.createNode(user.id, 'goal', id, {
         title: fullGoal?.title,
       });
     }

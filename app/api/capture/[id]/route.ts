@@ -4,9 +4,10 @@ import { captureService } from '@/modules/capture/services';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -14,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const session = await captureService.getSession(params.id);
+    const session = await captureService.getSession(id);
 
     if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });

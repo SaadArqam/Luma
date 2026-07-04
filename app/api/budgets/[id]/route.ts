@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await context.params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -20,7 +21,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         custom_days,
         rollover,
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single();
@@ -32,7 +33,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       await supabase
         .from('budget_categories')
         .delete()
-        .eq('budget_id', params.id);
+        .eq('budget_id', id);
 
       // Then add new ones
       if (category_ids.length > 0) {
@@ -40,7 +41,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           .from('budget_categories')
           .insert(
             category_ids.map((categoryId: string) => ({
-              budget_id: params.id,
+              budget_id: id,
               category_id: categoryId,
             }))
           );
@@ -56,8 +57,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await context.params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -65,7 +67,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     const { error } = await supabase
       .from('budgets')
       .update({ archived: true })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id);
 
     if (error) throw error;

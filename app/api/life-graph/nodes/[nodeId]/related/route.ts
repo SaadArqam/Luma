@@ -4,9 +4,10 @@ import { lifeGraphService } from '@/modules/life-graph';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { nodeId: string } }
+  context: { params: Promise<{ nodeId: string }> }
 ) {
   try {
+    const { nodeId } = await context.params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -15,7 +16,7 @@ export async function GET(
 
     const searchParams = request.nextUrl.searchParams;
     const edgeType = searchParams.get('edge_type');
-    const nodes = await lifeGraphService.getRelatedNodes(user.id, params.nodeId, edgeType as any);
+    const nodes = await lifeGraphService.getRelatedNodes(user.id, nodeId, edgeType as any);
 
     return NextResponse.json(nodes);
   } catch (error: any) {
