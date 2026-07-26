@@ -9,7 +9,6 @@ export default function MigrationBanner() {
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    // Show banner if not previously dismissed in this session
     const wasDismissed = sessionStorage.getItem('migration-dismissed')
     if (!wasDismissed) setShow(true)
   }, [])
@@ -45,14 +44,14 @@ export default function MigrationBanner() {
   if (!show || dismissed) return null
 
   return (
-    <div className="flex items-center gap-3 bg-[#1C1600] border border-[#E8B84B]/20 rounded-xl px-4 py-3 text-sm">
+    <div className="flex items-center gap-3 glass-card border border-[#E17A4D]/30 bg-[rgba(225,122,77,0.08)] rounded-[16px] px-4 py-3 text-sm">
       <span className="text-lg">📦</span>
-      <p className="flex-1 text-muted-foreground">
-        You have existing data — <button onClick={handleMigrate} disabled={loading} className="text-[#E8B84B] font-medium hover:underline disabled:opacity-50">
+      <p className="flex-1 text-[#8A8790]">
+        You have existing data — <button onClick={handleMigrate} disabled={loading} className="text-[#E17A4D] font-medium hover:underline disabled:opacity-50">
           {loading ? 'Claiming...' : 'click here to claim it'}
         </button> for your account.
       </p>
-      <button onClick={handleDismiss} className="text-muted-foreground hover:text-foreground text-xs ml-2">✕</button>
+      <button onClick={handleDismiss} className="text-[#8A8790] hover:text-[#F2EFEA] text-xs ml-2">✕</button>
     </div>
   )
 }
