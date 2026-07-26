@@ -71,7 +71,7 @@ export default async function DashboardPage() {
   const spendingByCategory = Object.values(categoryTotals).sort((a, b) => b.total - a.total)
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
 
       {/* ── Header greeting ─────────────────────── */}
       <div className="px-1 pt-2">

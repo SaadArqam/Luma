@@ -16,7 +16,7 @@ export default async function BalancePage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full overflow-x-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full overflow-x-hidden">
       <div className="pt-2 pb-2">
         <h1 className="font-fraunces text-header-display text-[#F2EFEA]">Balance</h1>
         <div style={{ width: '40px', height: '3px', backgroundColor: '#E17A4D', borderRadius: '2px', marginTop: '6px' }} />

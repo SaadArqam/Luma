@@ -60,7 +60,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
       <div className="pt-2 pb-2">
         <h1 className="font-fraunces text-header-display text-[#F2EFEA] flex items-center gap-3">
           <SettingsIcon className="h-8 w-8" />

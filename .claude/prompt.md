@@ -1,18 +1,27 @@
-Fix the Quick Add expense sheet overlapping and blending with the bottom dock.
+Diagnose and fix two related layout bugs introduced by the recent dock-hide-while-sheet-open change:
 
-## Root cause
-The sheet's z-index is likely equal to or below the dock's, and/or the dock isn't being hidden while the sheet is open — both are visible and interleaved in the screenshot (dock icons bleeding through the sheet, "Add Expense" submit button overlapped by the dock's home icon).
 
-## Fix
+## Bug 1: Dock no longer sticks to the viewport bottom
+The dock is now rendering mid-page (overlapping "Today's Budget") instead of fixed at the bottom of the screen, and at reduced opacity even when no sheet is open.
 
-1. **Hide the dock while the sheet is open** — this is the cleanest fix, not just a z-index bump. When the Quick Add sheet's open state is true, animate the dock out (fade + slight downward translate, 150ms) rather than leaving it rendered underneath. A user shouldn't be able to navigate away via the dock while mid-way through adding an expense anyway — hiding it reinforces that this is a focused task.
+Likely cause: `position: fixed` only works relative to the viewport if NO ancestor element has `transform`, `filter`, `backdrop-filter`, `perspective`, or `will-change` set to any of these properties. If the fade/hide animation added for the sheet-overlap fix applied a `transform` or `opacity` transition to a wrapper DIV that contains both the dock AND page content (instead of animating the dock's own isolated wrapper), that wrapper now creates a new positioning context — and the dock's `position: fixed` becomes fixed relative to THAT wrapper instead of the viewport, which is exactly this symptom (floating mid-content, tracking scroll instead of staying pinned).
 
-2. **Sheet z-index** — regardless of the above, set the sheet's z-index explicitly higher than the dock's (e.g. dock at z-index: 100 per earlier spec, sheet should be z-index: 200+) so if there's ever a transition frame where both are visible, the sheet is unambiguously on top.
+Fix: 
+- Find where the dock-hide animation was added. Confirm the animated `transform`/`opacity` is applied ONLY to the dock's own root element, not to any shared layout wrapper, `<main>`, or page container.
+- The dock component should be rendered as a sibling to page content at the layout root (in layout.tsx, outside the page's own wrapper div), never nested inside a container that also wraps page content — this is the structural fix, not just a CSS tweak.
+- After fixing, confirm `position: fixed; bottom: ...` on the dock is being computed relative to the viewport again (inspect in DevTools — computed position should not shift when the page scrolls).
 
-3. **Sheet background must be fully opaque at the bottom edge** — the current sheet appears to fade to transparent near its bottom, letting the backdrop scrim and dock show through. Use {colors.surface-glass-thick} (85% opacity, not lower) for the full sheet body, with no gradient-to-transparent at any edge.
+## Bug 2: Duplicate/ghost header content mid-page
+There's a second faint "PaisaTrack / Hey Saad · Sunday, 26 July" rendering partway down the page, underneath the stat cards, on top of what should be the Today's Budget section.
 
-4. **Sheet bottom padding** — ensure the sheet's own submit button ("Add Expense" inside the sheet, not the dock) has clearance from the bottom of the screen: padding-bottom: max(24px, env(safe-area-inset-bottom) + 16px) on the sheet's inner content, so the button is never close to where the dock would sit.
+Likely cause: the AnimatePresence page-transition setup (from the earlier Lenis/Framer Motion pass) may not be fully unmounting the previous page/component before mounting the new one — an old instance of the Home page is lingering in the DOM, partially transparent mid-exit-animation, stacked behind the current one.
 
-5. **Verify the backdrop scrim covers full viewport** — rgba(0,0,0,0.6) scrim should sit between the page content and the sheet, full screen, above the (now-hidden) dock, so no page content is visible through it at all while the sheet is open.
+Fix:
+- Check the AnimatePresence usage for `mode="wait"` — without it, enter and exit animations run simultaneously, which causes exactly this "two copies overlapping" symptom.
+- Confirm each page/route has a stable, unique `key` prop passed to its motion wrapper (React needs this to know it's a genuinely new instance to animate out the old one, not reuse it).
+- Verify the exit animation actually completes and unmounts — if `AnimatePresence` never fires `onExitComplete` cleanly, this ghost can persist indefinitely.
 
-Test by opening Quick Add and confirming: dock is completely gone/hidden, sheet background is fully solid with no page content bleeding through, and the sheet's own "Add Expense" submit button is fully visible and tappable without any dock overlap.
+## After fixing both
+Test this specific sequence, since it's what triggered the bug originally: open Quick Add sheet from Home → close it → navigate to a different tab via the dock → navigate back to Home. Confirm at each step: dock stays pinned to the true viewport bottom, and there's exactly one copy of the header/greeting rendered, never two.
+
+Report which of the two root causes (or both) was confirmed, since Bug 2 in particular could resurface on other pages if it's a systemic AnimatePresence issue rather than Home-specific.
