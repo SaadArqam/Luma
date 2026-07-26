@@ -20,6 +20,7 @@ export function AddBalanceForm() {
     setErrorMsg('')
     if (!amount || isNaN(Number(amount))) return
 
+    
     setLoading(true)
     try {
       const res = await fetch('/api/balance', {
