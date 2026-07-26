@@ -1,24 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import BottomNav from '@/components/BottomNav';
+import LenisProvider from '@/components/LenisProvider';
+import { QuickAddSheet } from '@/components/QuickAddSheet';
 import { Toaster } from "sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0C0C0C" },
-    { media: "(prefers-color-scheme: light)", color: "#0C0C0C" },
+    { media: "(prefers-color-scheme: dark)", color: "#1B1C21" },
+    { media: "(prefers-color-scheme: light)", color: "#1B1C21" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -76,15 +78,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark ${fraunces.variable} ${inter.variable} antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col md:flex-row bg-background text-foreground">
-        <Sidebar />
-        <main className="flex-1 min-w-0 pb-16 md:pb-0 overflow-y-auto">
-          {children}
-        </main>
-        <Toaster />
-        <BottomNav />
+      <body className="min-h-screen flex flex-col tablet:flex-row tablet:items-start bg-[#1B1C21] text-[#F2EFEA]">
+        <LenisProvider>
+          <Sidebar />
+          <main className="flex-1 min-w-0 pb-28 tablet:pb-0">
+            {children}
+          </main>
+          <Toaster />
+          <BottomNav />
+          <QuickAddSheet />
+        </LenisProvider>
       </body>
     </html>
   );

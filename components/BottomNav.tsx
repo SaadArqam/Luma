@@ -1,42 +1,67 @@
 'use client'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Wallet, Receipt, BarChart2, Settings } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 const links = [
   { href: '/', icon: Home, label: 'Home' },
-  { href: '/balance', icon: Wallet, label: 'Balance' },
   { href: '/expenses', icon: Receipt, label: 'Expenses' },
+  { href: '/balance', icon: Wallet, label: 'Wallet' },
   { href: '/reports', icon: BarChart2, label: 'Reports' },
   { href: '/settings', icon: Settings, label: 'Settings' },
-]
+] as const
 
 export default function BottomNav() {
   const path = usePathname()
+  const activeIndex = links.findIndex((l) => l.href === path)
+  const resolvedIndex = activeIndex === -1 ? 0 : activeIndex
+
+  // Track item positions for the gliding pill
+  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([])
+  const [pillStyle, setPillStyle] = useState<{ left: number; opacity: number }>({ left: 0, opacity: 0 })
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    const el = itemRefs.current[resolvedIndex]
+    if (!el) return
+    const parent = el.parentElement
+    if (!parent) return
+    const parentRect = parent.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+    const left = elRect.left - parentRect.left + (elRect.width - 40) / 2
+    setPillStyle({ left, opacity: 1 })
+  }, [resolvedIndex, mounted])
+
   return (
-    <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 border-t border-border"
-      style={{ height: '64px', backgroundColor: '#0C0C0C', paddingBottom: 'env(safe-area-inset-bottom)' }}
-    >
-      {links.map(({ href, icon: Icon, label }) => {
-        const active = path === href
+    <nav className="liquid-glass-dock" aria-label="Primary navigation">
+      {/* Gliding gold pill */}
+      <div
+        className="dock-pill"
+        style={{
+          left: pillStyle.left,
+          opacity: pillStyle.opacity,
+        }}
+        aria-hidden="true"
+      />
+
+      {links.map(({ href, icon: Icon, label }, i) => {
+        const isActive = resolvedIndex === i
         return (
-          <Link key={href} href={href}
-            className="flex flex-col items-center justify-center gap-1">
-            <div style={{
-              backgroundColor: active ? 'rgba(232,184,75,0.15)' : 'transparent',
-              borderRadius: '10px',
-              padding: '6px 8px',
-            }}>
-              <Icon size={22} strokeWidth={1.5}
-                color={active ? '#E8B84B' : '#3A3A3A'} />
-            </div>
-            <span
-              className="text-[9px] uppercase tracking-wide"
-              style={{ color: active ? '#E8B84B' : '#3A3A3A', fontWeight: active ? 600 : 500 }}
-            >
-              {label}
-            </span>
+          <Link
+            key={href}
+            href={href}
+            aria-label={label}
+            aria-current={isActive ? 'page' : undefined}
+            ref={(el) => { itemRefs.current[i] = el }}
+            className={`dock-item${isActive ? ' dock-item--active' : ''}`}
+          >
+            <Icon size={22} strokeWidth={1.5} />
           </Link>
         )
       })}
