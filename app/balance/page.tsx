@@ -16,25 +16,63 @@ export default async function BalancePage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full overflow-x-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="pt-2 pb-2">
         <h1 className="font-fraunces text-header-display text-[#F2EFEA]">Balance</h1>
         <div style={{ width: '40px', height: '3px', backgroundColor: '#E17A4D', borderRadius: '2px', marginTop: '6px' }} />
         <p className="text-body-muted-luma mt-2">Manage your wallet balance and view history</p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-1">
+      <div className="grid gap-8 tablet:grid-cols-3">
+        <div className="min-w-0 tablet:col-span-1">
           <AddBalanceForm />
         </div>
 
-        <div className="lg:col-span-2 space-y-4">
+        <div className="min-w-0 tablet:col-span-2 space-y-4">
           <Card className="glass-card shadow-md">
             <CardHeader>
               <CardTitle className="text-header-section">Balance History</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="solid-list-card">
+              {/* Mobile (< 640px): stacked card rows — avoids the wide table overflowing */}
+              <div className="solid-list-card sm:hidden">
+                {history && history.length > 0 ? (
+                  history.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="px-3 py-3 border-b border-[rgba(255,255,255,0.09)] last:border-b-0"
+                    >
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="text-number-inline text-[#F2EFEA] min-w-0 truncate">
+                          {entry.note || '—'}
+                        </span>
+                        <span
+                          className={`text-number-inline shrink-0 ${entry.type === 'credit' ? 'text-[#7FB69E]' : 'text-[#C4595A]'}`}
+                        >
+                          {entry.type === 'credit' ? '+' : '-'}₹{Number(entry.amount).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-body-muted-luma">
+                          {format(new Date(entry.created_at), 'dd MMM yyyy, h:mm a')}
+                        </span>
+                        {entry.type === 'credit' ? (
+                          <Badge className="badge-success-luma border-none shadow-none font-medium">Credit</Badge>
+                        ) : (
+                          <Badge className="badge-danger-luma border-none shadow-none font-medium">Debit</Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="h-32 flex items-center justify-center text-body-muted-luma">
+                    No history found
+                  </div>
+                )}
+              </div>
+
+              {/* Tablet / desktop (>= 640px): original table */}
+              <div className="solid-list-card hidden sm:block">
                 <Table>
                   <TableHeader className="bg-[#2B2C33]">
                     <TableRow className="border-b border-[rgba(255,255,255,0.09)]">
@@ -62,7 +100,9 @@ export default async function BalancePage() {
                               <Badge className="badge-danger-luma border-none shadow-none font-medium">Debit</Badge>
                             )}
                           </TableCell>
-                          <TableCell className="max-w-[150px] truncate text-body-muted-luma text-xs">{entry.note || '-'}</TableCell>
+                          <TableCell className="text-body-muted-luma text-xs">
+                            <div className="max-w-[150px] truncate">{entry.note || '-'}</div>
+                          </TableCell>
                           <TableCell
                             className={`text-right font-inter font-bold font-tnum text-sm ${entry.type === 'credit' ? 'text-[#7FB69E]' : 'text-[#C4595A]'}`}
                           >

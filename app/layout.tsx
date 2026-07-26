@@ -84,7 +84,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col tablet:flex-row tablet:items-start bg-[#1B1C21] text-[#F2EFEA]">
         <LenisProvider>
           <Sidebar />
-          <main className="flex-1 min-w-0 pb-28 tablet:pb-0">
+          <main className="flex-1 min-w-0 dock-clearance">
             {children}
           </main>
           <Toaster />

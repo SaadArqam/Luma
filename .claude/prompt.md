@@ -1,48 +1,32 @@
-Apply DESIGN-luma.md to the remaining pages: Wallet, Categories, Expenses, Recurring, Reports, and Settings. The Home page already has this applied — use it as the reference implementation for token usage patterns (glass-card, solid-list-card, typography roles, accent color) and match that same approach here.
+Fix the "You have existing data — click here to claim it" banner reappearing after dismissal or navigation.
 
-Read DESIGN-luma.md fully before starting. Go page by page, in this order, and list files touched after each page before moving to the next.
+## Diagnose first
+Find where the dismiss (X) handler is implemented. It's almost certainly using local useState (e.g. const [dismissed, setDismissed] = useState(false)) which resets every time the component remounts — i.e. every route change, since Home unmounts when you navigate away and remounts when you come back.
 
-## Wallet page (Balance / Add Balance + Balance History)
-- "Add Balance" form container → {component.glass-card}
-- Balance History table container → {component.solid-list-card} (scrolling list, no backdrop-filter)
-- "Add Money" button → {component.button-primary}
-- Amount/Date/Note inputs → background {colors.surface-solid-raised}, border {colors.border-hairline}, text {colors.text-primary}, focus state border {colors.accent-border}
-- "Credit" badges in the history table → replace current green with {colors.success}, background {colors.success-glow}
-- Page title "Balance" → {typography.header-display}, subtitle "Manage your wallet balance..." → {typography.body-muted}
+## Fix
+Persist the dismissal so it survives navigation and page reloads:
+- On dismiss click, write a flag to the database (a `banner_dismissed` or similar column/row tied to the user, in whatever table tracks user preferences/settings — check if one exists, create a minimal one if not) rather than only local state
+- On Home page load, check that flag before rendering the banner at all
+- If a full DB round-trip feels heavy for something this minor, an acceptable lighter-weight fix is localStorage (localStorage.setItem('claimBannerDismissed', 'true')) — but note this means the dismissal is per-device, not per-account, so it'll reappear if the user logs in elsewhere. Given this is a one-time "claim your data" prompt tied to account state, prefer the DB approach if there's already a user settings table to add one column to.
 
-## Categories page
-- "New Category" form → {component.glass-card}
-- Each category card in the grid → {component.category-chip} treatment but sized as a card (not pill) — background {colors.surface-solid-raised}, border {colors.border-hairline}; the one with a budget set gets border {colors.accent-border} and its "Daily: ₹210" badge in {colors.accent} on {colors.accent-glow} background
-- "Create Category" button → {component.button-primary}
-- "Set Budget" small buttons → {component.button-secondary}
-- Delete (trash) icon buttons → keep icon-only, recolor icon to {colors.danger} at rest, no fill background until hover/press
+## Also verify
+Once dismissed, confirm the banner doesn't just hide visually (display: none via CSS while still in the DOM/state as "shown") — it should not re-fetch or re-check the claimable-data condition until the underlying data state actually changes (e.g. don't show it again just because of a re-render).
 
-## Expenses page
-- "Add Expense" form → {component.glass-card}
-- Expense History table → {component.solid-list-card}
-- Category icons in the list stay as emoji/icons, unchanged
-- "Add Expense" button → {component.button-primary}
-- Search input and month/filter dropdown → same input styling as Wallet page inputs above
-- "Total for selected period" footer row → value in {typography.number-card}, label in {typography.body-muted}
-- Recurring payment checkbox → accent color {colors.accent} when checked
+Diagnose and fix the ~2 second delay when navigating between pages via the dock/sidebar.
 
-## Recurring page
-- Empty state card → {component.glass-card}
-- "Add from Expenses" button → {component.button-primary}
-- Icon in empty state → recolor from current blue to {colors.text-muted} (neutral, not colored — this is an empty state, not a status indicator)
+## Diagnose first — check these in order, report findings before fixing
+1. Confirm all dock/sidebar nav items use Next.js `<Link>` (or `router.push` from `next/navigation`) and NOT plain `<a href>` tags or `window.location` — a plain anchor tag causes a full page reload, which would fully explain a 2-second delay. This is the most likely cause.
+2. Check each page component for data-fetching — is it fetching fresh data from Supabase on every mount with no loading skeleton, so the user stares at a blank/frozen screen until the fetch resolves? If so, the "delay" is actually a fetch waterfall, not a routing problem.
+3. Check if Next.js prefetching is disabled anywhere (Link components with prefetch={false}) — default prefetch should make nav near-instant once the destination's JS is already loaded.
+4. Check bundle size — if each page is pulling in large dependencies (chart libraries, etc.) without code-splitting, first navigation to that page pays the full JS-parse cost. Run `next build` and check the per-route bundle sizes in the output.
 
-## Reports page
-- Time-range toggle (30 days / 90 days / 6 months) → active state uses {component.button-primary} treatment (accent fill), inactive uses {component.button-secondary}
-- Spending Activity stat cards (Active Days, Longest Streak, Biggest Day, Daily Average) → {component.glass-card}, labels in {typography.caption}, values in {typography.number-card}
-- Heatmap: keep the green intensity scale AS IS — do not recolor to terracotta, the heatmap's green-scale is a separate data-visualization convention distinct from the UI accent color and recoloring it would reduce readability
-- Monthly Spending bar chart → active/current month bar uses {colors.accent}, other months use {colors.surface-solid-raised}
-- "This Month by Category" list → progress bars recolor from gold to {colors.accent}, but keep each category's own row otherwise neutral (per the earlier "no rainbow" rule)
+## Likely fixes, apply whichever the diagnosis points to
+- If plain <a> tags: replace with <Link href="...">
+- If blocking fetches with no loading state: add a loading.tsx (Next.js App Router convention) per route so navigation feels instant even while data loads in the background, instead of a frozen screen
+- If large bundles: dynamic-import heavy components (e.g. chart library on Reports page) with next/dynamic so they don't block other routes' initial load
+- If it's the glass/backdrop-filter recalculating: check whether the dock/sidebar are being remounted on every route change instead of staying persistent across navigations — they should live in the root layout.tsx, not be re-rendered per-page, or the browser recalculates the blur effect on every nav which is expensive
 
-## Settings page
-- I don't have a screenshot of this page — inspect the actual current implementation and apply the same general rules: glass-card containers for forms/sections, button-primary for primary actions, button-secondary for secondary actions, inputs matching the Wallet/Expenses pattern, {typography.header-section} for section titles.
+Report back which of these was the actual cause once found — this matters for knowing whether to expect the same issue on pages not yet built.
 
-## Cross-cutting
-- Every page's glass-dock/glass-sidebar should already be consistent from the Home page work — if any page has a locally-overridden nav style, remove the override and let it inherit the shared component.
-- Do not touch layout structure, spacing, or component logic — this pass is tokens/colors/type only, same constraint as the Home page pass.
-
-After each page, tell me what you changed so I can spot anything that needs a follow-up pass.
+## Also, separately
+The bottom dock is still overlapping page content (visible in the latest screenshot — the Settings/Configure card and nav icons are overlapping). The padding-bottom fix requested earlier doesn't appear to have been applied, or was reverted. Re-check that the page-level scroll container has bottom padding accounting for the dock's full height + margin, on every page, not just Home.

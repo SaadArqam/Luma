@@ -156,6 +156,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+.text-number-inline {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  font-feature-settings: 'tnum' 1;
+  font-variant-numeric: tabular-nums;
+}
+
 .text-body-luma {
   font-family: var(--font-inter), Inter, system-ui, sans-serif;
   font-size: 15px;
@@ -312,6 +321,32 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
+/* ── Dock geometry + page clearance ──────────────────────────────────── */
+/* Derived from .liquid-glass-dock below — keep these in sync with it.
+   --dock-height  = .dock-item height (44) + dock padding (8*2) + border (1*2)
+   --dock-inset   = the dock's own `bottom` offset
+   --dock-buffer  = breathing room between content and the dock
+   Raise --dock-buffer alone if content still feels tight on device. */
+:root {
+  --dock-height: 62px;
+  --dock-inset: max(16px, env(safe-area-inset-bottom));
+  --dock-buffer: 16px;
+  --dock-clearance: calc(var(--dock-height) + var(--dock-inset) + var(--dock-buffer));
+}
+
+/* Applied once at the layout level so every page that renders the dock gets
+   clearance, rather than each page remembering to add its own padding. */
+.dock-clearance {
+  padding-bottom: var(--dock-clearance);
+}
+
+@media (min-width: 835px) {
+  /* Sidebar replaces the dock, so no bottom clearance is needed. */
+  .dock-clearance {
+    padding-bottom: 0;
+  }
+}
+
 /* ── Liquid Glass Dock (mobile ≤ 834px) ──────────────────────────────── */
 .liquid-glass-dock {
   display: none;
@@ -353,16 +388,32 @@
   }
 }
 
-/* Gliding terracotta pill */
+/* Gesture surface: spans the dock's full inner width so a drag can start
+   anywhere, not just on an icon. touch-action: none stops the page scrolling
+   while the finger travels across the dock. */
+.dock-row {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Gliding terracotta pill. Position is driven by a Framer Motion transform
+   (see BottomNav.tsx), so no `left` transition here — it would fight the
+   motion value during a drag. */
 .dock-pill {
   position: absolute;
+  left: 0;
   width: 40px;
   height: 40px;
   border-radius: 14px;
   background: rgba(225, 122, 77, 0.18);
   pointer-events: none;
-  transition: left 300ms cubic-bezier(0.34, 1.56, 0.64, 1),
-              opacity 200ms ease;
+  transition: opacity 200ms ease;
 }
 
 /* Dock items */
@@ -381,11 +432,8 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Colour only — magnification is now driven per-icon by the drag gesture, so a
+   static scale here would compound with the motion transform. */
 .dock-item--active {
   color: #E17A4D;
-  transform: scale(1.08);
-}
-
-.dock-item:not(.dock-item--active):active {
-  transform: scale(0.92);
 }

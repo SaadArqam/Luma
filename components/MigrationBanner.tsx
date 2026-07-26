@@ -1,17 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
-export default function MigrationBanner() {
-  const [show, setShow] = useState(false)
+export default function MigrationBanner({
+  hasClaimableData,
+  initialDismissed,
+}: {
+  hasClaimableData: boolean
+  initialDismissed: boolean
+}) {
   const [loading, setLoading] = useState(false)
-  const [dismissed, setDismissed] = useState(false)
+  const [dismissed, setDismissed] = useState(initialDismissed)
 
-  useEffect(() => {
-    const wasDismissed = sessionStorage.getItem('migration-dismissed')
-    if (!wasDismissed) setShow(true)
-  }, [])
+  const persistDismissed = () => {
+    fetch('/api/migrate/dismiss', { method: 'POST' }).catch(() => {})
+  }
 
   const handleMigrate = async () => {
     setLoading(true)
@@ -25,8 +29,8 @@ export default function MigrationBanner() {
         } else {
           toast.success('All data is already linked to your account.')
         }
-        sessionStorage.setItem('migration-dismissed', '1')
-        setShow(false)
+        setDismissed(true)
+        persistDismissed()
       }
     } catch {
       toast.error('Migration failed. Please try again.')
@@ -36,12 +40,11 @@ export default function MigrationBanner() {
   }
 
   const handleDismiss = () => {
-    sessionStorage.setItem('migration-dismissed', '1')
-    setShow(false)
     setDismissed(true)
+    persistDismissed()
   }
 
-  if (!show || dismissed) return null
+  if (!hasClaimableData || dismissed) return null
 
   return (
     <div className="flex items-center gap-3 glass-card border border-[#E17A4D]/30 bg-[rgba(225,122,77,0.08)] rounded-[16px] px-4 py-3 text-sm">

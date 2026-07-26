@@ -11,15 +11,34 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 export const dynamic = 'force-dynamic'
 
+// Tables that can hold rows orphaned from before auth was added (see app/api/migrate/route.ts).
+const CLAIMABLE_TABLES = ['expenses', 'categories', 'balance_entries', 'recurring_expenses', 'stipend_config'] as const
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const userName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] ?? user?.email?.split('@')[0] ?? 'there'
 
-  // Fetch summary data
-  const { data: credits } = await supabase.from('balance_entries').select('amount').eq('type', 'credit')
-  const { data: debits }  = await supabase.from('balance_entries').select('amount').eq('type', 'debit')
-  const { data: allExpenses } = await supabase.from('expenses').select('amount, date, category:categories(id, name, icon)')
+  // Fetch summary data — run in parallel instead of sequentially to avoid a request waterfall.
+  const [creditsRes, debitsRes, expensesRes, recentExpensesRes, settingsRes, ...claimableRes] = await Promise.all([
+    supabase.from('balance_entries').select('amount').eq('type', 'credit'),
+    supabase.from('balance_entries').select('amount').eq('type', 'debit'),
+    supabase.from('expenses').select('amount, date, category:categories(id, name, icon)'),
+    supabase.from('expenses').select('*, category:categories(*)').order('date', { ascending: false }).limit(5),
+    user
+      ? supabase.from('user_settings').select('migration_banner_dismissed').eq('user_id', user.id).maybeSingle()
+      : Promise.resolve({ data: null as { migration_banner_dismissed: boolean } | null }),
+    ...CLAIMABLE_TABLES.map((table) =>
+      supabase.from(table).select('id', { count: 'exact', head: true }).is('user_id', null)
+    ),
+  ])
+
+  const credits = creditsRes.data
+  const debits = debitsRes.data
+  const allExpenses = expensesRes.data
+  const recentExpenses = recentExpensesRes.data
+  const bannerDismissed = settingsRes.data?.migration_banner_dismissed ?? false
+  const hasClaimableData = claimableRes.some((r) => (r.count ?? 0) > 0)
 
   const totalCredited  = credits?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
   const totalDebited   = debits?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
@@ -51,13 +70,6 @@ export default async function DashboardPage() {
 
   const spendingByCategory = Object.values(categoryTotals).sort((a, b) => b.total - a.total)
 
-  // Last 5 expenses
-  const { data: recentExpenses } = await supabase
-    .from('expenses')
-    .select('*, category:categories(*)')
-    .order('date', { ascending: false })
-    .limit(5)
-
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
 
@@ -71,7 +83,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <MigrationBanner />
+      <MigrationBanner hasClaimableData={hasClaimableData} initialDismissed={bannerDismissed} />
 
       {/* ── Today Card + Quick Add + Streak ─────── */}
       <TodayCard />
@@ -86,8 +98,12 @@ export default async function DashboardPage() {
           className="col-span-2 glass-card p-4 rounded-[20px] relative overflow-hidden flex flex-col justify-between"
           style={{ borderTop: '2px solid #E17A4D' }}
         >
-          <div className="absolute right-0 top-0 opacity-[0.05] transform translate-x-1/4 -translate-y-1/4">
-            <Wallet className="w-28 h-28 text-[#F2EFEA]" />
+          {/* Decorative flourish. Kept fully inside the padding box and free of
+              any transform: a transformed child is composited separately and
+              Chrome/Android does not reliably clip it to the card's rounded,
+              backdrop-filtered box, which let it escape the right edge. */}
+          <div className="absolute right-3 top-3 opacity-[0.05] pointer-events-none">
+            <Wallet className="w-16 h-16 text-[#F2EFEA]" />
           </div>
           <div className="flex flex-row items-center justify-between pb-1">
             <h3 className="font-fraunces text-header-card text-[#8A8790]">Current Balance</h3>
