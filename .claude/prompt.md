@@ -1,21 +1,38 @@
-Diagnose the 500 errors on /api/notifications/subscribe and /api/notifications/settings.
+Implement working per-user custom reminder times using a GitHub Actions scheduled workflow, replacing the fixed-time-only Vercel Cron for the reminder check. Keep the EOD summary on Vercel Cron (once-daily, that's fine as-is).
 
-## 1. Get the actual server-side error first
-Go to the Vercel dashboard → this project → Logs (or Observability/Functions tab depending on current Vercel UI) → filter to these two routes → find the actual stack trace from the most recent failed requests. Do not guess at the fix without seeing this — a generic 500 can mean several different things and the log will say exactly which.
+## 1. Create .github/workflows/notification-reminders.yml in the repo
 
-## 2. Most likely causes to check, in order of likelihood
+name: Trigger daily reminders
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call reminder endpoint
+        run: |
+          curl -f -X POST https://paisa-track-xi.vercel.app/api/notifications/send-reminders \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
 
-a) VAPID_PRIVATE_KEY missing or malformed on the server side
-   Unlike NEXT_PUBLIC_VAPID_PUBLIC_KEY (client), VAPID_PRIVATE_KEY and VAPID_SUBJECT are server-only and used when the /subscribe route initializes web-push (webpush.setVapidDetails(...)). Confirm both are set in Vercel env vars for this environment, and that the deployment picked them up (redeploy after adding if just added).
+## 2. Add CRON_SECRET as a GitHub repo secret
+GitHub repo → Settings → Secrets and variables → Actions → New repository secret, name CRON_SECRET. Use the SAME value as whatever secret already protects the Vercel Cron routes (check the existing env var used for that auth check) — this lets both the GitHub Action and Vercel Cron authenticate the same way.
 
-b) Database table missing or schema mismatch
-   /subscribe writes to push_subscriptions, /settings reads/writes notification_preferences (or wherever these were meant to be added per the earlier plan). Confirm these tables/columns actually exist in the live Supabase database — if the migration was only written but never run against the actual database, every query against them will throw and surface as a 500.
+## 3. Update /api/notifications/send-reminders logic
+This route now needs to actually check each user's stored daily_reminder_time against the current time, since it's genuinely being called every 15 minutes:
+- Fetch all users where daily_reminder_enabled = true
+- For each, get their stored daily_reminder_time and timezone (default 'Asia/Kolkata' if not set)
+- Compute their current local time; if it falls within the current 15-minute window of their target time (e.g. target 20:00, window is 19:52:30–20:07:30, or simpler: round current time to nearest 15-min mark and compare), AND they haven't logged an expense yet today, send the notification
+- Add a `last_reminder_sent_date` column (or similar) to prevent double-sends if the Action's timing drifts slightly and the same user matches in two consecutive runs — check this before sending, set it after
 
-c) RLS (row-level security) blocking the insert/update
-   If Supabase RLS is enabled on these new tables but no policy was added allowing the authenticated user to insert/select their own rows, every request will fail server-side. Check Supabase dashboard → Authentication → Policies for push_subscriptions and notification_preferences — confirm policies exist allowing users to manage their own rows (auth.uid() = user_id pattern, matching whatever pattern the rest of the app's tables already use).
+## 4. Remove the "coming soon" disabled state if present
+Confirm the time picker in Settings has no disabled/grayed styling or placeholder note left over from the fixed-time interim fix — it should now be fully functional and honest about what it does.
 
-d) web-push package not properly initialized
-   Confirm 'web-push' is actually in package.json dependencies (not just installed locally and not committed), and that the import/require in the API route matches how it's actually installed (import webpush from 'web-push' vs require patterns can differ based on the route's runtime — check if this route is Edge or Node.js runtime, since 'web-push' requires Node.js APIs and will fail entirely on Edge runtime).
+## 5. Confirm the fix works end-to-end
+- Set the reminder time to a few minutes from now
+- Manually trigger the workflow once via GitHub Actions' "Run workflow" button (workflow_dispatch) to test without waiting for the schedule
+- Confirm the notification arrives close to the selected time, not just at 8 PM
+- Change the time to something else, repeat, confirm it now fires at the NEW time — this is the actual bug being fixed
 
-## 3. Report back
-Paste the actual stack trace/error message from Vercel logs here (or summarize it) rather than just confirming "it's fixed" — given how many candidate causes there are, knowing which one it actually was will save time if anything adjacent breaks later.
+Note for later: GitHub Actions scheduled workflows can be delayed a few minutes under GitHub's own load, and stop running if the repo goes 60+ days with no commits — both fine for personal daily use, but worth knowing if this feels inconsistent occasionally.

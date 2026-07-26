@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS public.push_subscriptions (
 -- Enable RLS for push_subscriptions
 ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for push_subscriptions
 DO $$ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_policies WHERE tablename = 'push_subscriptions' AND policyname = 'Users can manage their own push subscriptions'
@@ -34,13 +33,16 @@ CREATE TABLE IF NOT EXISTS public.notification_preferences (
     daily_reminder_time TEXT DEFAULT '20:00',
     eod_summary_enabled BOOLEAN DEFAULT true,
     timezone TEXT DEFAULT 'Asia/Kolkata',
+    last_reminder_sent_date TEXT,
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Ensure last_reminder_sent_date exists if table was created earlier
+ALTER TABLE public.notification_preferences ADD COLUMN IF NOT EXISTS last_reminder_sent_date TEXT;
 
 -- Enable RLS for notification_preferences
 ALTER TABLE public.notification_preferences ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for notification_preferences
 DO $$ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM pg_policies WHERE tablename = 'notification_preferences' AND policyname = 'Users can manage their own notification preferences'

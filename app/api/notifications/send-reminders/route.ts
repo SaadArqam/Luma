@@ -30,7 +30,7 @@ async function handleReminders(req: Request) {
     // 1. Query all users with daily_reminder_enabled = true
     const { data: prefs, error } = await supabase
       .from('notification_preferences')
-      .select('user_id, daily_reminder_time, timezone')
+      .select('id, user_id, daily_reminder_time, timezone, last_reminder_sent_date')
       .eq('daily_reminder_enabled', true)
 
     if (error || !prefs) {
@@ -58,6 +58,11 @@ async function handleReminders(req: Request) {
         day: '2-digit',
       }).format(now)
 
+      // Prevent double-sending if already sent today
+      if (pref.last_reminder_sent_date === localDateString) {
+        continue
+      }
+
       const [targetH, targetM] = targetTime.split(':').map(Number)
       const [currentH, currentM] = localTimeString.split(':').map(Number)
 
@@ -65,7 +70,7 @@ async function handleReminders(req: Request) {
       const currentMinOfDay = currentH * 60 + currentM
       const diff = Math.abs(currentMinOfDay - targetMinOfDay)
 
-      // Match within a 14-minute window (since cron runs every 15 minutes)
+      // Match within a 14-minute window (since GitHub Actions cron runs every 15 minutes)
       if (diff <= 14) {
         // Check if user has logged any expense today in their local timezone
         const { count } = await supabase
@@ -81,7 +86,15 @@ async function handleReminders(req: Request) {
             data: { url: '/' },
             tag: 'daily-reminder',
           })
-          if (res.success) sentCount++
+
+          if (res.success) {
+            sentCount++
+            // Record last_reminder_sent_date to prevent duplicate sends on the same day
+            await supabase
+              .from('notification_preferences')
+              .update({ last_reminder_sent_date: localDateString })
+              .eq('id', pref.id)
+          }
         }
       }
     }
