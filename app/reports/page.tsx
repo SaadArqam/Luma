@@ -137,12 +137,12 @@ export default function ReportsPage() {
             { label: 'Biggest day', value: `₹${stats.biggestDay.toLocaleString('en-IN')}`, sub: '' },
             { label: 'Daily average', value: `₹${stats.dailyAverage.toLocaleString('en-IN')}`, sub: 'when spending' },
           ].map(s => (
-            <div key={s.label} className="glass-card rounded-[16px]" style={{ padding: '12px 14px' }}>
-              <div className="text-caption-luma text-[#8A8790]" style={{ textTransform: 'uppercase', marginBottom: '4px' }}>
+            <div key={s.label} className="glass-card" style={{ padding: '12px 14px', borderRadius: '12px' }}>
+              <div className="text-caption-luma" style={{ color: '#8A8790', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {s.label}
               </div>
-              <div className="text-number-card text-[#F2EFEA]">
-                {s.value} <span className="text-caption-luma text-[#8A8790]" style={{ textTransform: 'none' }}>{s.sub}</span>
+              <div className="text-number-card" style={{ color: '#F2EFEA' }}>
+                {s.value} <span style={{ fontSize: '11px', color: '#8A8790', fontWeight: 400 }}>{s.sub}</span>
               </div>
             </div>
           ))}
@@ -303,11 +303,19 @@ export default function ReportsPage() {
     )
   }
 
+  // Solid, not glass: these wrap the glass stat cards, and nesting backdrop-filter
+  // inside backdrop-filter is the perf risk DESIGN-luma.md calls out.
   const SectionCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
-    <div className="glass-card rounded-[16px]" style={{ padding: '16px', marginBottom: '12px' }}>
+    <div style={{
+      backgroundColor: '#232429',
+      border: '1px solid rgba(255,255,255,0.09)',
+      borderRadius: '16px',
+      padding: '16px',
+      marginBottom: '12px',
+    }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
         <div style={{ width: '3px', height: '14px', backgroundColor: '#E17A4D', borderRadius: '2px' }} />
-        <span className="text-caption-luma" style={{ letterSpacing: '1px', textTransform: 'uppercase', color: '#8A8790' }}>{title}</span>
+        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: '#8A8790' }}>{title}</span>
       </div>
       {children}
     </div>
@@ -324,7 +332,7 @@ export default function ReportsPage() {
         </div>
 
         {loading ? (
-          <div className="text-body-muted-luma" style={{ textAlign: 'center', padding: '60px 0', fontSize: '14px' }}>
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#8A8790', fontSize: '14px' }}>
             Loading your data...
           </div>
         ) : (

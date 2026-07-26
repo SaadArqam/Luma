@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -98,51 +99,56 @@ export function CategoryList({ initialCategories }: { initialCategories: Categor
     <>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {initialCategories.map((category) => (
-          <div
+          <Card
             key={category.id}
-            className="relative group overflow-hidden rounded-[20px] p-6 flex flex-col items-center justify-center gap-3"
+            className="relative group overflow-hidden shadow-sm hover:shadow-md transition-all"
             style={{
               backgroundColor: '#2B2C33',
               border: category.daily_budget ? '1px solid rgba(225, 122, 77, 0.40)' : '1px solid rgba(255, 255, 255, 0.09)',
             }}
           >
-            <div style={{ backgroundColor: '#232429', borderRadius: '12px', padding: '10px', display: 'inline-block', marginBottom: '8px' }}>
-              <span className="text-4xl">{category.icon}</span>
-            </div>
-            <span
-              className="font-fraunces text-center truncate w-full text-[#F2EFEA]"
-              style={{ fontSize: '15px', fontWeight: 600 }}
-              title={category.name}
-            >
-              {category.name}
-            </span>
-
-            {category.daily_budget ? (
-              <div className="text-xs px-2 py-1 rounded-full font-inter font-tnum font-medium" style={{ color: '#E17A4D', backgroundColor: 'rgba(225, 122, 77, 0.18)' }}>
-                Daily: ₹{Number(category.daily_budget).toLocaleString('en-IN')}
+            <CardContent className="p-6 flex flex-col items-center justify-center gap-3">
+              <div style={{ backgroundColor: '#232429', borderRadius: '12px', padding: '10px', display: 'inline-block', marginBottom: '8px' }}>
+                <span className="text-4xl">{category.icon}</span>
               </div>
-            ) : (
-              <div className="text-xs text-body-muted-luma">No budget set</div>
-            )}
+              <span
+                className="font-fraunces text-center truncate w-full text-[#F2EFEA]"
+                style={{ fontSize: '15px', fontWeight: 600 }}
+                title={category.name}
+              >
+                {category.name}
+              </span>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => openBudgetDialog(category)}
-                className="btn-secondary-luma text-xs"
-                style={{ height: 'auto', padding: '6px 14px' }}
-              >
-                <Wallet className="h-3 w-3 mr-1" />
-                Set Budget
-              </button>
-              <button
-                onClick={() => setDeleteId(category.id)}
-                aria-label="Delete category"
-                className="h-7 w-7 flex items-center justify-center rounded-full text-[#C4595A] hover:bg-[rgba(196,89,90,0.16)] active:scale-95 transition-all"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
-            </div>
-          </div>
+              {category.daily_budget ? (
+                <div className="text-xs px-2 py-1 rounded-full font-inter font-tnum" style={{ color: '#E17A4D', backgroundColor: 'rgba(225, 122, 77, 0.18)' }}>
+                  Daily: ₹{Number(category.daily_budget).toLocaleString('en-IN')}
+                </div>
+              ) : (
+                <div className="text-xs" style={{ color: '#8A8790' }}>No budget set</div>
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="btn-secondary-luma"
+                  style={{ height: '1.75rem', padding: '0 14px', fontSize: '12px' }}
+                  onClick={() => openBudgetDialog(category)}
+                >
+                  <Wallet className="h-3 w-3 mr-1" />
+                  Set Budget
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-[#C4595A] hover:bg-[rgba(196,89,90,0.16)]"
+                  onClick={() => setDeleteId(category.id)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 

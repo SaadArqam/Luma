@@ -1,32 +1,48 @@
-Fix horizontal overflow on the Balance and Expenses pages on mobile (≤ 640px). The root cause is likely one or both of:
-1. The two-column grid (form + history) isn't collapsing to single-column below the tablet breakpoint
-2. The history/expense tables have fixed-width columns wider than the viewport, and that width is leaking to the whole page instead of being contained to a scrollable table area
+Apply DESIGN-luma.md to the remaining pages: Wallet, Categories, Expenses, Recurring, Reports, and Settings. The Home page already has this applied — use it as the reference implementation for token usage patterns (glass-card, solid-list-card, typography roles, accent color) and match that same approach here.
 
-## 1. Layout stacking
-On both Balance and Expenses pages, confirm the grid/flex container holding [Add Balance form + Balance History] and [Add Expense form + Expense History] switches from side-by-side to stacked (form on top, history below) at the same breakpoint used elsewhere (735px, per the tablet: utility class already set up in globals.css). If it's currently using a fixed grid-template-columns instead of a responsive one, fix it to use the tablet: prefix pattern already established for the sidebar/dock switch.
+Read DESIGN-luma.md fully before starting. Go page by page, in this order, and list files touched after each page before moving to the next.
 
-## 2. Replace table layout with card rows on mobile (≤ 640px)
+## Wallet page (Balance / Add Balance + Balance History)
+- "Add Balance" form container → {component.glass-card}
+- Balance History table container → {component.solid-list-card} (scrolling list, no backdrop-filter)
+- "Add Money" button → {component.button-primary}
+- Amount/Date/Note inputs → background {colors.surface-solid-raised}, border {colors.border-hairline}, text {colors.text-primary}, focus state border {colors.accent-border}
+- "Credit" badges in the history table → replace current green with {colors.success}, background {colors.success-glow}
+- Page title "Balance" → {typography.header-display}, subtitle "Manage your wallet balance..." → {typography.body-muted}
 
-Instead of forcing the existing table (Date / Category / Note / Amount columns) to shrink or scroll horizontally, restructure each row into a stacked card layout below 640px:
+## Categories page
+- "New Category" form → {component.glass-card}
+- Each category card in the grid → {component.category-chip} treatment but sized as a card (not pill) — background {colors.surface-solid-raised}, border {colors.border-hairline}; the one with a budget set gets border {colors.accent-border} and its "Daily: ₹210" badge in {colors.accent} on {colors.accent-glow} background
+- "Create Category" button → {component.button-primary}
+- "Set Budget" small buttons → {component.button-secondary}
+- Delete (trash) icon buttons → keep icon-only, recolor icon to {colors.danger} at rest, no fill background until hover/press
 
-Balance History row (mobile):
-- Top line: Note (e.g. "Monthly") on the left, Amount (e.g. "+₹2,805") on the right, in {typography.number-inline}
-- Bottom line: Date + "Credit" badge, in {typography.body-muted}
-- Full row wrapped in a subtle bottom border {colors.border-hairline}, padding 12px vertical
+## Expenses page
+- "Add Expense" form → {component.glass-card}
+- Expense History table → {component.solid-list-card}
+- Category icons in the list stay as emoji/icons, unchanged
+- "Add Expense" button → {component.button-primary}
+- Search input and month/filter dropdown → same input styling as Wallet page inputs above
+- "Total for selected period" footer row → value in {typography.number-card}, label in {typography.body-muted}
+- Recurring payment checkbox → accent color {colors.accent} when checked
 
-Expense History row (mobile):
-- Top line: category icon + category name on the left, Amount on the right in {typography.number-inline}
-- Bottom line: Note + Date, in {typography.body-muted}
-- Delete icon stays top-right or becomes a swipe-to-delete gesture if easy to add, otherwise keep as a small icon button
-- Same border/padding pattern as above
+## Recurring page
+- Empty state card → {component.glass-card}
+- "Add from Expenses" button → {component.button-primary}
+- Icon in empty state → recolor from current blue to {colors.text-muted} (neutral, not colored — this is an empty state, not a status indicator)
 
-Keep the existing table layout for ≥ 641px (tablet/desktop) — this is a mobile-only restructure, use a media query or conditional rendering, don't remove the table for larger screens.
+## Reports page
+- Time-range toggle (30 days / 90 days / 6 months) → active state uses {component.button-primary} treatment (accent fill), inactive uses {component.button-secondary}
+- Spending Activity stat cards (Active Days, Longest Streak, Biggest Day, Daily Average) → {component.glass-card}, labels in {typography.caption}, values in {typography.number-card}
+- Heatmap: keep the green intensity scale AS IS — do not recolor to terracotta, the heatmap's green-scale is a separate data-visualization convention distinct from the UI accent color and recoloring it would reduce readability
+- Monthly Spending bar chart → active/current month bar uses {colors.accent}, other months use {colors.surface-solid-raised}
+- "This Month by Category" list → progress bars recolor from gold to {colors.accent}, but keep each category's own row otherwise neutral (per the earlier "no rainbow" rule)
 
-## 3. Contain any remaining horizontal scroll
-- Add overflow-x: hidden to the page-level wrapper (not body/html globally, which can break the dock's fixed positioning — scope it to the page content container) as a safety net
-- Audit for any element with a hardcoded px width (not %, not max-width) inside these two pages — these are the most common cause of silent overflow. Search page-item widths especially in the Recent Expenses / Balance History filter row (e.g. "July 2026" + "all" dropdown area — these could be sitting in a flex row without wrap)
-- The month/filter dropdown row on the Expenses page ("Search expenses... July 2026 all ▾") likely needs to wrap onto two lines on mobile — search input full-width on its own row, filters below it
+## Settings page
+- I don't have a screenshot of this page — inspect the actual current implementation and apply the same general rules: glass-card containers for forms/sections, button-primary for primary actions, button-secondary for secondary actions, inputs matching the Wallet/Expenses pattern, {typography.header-section} for section titles.
 
-Test at 375px and 412px viewport widths specifically (common Android widths, close to your Realme GT 7's logical resolution) — not just 320px or desktop-shrunk-down, since Android viewport behavior can differ slightly from iOS.
+## Cross-cutting
+- Every page's glass-dock/glass-sidebar should already be consistent from the Home page work — if any page has a locally-overridden nav style, remove the override and let it inherit the shared component.
+- Do not touch layout structure, spacing, or component logic — this pass is tokens/colors/type only, same constraint as the Home page pass.
 
-List the specific elements that were causing the overflow once found, so we know the root cause for future pages.
+After each page, tell me what you changed so I can spot anything that needs a follow-up pass.

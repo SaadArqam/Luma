@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -48,45 +49,49 @@ export function AddCategoryForm() {
   }
 
   return (
-    <div className="glass-card p-5 rounded-[20px]">
-      <h3 className="font-fraunces text-header-card text-[#F2EFEA]">New Category</h3>
-      <p className="text-body-muted-luma mt-1 mb-4">Create a custom expense category</p>
-      {errorMsg && (
-        <Alert variant="destructive" className="mb-4 py-2">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="ml-2">{errorMsg}</AlertDescription>
-        </Alert>
-      )}
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
-          <input
-            id="name"
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., Groceries"
-            className="input-luma"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="icon">Emoji Icon</Label>
-          <input
-            id="icon"
-            type="text"
-            required
-            value={icon}
-            onChange={(e) => setIcon(e.target.value)}
-            placeholder="🍔"
-            maxLength={2}
-            className="input-luma"
-          />
-        </div>
-        <button type="submit" disabled={loading} className="btn-primary-luma w-full disabled:opacity-60 disabled:cursor-not-allowed">
-          {loading ? 'Creating...' : 'Create Category'}
-        </button>
-      </form>
-    </div>
+    <Card className="glass-card shadow-md">
+      <CardHeader>
+        <CardTitle>New Category</CardTitle>
+        <CardDescription className="text-body-muted-luma">Create a custom expense category</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {errorMsg && (
+          <Alert variant="destructive" className="mb-4 py-2">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="ml-2">{errorMsg}</AlertDescription>
+          </Alert>
+        )}
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <input
+              id="name"
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., Groceries"
+              className="input-luma"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="icon">Emoji Icon</Label>
+            <input
+              id="icon"
+              type="text"
+              required
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="🍔"
+              maxLength={2}
+              className="input-luma"
+            />
+          </div>
+          <button type="submit" disabled={loading} className="btn-primary-luma w-full disabled:opacity-60 disabled:cursor-not-allowed">
+            {loading ? 'Creating...' : 'Create Category'}
+          </button>
+        </form>
+      </CardContent>
+    </Card>
   )
 }
