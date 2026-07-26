@@ -123,6 +123,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.text-header-display {
+  font-family: var(--font-fraunces), Fraunces, Georgia, serif;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.2px;
+}
+
 .text-header-section {
   font-family: var(--font-fraunces), Fraunces, Georgia, serif;
   font-size: 22px;
@@ -153,6 +161,14 @@
   font-size: 15px;
   font-weight: 400;
   line-height: 1.5;
+}
+
+.text-caption-luma {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.1px;
 }
 
 .text-body-muted-luma {
@@ -242,6 +258,44 @@
 
 .terracotta-glow {
   box-shadow: 0 0 20px rgba(225, 122, 77, 0.25);
+}
+
+/* ── Inputs (Wallet/Categories/Expenses/Settings forms) ──── */
+.input-luma {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  background-color: #2B2C33;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  color: #F2EFEA;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.input-luma:focus {
+  border-color: rgba(225, 122, 77, 0.40);
+}
+
+.input-luma::placeholder {
+  color: #5C5A60;
+}
+
+/* ── Status badges (glow background, tinted text) ────────── */
+.badge-success-luma {
+  background-color: rgba(127, 182, 158, 0.16);
+  color: #7FB69E;
+}
+
+.badge-warning-luma {
+  background-color: rgba(224, 164, 88, 0.16);
+  color: #E0A458;
+}
+
+.badge-danger-luma {
+  background-color: rgba(196, 89, 90, 0.16);
+  color: #C4595A;
 }
 
 /* ── Glass Sidebar (desktop ≥ 835px) ─────────────────────────────────── */

@@ -1,41 +1,32 @@
-Apply the design system defined in DESIGN-luma.md to the Home/dashboard page (app/page.tsx or wherever the dashboard currently lives). Read DESIGN-luma.md first and use its token references directly — do not invent new colors or type values.
+Fix horizontal overflow on the Balance and Expenses pages on mobile (≤ 640px). The root cause is likely one or both of:
+1. The two-column grid (form + history) isn't collapsing to single-column below the tablet breakpoint
+2. The history/expense tables have fixed-width columns wider than the viewport, and that width is leaking to the whole page instead of being contained to a scrollable table area
 
-## Scope for this pass
-Home page only. Do not touch Expenses, Categories, Wallet, Recurring, or Reports yet — those come in later passes.
+## 1. Layout stacking
+On both Balance and Expenses pages, confirm the grid/flex container holding [Add Balance form + Balance History] and [Add Expense form + Expense History] switches from side-by-side to stacked (form on top, history below) at the same breakpoint used elsewhere (735px, per the tablet: utility class already set up in globals.css). If it's currently using a fixed grid-template-columns instead of a responsive one, fix it to use the tablet: prefix pattern already established for the sidebar/dock switch.
 
-## 1. Base layer
-- Replace the current canvas background with {colors.canvas} (#1B1C21)
-- Replace all existing card/panel backgrounds with the correct token per component type:
-  - Stat cards (Current Balance, Total Credited, Spent This Month, Transactions) and the Today's Budget card → {component.glass-card} background/border/blur values
-  - Recent Expenses table → {component.solid-list-card} (no backdrop-filter — this is a scrolling list)
-- Replace all hairline borders with {colors.border-hairline}, and any currently-bold borders with {colors.border-hairline-strong}
+## 2. Replace table layout with card rows on mobile (≤ 640px)
 
-## 2. Typography
-- Any section title ("Today's Budget", "Spending by Category", "Recent Expenses") → {typography.header-section}, font Fraunces
-- Card labels (e.g. "Current Balance", "Total Credited") → {typography.header-card}
-- All numeric values (₹555.58, ₹17,310, ₹4,503.96, the 16 in Transactions) → {typography.number-card} for stat cards. Use font-feature-settings tabular-nums so digits don't shift width when they update.
-- Body copy (dates, notes, "Resets at midnight", "1 of 1 categories within budget today") → {typography.body} or {typography.body-muted} depending on current emphasis
-- Import Fraunces and Inter via next/font/google if not already set up; do not use CDN links.
+Instead of forcing the existing table (Date / Category / Note / Amount columns) to shrink or scroll horizontally, restructure each row into a stacked card layout below 640px:
 
-## 3. Color mapping — replace gold (#E8B84B) with terracotta
-- Every current gold usage (Configure button, active nav states, "click here to claim it" link, budget bar fill) → {colors.accent} (#D97757)
-- Button text on terracotta background → {colors.canvas}, NOT white (per DESIGN-luma.md button-primary spec — dark text on the warm accent, not light text)
-- Pressed/active state on any terracotta element → {colors.accent-pressed}
+Balance History row (mobile):
+- Top line: Note (e.g. "Monthly") on the left, Amount (e.g. "+₹2,805") on the right, in {typography.number-inline}
+- Bottom line: Date + "Credit" badge, in {typography.body-muted}
+- Full row wrapped in a subtle bottom border {colors.border-hairline}, padding 12px vertical
 
-## 4. Semantic status colors
-- The Today's Budget progress bar and "X% within budget" indicator: apply {colors.success} / {colors.warning} / {colors.danger} per the thresholds in {component.today-ring} (under 70% / 70-100% / over 100%), even though the full ring redesign hasn't shipped yet — just recolor the existing bar/badge with these tokens for now
-- Spending by Category donut: recolor slices — Fuel/Food/Gifts/extra should use desaturated neutral tones from the graphite family (NOT rainbow colors), with only the currently-selected/hovered slice picking up {colors.accent-glow} as a highlight
+Expense History row (mobile):
+- Top line: category icon + category name on the left, Amount on the right in {typography.number-inline}
+- Bottom line: Note + Date, in {typography.body-muted}
+- Delete icon stays top-right or becomes a swipe-to-delete gesture if easy to add, otherwise keep as a small icon button
+- Same border/padding pattern as above
 
-## 5. Buttons
-- "Configure" button → {component.button-primary}
-- Any secondary/ghost buttons → {component.button-secondary}
-- Apply transform: scale(0.95) on :active for every button (check this is already wired from earlier motion work — if using Framer Motion whileTap, use that instead of raw CSS)
+Keep the existing table layout for ≥ 641px (tablet/desktop) — this is a mobile-only restructure, use a media query or conditional rendering, don't remove the table for larger screens.
 
-## 6. Glass dock / sidebar
-- If not already using DESIGN-luma tokens (it was built against the old gold/black glass spec), update {component.glass-dock} and {component.glass-sidebar} background/border values to match DESIGN-luma.md, and swap the active-pill highlight from gold to {colors.accent-glow} / {colors.accent}
+## 3. Contain any remaining horizontal scroll
+- Add overflow-x: hidden to the page-level wrapper (not body/html globally, which can break the dock's fixed positioning — scope it to the page content container) as a safety net
+- Audit for any element with a hardcoded px width (not %, not max-width) inside these two pages — these are the most common cause of silent overflow. Search page-item widths especially in the Recent Expenses / Balance History filter row (e.g. "July 2026" + "all" dropdown area — these could be sitting in a flex row without wrap)
+- The month/filter dropdown row on the Expenses page ("Search expenses... July 2026 all ▾") likely needs to wrap onto two lines on mobile — search input full-width on its own row, filters below it
 
-## 7. What NOT to change yet
-- Don't build the Today ring or Quick Add sheet in this pass — that's separate, upcoming work. This pass is a token/color/type swap on the EXISTING layout structure only.
-- Don't touch the "You have existing data" claim banner logic, just restyle its container/text with the new tokens.
+Test at 375px and 412px viewport widths specifically (common Android widths, close to your Realme GT 7's logical resolution) — not just 320px or desktop-shrunk-down, since Android viewport behavior can differ slightly from iOS.
 
-Implement this as one pass. Afterward, list every file you touched so I can review the diff before testing on device.
+List the specific elements that were causing the overflow once found, so we know the root cause for future pages.

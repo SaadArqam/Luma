@@ -36,6 +36,8 @@ export default function ReportsPage() {
     })
   }, [days])
 
+  // Heatmap green intensity scale is a data-viz convention distinct from the UI
+  // accent color — intentionally left as-is (see DESIGN-luma.md).
   const getColor = (amount: number, maxAmount: number) => {
     if (!amount) return null
     const ratio = amount / maxAmount
@@ -110,8 +112,8 @@ export default function ReportsPage() {
               width: '11px',
               height: '11px',
               borderRadius: '2px',
-              backgroundColor: isFuture ? 'transparent' : color || '#161616',
-              border: (!isFuture && !color) ? '1px solid #222' : 'none',
+              backgroundColor: isFuture ? 'transparent' : color || '#2B2C33',
+              border: (!isFuture && !color) ? '1px solid rgba(255,255,255,0.09)' : 'none',
               flexShrink: 0,
               cursor: isFuture ? 'default' : 'pointer'
             }}
@@ -135,17 +137,12 @@ export default function ReportsPage() {
             { label: 'Biggest day', value: `₹${stats.biggestDay.toLocaleString('en-IN')}`, sub: '' },
             { label: 'Daily average', value: `₹${stats.dailyAverage.toLocaleString('en-IN')}`, sub: 'when spending' },
           ].map(s => (
-            <div key={s.label} style={{
-              backgroundColor: '#161616',
-              border: '1px solid #222',
-              borderRadius: '12px',
-              padding: '12px 14px'
-            }}>
-              <div style={{ fontSize: '10px', color: '#555', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>
+            <div key={s.label} className="glass-card rounded-[16px]" style={{ padding: '12px 14px' }}>
+              <div className="text-caption-luma text-[#8A8790]" style={{ textTransform: 'uppercase', marginBottom: '4px' }}>
                 {s.label}
               </div>
-              <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: '20px', fontWeight: 600, color: '#E8E4DC' }}>
-                {s.value} <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>{s.sub}</span>
+              <div className="text-number-card text-[#F2EFEA]">
+                {s.value} <span className="text-caption-luma text-[#8A8790]" style={{ textTransform: 'none' }}>{s.sub}</span>
               </div>
             </div>
           ))}
@@ -158,7 +155,7 @@ export default function ReportsPage() {
               position: 'absolute',
               left: `${mp.col * 14}px`,
               fontSize: '10px',
-              color: '#555'
+              color: '#8A8790'
             }}>{mp.label}</span>
           ))}
         </div>
@@ -175,20 +172,19 @@ export default function ReportsPage() {
         >
           {/* Tooltip */}
           {tooltip && (
-            <div style={{
+            <div className="font-inter font-tnum" style={{
               position: 'absolute',
               left: `${tooltip.x}px`,
               top: `${tooltip.y}px`,
-              backgroundColor: '#1E1E1E',
-              border: '1px solid #2A2A2A',
+              backgroundColor: '#2B2C33',
+              border: '1px solid rgba(255,255,255,0.09)',
               borderRadius: '8px',
               padding: '6px 10px',
               fontSize: '12px',
-              color: '#E8E4DC',
+              color: '#F2EFEA',
               pointerEvents: 'none',
               zIndex: 50,
               whiteSpace: 'nowrap',
-              fontFamily: 'var(--font-geist-mono)'
             }}>
               {tooltip.text}
             </div>
@@ -198,7 +194,7 @@ export default function ReportsPage() {
             {/* Day labels */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginRight: '4px', paddingTop: '0px' }}>
               {['','M','','W','','F',''].map((d, i) => (
-                <div key={i} style={{ fontSize: '9px', color: '#444', height: '11px', lineHeight: '11px', width: '14px' }}>{d}</div>
+                <div key={i} style={{ fontSize: '9px', color: '#5C5A60', height: '11px', lineHeight: '11px', width: '14px' }}>{d}</div>
               ))}
             </div>
             {/* Columns */}
@@ -210,15 +206,15 @@ export default function ReportsPage() {
 
         {/* Legend */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '10px', justifyContent: 'flex-end' }}>
-          <span style={{ fontSize: '10px', color: '#444' }}>Less</span>
+          <span style={{ fontSize: '10px', color: '#5C5A60' }}>Less</span>
           {[null, '#1a3a0e', '#3d7a22', '#5aa032', '#7dc845'].map((c, i) => (
             <div key={i} style={{
               width: '11px', height: '11px', borderRadius: '2px',
-              backgroundColor: c || '#161616',
-              border: !c ? '1px solid #222' : 'none'
+              backgroundColor: c || '#2B2C33',
+              border: !c ? '1px solid rgba(255,255,255,0.09)' : 'none'
             }} />
           ))}
-          <span style={{ fontSize: '10px', color: '#444' }}>More</span>
+          <span style={{ fontSize: '10px', color: '#5C5A60' }}>More</span>
         </div>
       </div>
     )
@@ -236,16 +232,16 @@ export default function ReportsPage() {
             const height = Math.max((m.amount / max) * 100, 4)
             return (
               <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' }}>
-                <div style={{ fontSize: '9px', color: '#555', fontFamily: 'var(--font-geist-mono)' }}>
+                <div className="font-inter font-tnum" style={{ fontSize: '9px', color: '#8A8790' }}>
                   ₹{m.amount >= 1000 ? `${Math.round(m.amount/1000)}k` : m.amount}
                 </div>
                 <div style={{
                   width: '100%',
                   height: `${height}%`,
-                  backgroundColor: isCurrentMonth ? '#E8B84B' : '#2A2A2A',
+                  backgroundColor: isCurrentMonth ? '#E17A4D' : '#2B2C33',
                   borderRadius: '4px 4px 0 0',
                   transition: 'height 500ms ease',
-                  border: isCurrentMonth ? 'none' : '1px solid #333'
+                  border: isCurrentMonth ? 'none' : '1px solid rgba(255,255,255,0.09)'
                 }} />
               </div>
             )
@@ -256,7 +252,7 @@ export default function ReportsPage() {
             <div key={m.month} style={{
               flex: 1,
               fontSize: '9px',
-              color: i === monthlyData.monthly.length - 1 ? '#E8B84B' : '#444',
+              color: i === monthlyData.monthly.length - 1 ? '#E17A4D' : '#5C5A60',
               textAlign: 'center',
               fontWeight: i === monthlyData.monthly.length - 1 ? 600 : 400
             }}>{m.label}</div>
@@ -279,23 +275,23 @@ export default function ReportsPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{
-                    width: '28px', height: '28px', backgroundColor: '#1A1A1A',
-                    border: '1px solid #222', borderRadius: '8px',
+                    width: '28px', height: '28px', backgroundColor: '#2B2C33',
+                    border: '1px solid rgba(255,255,255,0.09)', borderRadius: '8px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
                   }}>{c.icon}</div>
-                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#D4D0C8' }}>{c.name}</span>
+                  <span className="font-fraunces" style={{ fontSize: '13px', fontWeight: 500, color: '#F2EFEA' }}>{c.name}</span>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: '13px', fontWeight: 500, color: '#E8E4DC' }}>
+                  <div className="font-inter font-tnum" style={{ fontSize: '13px', fontWeight: 500, color: '#F2EFEA' }}>
                     ₹{c.amount.toLocaleString('en-IN')}
                   </div>
-                  <div style={{ fontSize: '10px', color: '#555' }}>{pct}%</div>
+                  <div style={{ fontSize: '10px', color: '#8A8790' }}>{pct}%</div>
                 </div>
               </div>
-              <div style={{ backgroundColor: '#1A1A1A', borderRadius: '2px', height: '3px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#2B2C33', borderRadius: '2px', height: '3px', overflow: 'hidden' }}>
                 <div style={{
                   width: `${pct}%`, height: '3px',
-                  backgroundColor: '#E8B84B',
+                  backgroundColor: '#E17A4D',
                   borderRadius: '2px',
                   transition: 'width 500ms ease'
                 }} />
@@ -308,30 +304,27 @@ export default function ReportsPage() {
   }
 
   const SectionCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
-    <div style={{ backgroundColor: '#141414', border: '1px solid #1E1E1E', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
+    <div className="glass-card rounded-[16px]" style={{ padding: '16px', marginBottom: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-        <div style={{ width: '3px', height: '14px', backgroundColor: '#E8B84B', borderRadius: '2px' }} />
-        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: '#555' }}>{title}</span>
+        <div style={{ width: '3px', height: '14px', backgroundColor: '#E17A4D', borderRadius: '2px' }} />
+        <span className="text-caption-luma" style={{ letterSpacing: '1px', textTransform: 'uppercase', color: '#8A8790' }}>{title}</span>
       </div>
       {children}
     </div>
   )
 
   return (
-    <div style={{ backgroundColor: '#0C0C0C', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: '#1B1C21', minHeight: '100vh' }}>
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '20px 16px' }}>
         {/* Header */}
         <div style={{ marginBottom: '20px' }}>
-          <h1 style={{
-            fontFamily: 'var(--font-geist-sans)', fontSize: '26px', fontWeight: 700,
-            letterSpacing: '-0.5px', color: '#E8E4DC', margin: 0
-          }}>Reports</h1>
-          <div style={{ width: '36px', height: '3px', backgroundColor: '#E8B84B', borderRadius: '2px', marginTop: '6px' }} />
-          <p style={{ fontSize: '13px', color: '#555', marginTop: '6px' }}>Your spending patterns at a glance</p>
+          <h1 className="font-fraunces text-header-display text-[#F2EFEA]" style={{ margin: 0 }}>Reports</h1>
+          <div style={{ width: '36px', height: '3px', backgroundColor: '#E17A4D', borderRadius: '2px', marginTop: '6px' }} />
+          <p className="text-body-muted-luma" style={{ marginTop: '6px' }}>Your spending patterns at a glance</p>
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: '#444', fontSize: '14px' }}>
+          <div className="text-body-muted-luma" style={{ textAlign: 'center', padding: '60px 0', fontSize: '14px' }}>
             Loading your data...
           </div>
         ) : (
@@ -346,16 +339,14 @@ export default function ReportsPage() {
                 <button
                   key={opt.value}
                   onClick={() => setDays(opt.value)}
+                  className={days === opt.value ? 'btn-primary-luma' : 'btn-secondary-luma'}
                   style={{
+                    height: 'auto',
+                    minHeight: 0,
                     padding: '6px 14px',
-                    borderRadius: '20px',
-                    border: days === opt.value ? 'none' : '1px solid #222',
-                    backgroundColor: days === opt.value ? '#E8B84B' : '#141414',
-                    color: days === opt.value ? '#0C0C0C' : '#666',
                     fontSize: '12px',
                     fontWeight: days === opt.value ? 600 : 400,
-                    cursor: 'pointer',
-                    fontFamily: 'var(--font-geist-sans)'
+                    boxShadow: 'none',
                   }}
                 >
                   {opt.label}

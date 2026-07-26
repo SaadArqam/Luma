@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -194,19 +193,16 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       <div className="lg:col-span-1">
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle>Add Expense</CardTitle>
-            <CardDescription>Record a new transaction</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {errorMsg && (
-              <Alert variant="destructive" className="mb-4 py-2">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="ml-2">{errorMsg}</AlertDescription>
-              </Alert>
-            )}
-            <div className="space-y-4">
+        <div className="glass-card p-5 rounded-[20px]">
+          <h3 className="font-fraunces text-header-card text-[#F2EFEA]">Add Expense</h3>
+          <p className="text-body-muted-luma mt-1 mb-4">Record a new transaction</p>
+          {errorMsg && (
+            <Alert variant="destructive" className="mb-4 py-2">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="ml-2">{errorMsg}</AlertDescription>
+            </Alert>
+          )}
+          <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select
@@ -221,7 +217,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                     }
                   }}
                 >
-                  <SelectTrigger id="category">
+                  <SelectTrigger id="category" className="w-full h-12 bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] rounded-[10px] focus-visible:border-[rgba(225,122,77,0.40)]">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -234,7 +230,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                       </SelectItem>
                     ))}
                     <SelectItem value="__new__">
-                      <span style={{ color: '#E8B84B', fontWeight: 600 }}>+ Create new category</span>
+                      <span style={{ color: '#E17A4D', fontWeight: 600 }}>+ Create new category</span>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -242,8 +238,8 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                 {/* Inline create-category form */}
                 {showNewCategory && (
                   <div style={{
-                    backgroundColor: '#161616',
-                    border: '1px solid #2A2A2A',
+                    backgroundColor: '#232429',
+                    border: '1px solid rgba(255,255,255,0.09)',
                     borderRadius: '12px',
                     padding: '12px',
                     marginTop: '8px',
@@ -258,8 +254,8 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         placeholder="💰"
                         style={{
                           width: '50px', height: '40px', textAlign: 'center', fontSize: '18px',
-                          backgroundColor: '#0C0C0C', border: '1px solid #222',
-                          borderRadius: '8px', color: '#E8E4DC', outline: 'none'
+                          backgroundColor: '#2B2C33', border: '1px solid rgba(255,255,255,0.09)',
+                          borderRadius: '8px', color: '#F2EFEA', outline: 'none'
                         }}
                       />
                       <input
@@ -268,9 +264,9 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         placeholder="Category name"
                         onKeyDown={e => { if (e.key === 'Enter' && newCatName.trim()) handleCreateCategory() }}
                         style={{
-                          flex: 1, height: '40px', backgroundColor: '#0C0C0C',
-                          border: '1px solid #222', borderRadius: '8px',
-                          padding: '0 12px', color: '#E8E4DC', fontSize: '13px', outline: 'none'
+                          flex: 1, height: '40px', backgroundColor: '#2B2C33',
+                          border: '1px solid rgba(255,255,255,0.09)', borderRadius: '8px',
+                          padding: '0 12px', color: '#F2EFEA', fontSize: '13px', outline: 'none'
                         }}
                       />
                     </div>
@@ -279,7 +275,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         onClick={handleCreateCategory}
                         disabled={!newCatName.trim() || creatingCat}
                         style={{
-                          flex: 1, height: '38px', backgroundColor: '#E8B84B', color: '#0C0C0C',
+                          flex: 1, height: '38px', backgroundColor: '#E17A4D', color: '#1B1C21',
                           border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
                           cursor: !newCatName.trim() || creatingCat ? 'not-allowed' : 'pointer',
                           opacity: !newCatName.trim() || creatingCat ? 0.6 : 1,
@@ -294,8 +290,8 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                           setNewCatEmoji('💰')
                         }}
                         style={{
-                          flex: 1, height: '38px', backgroundColor: 'transparent', color: '#666',
-                          border: '1px solid #222', borderRadius: '8px', fontSize: '13px', cursor: 'pointer'
+                          flex: 1, height: '38px', backgroundColor: 'transparent', color: '#8A8790',
+                          border: '1px solid rgba(255,255,255,0.16)', borderRadius: '8px', fontSize: '13px', cursor: 'pointer'
                         }}
                       >
                         Cancel
@@ -314,17 +310,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  style={{
-                    backgroundColor: '#111111',
-                    border: '1px solid #222222',
-                    borderRadius: '10px',
-                    color: '#E8E4DC',
-                    padding: '0 16px',
-                    height: '48px',
-                    width: '100%',
-                    outline: 'none',
-                    fontSize: '14px',
-                  }}
+                  className="input-luma"
                 />
               </div>
               <div className="space-y-2">
@@ -334,17 +320,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  style={{
-                    backgroundColor: '#111111',
-                    border: '1px solid #222222',
-                    borderRadius: '10px',
-                    color: '#E8E4DC',
-                    padding: '0 16px',
-                    height: '48px',
-                    width: '100%',
-                    outline: 'none',
-                    fontSize: '14px',
-                  }}
+                  className="input-luma"
                 />
               </div>
               <div className="space-y-2">
@@ -355,17 +331,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="e.g., Dinner, Taxi"
-                  style={{
-                    backgroundColor: '#111111',
-                    border: '1px solid #222222',
-                    borderRadius: '10px',
-                    color: '#E8E4DC',
-                    padding: '0 16px',
-                    height: '48px',
-                    width: '100%',
-                    outline: 'none',
-                    fontSize: '14px',
-                  }}
+                  className="input-luma"
                 />
               </div>
 
@@ -376,9 +342,9 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                     checked={isRecurring}
                     onChange={(e) => setIsRecurring(e.target.checked)}
                     className="w-4 h-4"
-                    style={{ accentColor: '#E8B84B' }}
+                    style={{ accentColor: '#E17A4D' }}
                   />
-                  <span className="text-sm font-medium">Recurring payment</span>
+                  <span className="text-sm font-medium text-[#F2EFEA]">Recurring payment</span>
                 </label>
 
                 <div
@@ -394,17 +360,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         value={recurringName}
                         onChange={(e) => setRecurringName(e.target.value)}
                         placeholder="e.g., Tiffin Service"
-                        style={{
-                          backgroundColor: '#111111',
-                          border: '1px solid #222222',
-                          borderRadius: '10px',
-                          color: '#E8E4DC',
-                          padding: '0 16px',
-                          height: '48px',
-                          width: '100%',
-                          outline: 'none',
-                          fontSize: '14px',
-                        }}
+                        className="input-luma"
                       />
                     </div>
                     <div className="space-y-2">
@@ -414,17 +370,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         type="date"
                         value={recurringNextDue}
                         onChange={(e) => setRecurringNextDue(e.target.value)}
-                        style={{
-                          backgroundColor: '#111111',
-                          border: '1px solid #222222',
-                          borderRadius: '10px',
-                          color: '#E8E4DC',
-                          padding: '0 16px',
-                          height: '48px',
-                          width: '100%',
-                          outline: 'none',
-                          fontSize: '14px',
-                        }}
+                        className="input-luma"
                       />
                     </div>
                     <div className="space-y-2">
@@ -433,7 +379,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         value={recurringFrequency}
                         onValueChange={(val) => setRecurringFrequency((val || 'monthly') as 'weekly' | 'monthly' | 'custom')}
                       >
-                        <SelectTrigger id="recurringFrequency">
+                        <SelectTrigger id="recurringFrequency" className="w-full h-12 bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] rounded-[10px] focus-visible:border-[rgba(225,122,77,0.40)]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -453,6 +399,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                           value={recurringCustomDays}
                           onChange={(e) => setRecurringCustomDays(e.target.value)}
                           placeholder="30"
+                          className="h-12 bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] rounded-[10px] focus-visible:border-[rgba(225,122,77,0.40)]"
                         />
                       </div>
                     )}
@@ -462,126 +409,110 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
 
               <button
                 onClick={onAddSubmit}
-                className="w-full min-h-[44px]"
+                className="btn-primary-luma w-full disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={loading || !amount || !categoryId || !date}
-                style={{
-                  backgroundColor: '#E8B84B',
-                  color: '#0C0C0C',
-                  border: 'none',
-                  borderRadius: '13px',
-                  height: '52px',
-                  width: '100%',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  cursor: loading || !amount || !categoryId || !date ? 'not-allowed' : 'pointer',
-                  opacity: loading || !amount || !categoryId || !date ? 0.5 : 1,
-                  fontFamily: 'var(--font-outfit)',
-                }}
               >
                 {loading ? 'Adding...' : 'Add Expense'}
               </button>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      <div className="lg:col-span-2 space-y-4">
-        <Card className="shadow-md border-muted/50">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <CardTitle>Expense History</CardTitle>
-              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-                <Input
-                  type="text"
-                  placeholder="Search expenses..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-[160px]"
-                />
-                <Input
-                  type="month"
-                  value={filterMonth}
-                  onChange={(e) => setFilterMonth(e.target.value)}
-                  className="w-full sm:w-[160px]"
-                />
-                <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val || 'all')}>
-                  <SelectTrigger className="w-full sm:w-[160px]">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {categories.map(cat => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Note</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredExpenses.length > 0 ? (
-                    filteredExpenses.map((expense) => (
-                      <TableRow key={expense.id} className="hover:bg-muted/50 transition-colors">
-                        <TableCell className="text-muted-foreground whitespace-nowrap">
-                          {format(new Date(expense.date), 'dd MMM yyyy')}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span style={{ backgroundColor: '#1A1A1A', borderRadius: '8px', padding: '6px', fontSize: '16px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              {expense.category?.icon}
-                            </span>
-                            <span className="font-medium">{expense.category?.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-[150px] truncate">{expense.note || '-'}</TableCell>
-                        <TableCell className="text-right" style={{ color: '#C96B6B', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
-                          ₹{Number(expense.amount).toLocaleString('en-IN')}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => handleDelete(expense.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                        No expenses found for this period
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+      <div className="lg:col-span-2 space-y-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="font-fraunces text-header-section text-[#F2EFEA] flex items-center gap-2">
+            <div style={{ width: 3, height: 18, backgroundColor: '#E17A4D', borderRadius: 2 }} />
+            <span>Expense History</span>
+          </h2>
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+            <input
+              type="text"
+              placeholder="Search expenses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full sm:w-[160px] h-10 px-4 bg-[#2B2C33] border border-[rgba(255,255,255,0.09)] rounded-[10px] text-[#F2EFEA] text-sm outline-none focus:border-[rgba(225,122,77,0.40)] placeholder:text-[#5C5A60]"
+            />
+            <input
+              type="month"
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+              className="w-full sm:w-[160px] h-10 px-4 bg-[#2B2C33] border border-[rgba(255,255,255,0.09)] rounded-[10px] text-[#F2EFEA] text-sm outline-none focus:border-[rgba(225,122,77,0.40)]"
+            />
+            <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val || 'all')}>
+              <SelectTrigger className="w-full sm:w-[160px] h-10 bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] rounded-[10px] focus-visible:border-[rgba(225,122,77,0.40)]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map(cat => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-            <div className="mt-4 flex justify-between items-center bg-muted/30 p-4 rounded-lg border">
-              <span className="font-medium text-muted-foreground">Total for selected period:</span>
-              <span className="text-xl font-bold tracking-tight font-mono text-destructive">
-                ₹{totalFiltered.toLocaleString('en-IN')}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="solid-list-card rounded-[20px] border border-[rgba(255,255,255,0.09)]">
+          <Table>
+            <TableHeader className="bg-[#2B2C33]">
+              <TableRow className="border-b border-[rgba(255,255,255,0.09)]">
+                <TableHead className="font-fraunces text-[#8A8790]">Date</TableHead>
+                <TableHead className="font-fraunces text-[#8A8790]">Category</TableHead>
+                <TableHead className="font-fraunces text-[#8A8790]">Note</TableHead>
+                <TableHead className="font-fraunces text-[#8A8790] text-right">Amount</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredExpenses.length > 0 ? (
+                filteredExpenses.map((expense) => (
+                  <TableRow key={expense.id} className="border-b border-[rgba(255,255,255,0.06)] hover:bg-[#2B2C33]/50 transition-colors">
+                    <TableCell className="text-body-muted-luma text-xs whitespace-nowrap font-inter font-tnum">
+                      {format(new Date(expense.date), 'dd MMM yyyy')}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg bg-[#2B2C33] rounded-full p-1 border border-[rgba(255,255,255,0.09)]" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {expense.category?.icon}
+                        </span>
+                        <span className="font-fraunces text-sm font-medium text-[#F2EFEA]">{expense.category?.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-[150px] truncate text-body-muted-luma text-xs">{expense.note || '-'}</TableCell>
+                    <TableCell className="text-right font-inter font-bold font-tnum text-sm text-[#F2EFEA]">
+                      ₹{Number(expense.amount).toLocaleString('en-IN')}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDelete(expense.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center h-32 text-body-muted-luma">
+                    No expenses found for this period
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="glass-card rounded-[16px] p-4 flex justify-between items-center">
+          <span className="text-body-muted-luma">Total for selected period:</span>
+          <span className="font-inter font-bold font-tnum text-number-card text-[#F2EFEA]">
+            ₹{totalFiltered.toLocaleString('en-IN')}
+          </span>
+        </div>
       </div>
     </div>
   )

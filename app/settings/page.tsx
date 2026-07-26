@@ -1,9 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Settings as SettingsIcon, Save } from 'lucide-react'
 import LogoutButton from '@/components/LogoutButton'
@@ -62,98 +59,88 @@ export default function SettingsPage() {
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="pt-2 pb-2">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-3">
+        <h1 className="font-fraunces text-header-display text-[#F2EFEA] flex items-center gap-3">
           <SettingsIcon className="h-8 w-8" />
           Settings
         </h1>
-        <p className="text-muted-foreground mt-2">Configure your stipend settings</p>
+        <p className="text-body-muted-luma mt-2">Configure your stipend settings</p>
       </div>
 
       <div className="max-w-2xl">
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle>Stipend Configuration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="amount">Monthly Stipend Amount (₹)</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  placeholder="e.g., 25000"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                  min="0"
-                  step="0.01"
-                  className="text-lg"
-                />
-              </div>
+        <div className="glass-card p-5 rounded-[20px]">
+          <h2 className="font-fraunces text-header-section text-[#F2EFEA] mb-4">Stipend Configuration</h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="amount">Monthly Stipend Amount (₹)</Label>
+              <input
+                id="amount"
+                type="number"
+                placeholder="e.g., 25000"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+                min="0"
+                step="0.01"
+                className="input-luma"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="creditDay">Stipend Credit Day (1-31)</Label>
-                <Input
-                  id="creditDay"
-                  type="number"
-                  placeholder="e.g., 1 for 1st of the month"
-                  value={creditDay}
-                  onChange={(e) => setCreditDay(e.target.value)}
-                  required
-                  min="1"
-                  max="31"
-                  className="text-lg"
-                />
-                <p className="text-sm text-muted-foreground">
-                  The day of the month when your stipend arrives
-                </p>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="creditDay">Stipend Credit Day (1-31)</Label>
+              <input
+                id="creditDay"
+                type="number"
+                placeholder="e.g., 1 for 1st of the month"
+                value={creditDay}
+                onChange={(e) => setCreditDay(e.target.value)}
+                required
+                min="1"
+                max="31"
+                className="input-luma"
+              />
+              <p className="text-body-muted-luma">
+                The day of the month when your stipend arrives
+              </p>
+            </div>
 
-              {message && (
-                <div className={`p-3 rounded-lg ${
-                  message.type === 'success' 
-                    ? 'bg-green-500/10 text-green-500 border border-green-500/20' 
-                    : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                }`}>
-                  {message.text}
-                </div>
-              )}
-
-              <Button type="submit" variant="default" disabled={loading} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                {loading ? 'Saving...' : 'Save Configuration'}
-              </Button>
-            </form>
-
-            {currentConfig && (
-              <div className="mt-6 pt-6 border-t">
-                <h3 className="font-semibold mb-3">Current Configuration</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Monthly Stipend:</span>
-                    <span className="font-medium">₹{Number(currentConfig.amount).toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Credit Day:</span>
-                    <span className="font-medium">{currentConfig.credit_day}{getOrdinalSuffix(currentConfig.credit_day)} of the month</span>
-                  </div>
-                </div>
+            {message && (
+              <div className={`p-3 rounded-lg border-none ${
+                message.type === 'success' ? 'badge-success-luma' : 'badge-danger-luma'
+              }`}>
+                {message.text}
               </div>
             )}
-          </CardContent>
-        </Card>
+
+            <button type="submit" disabled={loading} className="btn-primary-luma w-full disabled:opacity-60 disabled:cursor-not-allowed">
+              <Save className="h-4 w-4 mr-2" />
+              {loading ? 'Saving...' : 'Save Configuration'}
+            </button>
+          </form>
+
+          {currentConfig && (
+            <div className="mt-6 pt-6 border-t border-[rgba(255,255,255,0.09)]">
+              <h3 className="font-fraunces text-header-card text-[#F2EFEA] mb-3">Current Configuration</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-body-muted-luma">Monthly Stipend:</span>
+                  <span className="font-inter font-tnum font-medium text-[#F2EFEA]">₹{Number(currentConfig.amount).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-body-muted-luma">Credit Day:</span>
+                  <span className="font-inter font-tnum font-medium text-[#F2EFEA]">{currentConfig.credit_day}{getOrdinalSuffix(currentConfig.credit_day)} of the month</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Account section */}
       <div className="max-w-2xl">
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle>Account</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LogoutButton />
-          </CardContent>
-        </Card>
+        <div className="glass-card p-5 rounded-[20px]">
+          <h2 className="font-fraunces text-header-section text-[#F2EFEA] mb-4">Account</h2>
+          <LogoutButton />
+        </div>
       </div>
     </div>
   )

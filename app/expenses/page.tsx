@@ -19,8 +19,8 @@ export default async function ExpensesPage() {
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="sticky top-0 z-10 bg-background border-b border-border px-6 pt-6 pb-2">
-        <h1 className="text-2xl font-bold tracking-tight">Expenses</h1>
-        <p className="text-muted-foreground mt-2">Track and manage your spending</p>
+        <h1 className="font-fraunces text-header-display text-[#F2EFEA]">Expenses</h1>
+        <p className="text-body-muted-luma mt-2">Track and manage your spending</p>
       </div>
 
       <ExpenseManager categories={categories || []} initialExpenses={expenses || []} />
