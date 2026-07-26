@@ -48,13 +48,15 @@ export function DashboardChart({ data }: { data: ChartData[] }) {
             >
               {chartData.map((entry, index) => {
                 const isHovered = activeIndex === index
-                const fill = isHovered ? '#E17A4D' : entry.color
                 return (
                   <Cell
                     key={`cell-${index}`}
-                    fill={fill}
+                    fill={entry.color}
+                    stroke={isHovered ? '#E17A4D' : 'none'}
+                    strokeWidth={isHovered ? 2 : 0}
                     className="transition-all duration-200"
                     style={{
+                      opacity: activeIndex !== null && !isHovered ? 0.65 : 1,
                       filter: isHovered ? 'drop-shadow(0 0 10px rgba(225, 122, 77, 0.45))' : 'none',
                       cursor: 'pointer',
                     }}
@@ -78,22 +80,24 @@ export function DashboardChart({ data }: { data: ChartData[] }) {
         </ResponsiveContainer>
       </div>
 
-      {/* Custom stable-colored Legend grid */}
+      {/* Custom categorical-colored Legend grid */}
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 border-t border-[rgba(255,255,255,0.06)]">
         {chartData.map((item, index) => {
           const isHovered = activeIndex === index
-          const bulletColor = isHovered ? '#E17A4D' : item.color
           return (
             <div
               key={item.name}
               className="flex items-center gap-1.5 cursor-pointer text-xs transition-opacity hover:opacity-100"
-              style={{ opacity: activeIndex !== null && !isHovered ? 0.6 : 1 }}
+              style={{ opacity: activeIndex !== null && !isHovered ? 0.5 : 1 }}
               onMouseEnter={() => setActiveIndex(index)}
               onMouseLeave={() => setActiveIndex(null)}
             >
               <span
-                className="w-2.5 h-2.5 rounded-full shrink-0 transition-colors duration-200"
-                style={{ backgroundColor: bulletColor }}
+                className="w-2.5 h-2.5 rounded-full shrink-0 transition-all duration-200"
+                style={{
+                  backgroundColor: item.color,
+                  boxShadow: isHovered ? '0 0 8px #E17A4D' : 'none',
+                }}
               />
               <span className="font-fraunces text-[#F2EFEA] truncate max-w-[110px]">
                 {item.icon} {item.name}

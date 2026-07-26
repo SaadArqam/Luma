@@ -1,17 +1,19 @@
 /**
- * Fixed neutral palette of desaturated shades for category colors per DESIGN-luma.md spec:
- * Tone A: #4A4B54 (cool slate)
- * Tone B: #5C5850 (warm taupe)
- * Tone C: #45504A (muted sage-gray)
- * Tone D: #524850 (muted plum-gray)
- * Tone E: #565048 (muted olive-gray)
+ * Categorical palette for category colors per DESIGN-luma.md spec:
+ * - clay: #D9825A
+ * - sage: #8FA888
+ * - dusty-blue: #7C93A8
+ * - muted-gold: #B8954A
+ * - dusty-rose: #B87A8A
+ * - muted-teal: #6B9A8F
  */
 export const CATEGORY_PALETTE = [
-  '#4A4B54', // cool slate
-  '#5C5850', // warm taupe
-  '#45504A', // muted sage-gray
-  '#524850', // muted plum-gray
-  '#565048', // muted olive-gray
+  '#D9825A', // clay
+  '#8FA888', // sage
+  '#7C93A8', // dusty-blue
+  '#B8954A', // muted-gold
+  '#B87A8A', // dusty-rose
+  '#6B9A8F', // muted-teal
 ] as const
 
 /**
