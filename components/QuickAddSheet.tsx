@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useQuickAddStore } from '@/lib/quickAddStore'
 
 interface Category {
@@ -25,7 +26,10 @@ export function QuickAddSheet() {
     if (isOpen) {
       fetch('/api/categories')
         .then((res) => res.json())
-        .then((data) => setCategories(data))
+        .then((data) => {
+          if (Array.isArray(data)) setCategories(data)
+        })
+        .catch(console.error)
     }
   }, [isOpen])
 
@@ -64,80 +68,101 @@ export function QuickAddSheet() {
     }
   }
 
-  if (!isOpen) return null
-
   return (
-    <>
-      <div
-        className="fixed inset-0 bg-black/70 z-40"
-        onClick={close}
-      />
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-[#141414] border-t border-x border-[#1E1E1E] rounded-t-[20px] transition-transform duration-300 ease-out"
-        style={{
-          transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
-          willChange: 'transform',
-        }}
-      >
-        <div className="w-10 h-1 bg-[#2A2A2A] rounded-full mx-auto mt-3 mb-5" />
-
-        <div className="px-5 mb-4">
-          <h2 className="text-[16px] font-600 text-[#E8E4DC]">Add Expense</h2>
-        </div>
-
-        <div className="flex flex-col gap-3 px-5">
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="h-12 bg-[#101010] border border-[#1E1E1E] rounded-xl px-4 text-[14px] text-[#E8E4DC] focus:border-[#E8B84B] outline-none"
-          >
-            <option value="" disabled>Select category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.icon} {cat.name}
-              </option>
-            ))}
-          </select>
-
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-[18px] text-[#555]">
-              ₹
-            </span>
-            <input
-              type="number"
-              step="0.01"
-              min="1"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-full h-14 pl-10 pr-4 font-mono text-[22px] font-500 bg-[#101010] border border-[#1E1E1E] rounded-xl focus:border-[#E8B84B] outline-none"
-            />
-          </div>
-
-          <input
-            type="text"
-            placeholder="Note (optional)"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="h-12 bg-[#101010] border border-[#1E1E1E] rounded-xl px-4 text-[14px] text-[#E8E4DC] focus:border-[#E8B84B] outline-none"
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop Scrim — covers full viewport, higher z-index than dock (z-200) */}
+          <motion.div
+            className="fixed inset-0 bg-black/70 z-[200]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={close}
           />
 
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="h-12 bg-[#101010] border border-[#1E1E1E] rounded-xl px-4 text-[14px] text-[#E8E4DC] focus:border-[#E8B84B] outline-none"
-          />
-
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="mt-3 mb-5 w-full h-[52px] bg-[#E8B84B] rounded-[13px] font-outfit text-[14px] font-600 text-[#0C0C0C] active:scale-[0.98] transition-all duration-150 disabled:opacity-50"
+          {/* Bottom Sheet Modal — z-210, surface-glass-thick, safe bottom padding */}
+          <motion.div
+            className="fixed bottom-0 left-0 right-0 z-[210] rounded-t-[28px] border-t border-x border-[rgba(255,255,255,0.12)] overflow-hidden shadow-2xl"
+            style={{
+              background: 'rgba(38, 39, 46, 0.92)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+            }}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           >
-            {loading ? 'Adding...' : 'Add Expense'}
-          </button>
-        </div>
-      </div>
-    </>
+            {/* Grab handle */}
+            <div className="w-10 h-1 bg-[rgba(255,255,255,0.2)] rounded-full mx-auto mt-3 mb-4" />
+
+            <div className="px-5 mb-4">
+              <h2 className="font-fraunces text-header-section text-[#F2EFEA]">Add Expense</h2>
+            </div>
+
+            <div
+              className="flex flex-col gap-3.5 px-5"
+              style={{ paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom, 0px) + 16px))' }}
+            >
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="input-luma cursor-pointer"
+              >
+                <option value="" disabled className="bg-[#232429] text-[#8A8790]">
+                  Select category
+                </option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id} className="bg-[#232429] text-[#F2EFEA]">
+                    {cat.icon} {cat.name}
+                  </option>
+                ))}
+              </select>
+
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-inter font-tnum text-lg text-[#8A8790]">
+                  ₹
+                </span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="1"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="input-luma pl-9 font-inter font-bold font-tnum text-xl"
+                  style={{ height: 52 }}
+                />
+              </div>
+
+              <input
+                type="text"
+                placeholder="Note (optional)"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="input-luma"
+              />
+
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="input-luma"
+              />
+
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="btn-primary-luma mt-2 w-full active:scale-[0.98] transition-all disabled:opacity-50"
+              >
+                {loading ? 'Adding...' : 'Add Expense'}
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   )
 }

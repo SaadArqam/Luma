@@ -10,8 +10,10 @@ import {
   useSpring,
   useTransform,
   animate,
+  AnimatePresence,
   type MotionValue,
 } from 'framer-motion'
+import { useQuickAddStore } from '@/lib/quickAddStore'
 
 const links = [
   { href: '/', icon: Home, label: 'Home' },
@@ -233,39 +235,52 @@ export default function BottomNav() {
     movedRef.current = false
   }
 
-  return (
-    <nav className="liquid-glass-dock" aria-label="Primary navigation">
-      <div
-        ref={rowRef}
-        className="dock-row"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={(e) => endGesture(e, false)}
-        onPointerCancel={(e) => endGesture(e, true)}
-      >
-        {/* Gliding terracotta pill — x is driven by the finger, then snapped. */}
-        <motion.div
-          className="dock-pill"
-          style={{ x: pillX, opacity: pillReady ? 1 : 0 }}
-          aria-hidden="true"
-        />
+  const { isOpen: isQuickAddOpen } = useQuickAddStore()
 
-        {links.map(({ href, icon: Icon, label }, i) => (
-          <DockItem
-            key={href}
-            href={href}
-            label={label}
-            Icon={Icon}
-            isActive={activeIndex === i}
-            center={centers[i]}
-            pointerX={pointerX}
-            itemRef={(el) => {
-              itemRefs.current[i] = el
-            }}
-            suppressClickRef={suppressClickRef}
-          />
-        ))}
-      </div>
-    </nav>
+  return (
+    <AnimatePresence>
+      {!isQuickAddOpen && (
+        <motion.nav
+          className="liquid-glass-dock"
+          aria-label="Primary navigation"
+          initial={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.15, ease: 'easeOut' }}
+        >
+          <div
+            ref={rowRef}
+            className="dock-row"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={(e) => endGesture(e, false)}
+            onPointerCancel={(e) => endGesture(e, true)}
+          >
+            {/* Gliding terracotta pill — x is driven by the finger, then snapped. */}
+            <motion.div
+              className="dock-pill"
+              style={{ x: pillX, opacity: pillReady ? 1 : 0 }}
+              aria-hidden="true"
+            />
+
+            {links.map(({ href, icon: Icon, label }, i) => (
+              <DockItem
+                key={href}
+                href={href}
+                label={label}
+                Icon={Icon}
+                isActive={activeIndex === i}
+                center={centers[i]}
+                pointerX={pointerX}
+                itemRef={(el) => {
+                  itemRefs.current[i] = el
+                }}
+                suppressClickRef={suppressClickRef}
+              />
+            ))}
+          </div>
+        </motion.nav>
+      )}
+    </AnimatePresence>
   )
 }
