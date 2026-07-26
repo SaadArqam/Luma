@@ -7,9 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-inter), Inter, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Fraunces, Georgia, serif;
+  --font-mono: var(--font-inter), Inter, system-ui, sans-serif;
+  --font-heading: var(--font-fraunces), Fraunces, Georgia, serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -46,71 +47,52 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Custom breakpoint: 835px = dock/sidebar switchover point */
+  --breakpoint-tablet: 835px;
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #1B1C21;
+  --foreground: #F2EFEA;
+  --card: rgba(38, 39, 46, 0.72);
+  --card-foreground: #F2EFEA;
+  --popover: #232429;
+  --popover-foreground: #F2EFEA;
+  --primary: #E17A4D;
+  --primary-foreground: #1B1C21;
+  --secondary: #2B2C33;
+  --secondary-foreground: #F2EFEA;
+  --muted: #232429;
+  --muted-foreground: #8A8790;
+  --accent: #E17A4D;
+  --accent-foreground: #1B1C21;
+  --destructive: #C4595A;
+  --border: rgba(255, 255, 255, 0.09);
+  --input: #232429;
+  --ring: #E17A4D;
+  --radius: 0.875rem;
 }
 
 .dark {
-  --background: oklch(0.07 0 0);
-  --foreground: oklch(0.91 0.008 80);
-  --card: oklch(0.11 0 0);
-  --card-foreground: oklch(0.91 0.008 80);
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.91 0.008 80);
-  --primary: oklch(0.78 0.13 75);
-  --primary-foreground: oklch(0.09 0 0);
-  --secondary: oklch(0.16 0 0);
-  --secondary-foreground: oklch(0.91 0.008 80);
-  --muted: oklch(0.16 0 0);
-  --muted-foreground: oklch(0.42 0 0);
-  --accent: oklch(0.16 0 0);
-  --accent-foreground: oklch(0.91 0.008 80);
-  --destructive: oklch(0.58 0.12 20);
-  --border: oklch(0.20 0 0);
-  --input: oklch(0.10 0 0);
-  --ring: oklch(0.78 0.12 80);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.07 0 0);
-  --sidebar-foreground: oklch(0.91 0.008 80);
-  --sidebar-primary: oklch(0.78 0.13 75);
-  --sidebar-primary-foreground: oklch(0.09 0 0);
-  --sidebar-accent: oklch(0.14 0 0);
-  --sidebar-accent-foreground: oklch(0.91 0.008 80);
-  --sidebar-border: oklch(0.15 0 0);
-  --sidebar-ring: oklch(0.78 0.12 80);
+  --background: #1B1C21;
+  --foreground: #F2EFEA;
+  --card: rgba(38, 39, 46, 0.72);
+  --card-foreground: #F2EFEA;
+  --popover: #232429;
+  --popover-foreground: #F2EFEA;
+  --primary: #E17A4D;
+  --primary-foreground: #1B1C21;
+  --secondary: #2B2C33;
+  --secondary-foreground: #F2EFEA;
+  --muted: #232429;
+  --muted-foreground: #8A8790;
+  --accent: #E17A4D;
+  --accent-foreground: #1B1C21;
+  --destructive: #C4595A;
+  --border: rgba(255, 255, 255, 0.09);
+  --input: #232429;
+  --ring: #E17A4D;
+  --radius: 0.875rem;
 }
 
 @layer base {
@@ -118,21 +100,238 @@
     @apply border-border outline-ring/50;
   }
   body {
-    background-color: #0C0C0C;
-    color: #E8E4DC;
+    background-color: #1B1C21;
+    color: #F2EFEA;
+    font-family: var(--font-inter), Inter, system-ui, sans-serif;
   }
   html {
     @apply font-sans;
   }
 }
 
-.card-hover {
-  transition: border-color 150ms ease, transform 150ms ease;
-}
-.card-hover:active {
-  transform: scale(0.98);
+/* ── Typography Utilities ─────────────────────────────────── */
+.font-fraunces {
+  font-family: var(--font-fraunces), Fraunces, Georgia, serif;
 }
 
-.amber-glow {
-  box-shadow: 0 0 20px rgba(232, 184, 75, 0.15);
+.font-inter {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+}
+
+.font-tnum {
+  font-feature-settings: 'tnum' 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-header-section {
+  font-family: var(--font-fraunces), Fraunces, Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.1px;
+}
+
+.text-header-card {
+  font-family: var(--font-fraunces), Fraunces, Georgia, serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.text-number-card {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.3px;
+  font-feature-settings: 'tnum' 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-body-luma {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-body-muted-luma {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: #8A8790;
+}
+
+/* ── Glass Card (stat cards, today card, budget overview) ──── */
+.glass-card {
+  background: rgba(38, 39, 46, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  pointer-events: none;
+}
+
+/* ── Solid List Card (Recent Expenses table, dense lists) ────── */
+.solid-list-card {
+  background: #232429;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn-primary-luma {
+  background-color: #E17A4D;
+  color: #1B1C21;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 14px 24px;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 150ms ease;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 20px rgba(225, 122, 77, 0.35);
+}
+
+.btn-primary-luma:active {
+  transform: scale(0.95);
+  background-color: #C9663B;
+  box-shadow: 0 2px 10px rgba(225, 122, 77, 0.25);
+}
+
+.btn-secondary-luma {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #F2EFEA;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 12px 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+
+.btn-secondary-luma:active {
+  transform: scale(0.95);
+}
+
+.terracotta-glow {
+  box-shadow: 0 0 20px rgba(225, 122, 77, 0.25);
+}
+
+/* ── Glass Sidebar (desktop ≥ 835px) ─────────────────────────────────── */
+.glass-sidebar {
+  position: sticky;
+  top: 12px;
+  margin: 12px;
+  height: calc(100vh - 24px);
+  border-radius: 20px;
+  background: rgba(38, 39, 46, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Liquid Glass Dock (mobile ≤ 834px) ──────────────────────────────── */
+.liquid-glass-dock {
+  display: none;
+  position: fixed;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  background: rgba(38, 39, 46, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 8px 12px;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  will-change: backdrop-filter;
+  overflow: hidden;
+}
+
+.liquid-glass-dock::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  pointer-events: none;
+}
+
+@media (max-width: 834px) {
+  .liquid-glass-dock {
+    display: flex;
+  }
+}
+
+/* Gliding terracotta pill */
+.dock-pill {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: rgba(225, 122, 77, 0.18);
+  pointer-events: none;
+  transition: left 300ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 200ms ease;
+}
+
+/* Dock items */
+.dock-item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: #8A8790;
+  transition: color 200ms ease,
+              transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dock-item--active {
+  color: #E17A4D;
+  transform: scale(1.08);
+}
+
+.dock-item:not(.dock-item--active):active {
+  transform: scale(0.92);
 }

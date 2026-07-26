@@ -1,13 +1,13 @@
 import { createClient } from '@/lib/supabase-server'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DashboardChart } from '@/components/DashboardChart'
 import { StipendWidget } from '@/components/StipendWidget'
 import { BudgetOverview } from '@/components/BudgetOverview'
 import { RecurringSection } from '@/components/RecurringSection'
+import { TodayCard } from '@/components/TodayCard'
+import MigrationBanner from '@/components/MigrationBanner'
 import { startOfMonth, endOfMonth, format } from 'date-fns'
 import { TrendingUp, TrendingDown, Activity, Wallet } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import MigrationBanner from '@/components/MigrationBanner'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,39 +15,35 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const userName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] ?? user?.email?.split('@')[0] ?? 'there'
-  
+
   // Fetch summary data
   const { data: credits } = await supabase.from('balance_entries').select('amount').eq('type', 'credit')
-  const { data: debits } = await supabase.from('balance_entries').select('amount').eq('type', 'debit')
+  const { data: debits }  = await supabase.from('balance_entries').select('amount').eq('type', 'debit')
   const { data: allExpenses } = await supabase.from('expenses').select('amount, date, category:categories(id, name, icon)')
-  
-  const totalCredited = credits?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
-  const totalDebited = debits?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
-  const totalExpenses = allExpenses?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
-  
-  const totalBalance = totalCredited - totalDebited - totalExpenses
+
+  const totalCredited  = credits?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
+  const totalDebited   = debits?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
+  const totalExpenses  = allExpenses?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
+  const totalBalance   = totalCredited - totalDebited - totalExpenses
 
   // Current month stats
   const now = new Date()
   const monthStart = startOfMonth(now)
-  const monthEnd = endOfMonth(now)
-  
+  const monthEnd   = endOfMonth(now)
+
   let totalSpentThisMonth = 0
-  let transactionCount = 0
-  const categoryTotals: Record<string, { name: string, icon: string, total: number }> = {}
+  let transactionCount    = 0
+  const categoryTotals: Record<string, { name: string; icon: string; total: number }> = {}
 
   allExpenses?.forEach((expense: any) => {
     const expDate = new Date(expense.date)
     if (expDate >= monthStart && expDate <= monthEnd) {
       const amt = Number(expense.amount)
       totalSpentThisMonth += amt
-      transactionCount += 1
-      
+      transactionCount    += 1
       const cat = expense.category
       if (cat) {
-        if (!categoryTotals[cat.id]) {
-          categoryTotals[cat.id] = { name: cat.name, icon: cat.icon, total: 0 }
-        }
+        if (!categoryTotals[cat.id]) categoryTotals[cat.id] = { name: cat.name, icon: cat.icon, total: 0 }
         categoryTotals[cat.id].total += amt
       }
     }
@@ -63,146 +59,143 @@ export default async function DashboardPage() {
     .limit(5)
 
   return (
-    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="px-6 pt-6 pb-2">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Paisa<span style={{color: '#E8B84B'}}>Track</span>
+    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+      {/* ── Header greeting ─────────────────────── */}
+      <div className="px-1 pt-2">
+        <h1 className="font-fraunces text-2xl font-bold tracking-tight text-[#F2EFEA]">
+          Paisa<span className="text-[#E17A4D]">Track</span>
         </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Hey {userName} · {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+        <p className="text-body-muted-luma text-sm mt-0.5">
+          Hey {userName} · {now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
       </div>
 
       <MigrationBanner />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="shadow-lg lg:col-span-1 md:col-span-2 overflow-hidden relative flex flex-col justify-between h-full min-h-[100px]" style={{ borderTop: '2px solid #E8B84B' }}>
-          <div className="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-            <Wallet className="w-32 h-32" />
-          </div>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Current Balance</CardTitle>
-            <Wallet className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-mono text-5xl md:text-6xl font-semibold tracking-tight">₹{totalBalance.toLocaleString('en-IN')}</div>
-          </CardContent>
-        </Card>
+      {/* ── Today Card + Quick Add + Streak ─────── */}
+      <TodayCard />
 
-        <Card className="shadow-md hover:shadow-lg transition-shadow flex flex-col justify-between h-full min-h-[100px]" style={{ borderTop: '2px solid #5DBE8A' }}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Credited</CardTitle>
-            <TrendingUp className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{totalCredited.toLocaleString('en-IN')}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-md hover:shadow-lg transition-shadow flex flex-col justify-between h-full min-h-[100px]" style={{ borderTop: '2px solid #C96B6B' }}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Spent This Month</CardTitle>
-            <TrendingDown className="h-4 w-4 text-rose-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{totalSpentThisMonth.toLocaleString('en-IN')}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-md hover:shadow-lg transition-shadow flex flex-col justify-between h-full min-h-[100px]" style={{ borderTop: '2px solid #6B9FE8' }}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Transactions</CardTitle>
-            <Activity className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{transactionCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">This month</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <StipendWidget />
-
+      {/* ── Recurring upcoming payments ──────────── */}
       <RecurringSection />
 
+      {/* ── Stat cards (demoted — reference info) ── */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* Current Balance — kept prominent, full width */}
+        <div
+          className="col-span-2 glass-card p-4 rounded-[20px] relative overflow-hidden flex flex-col justify-between"
+          style={{ borderTop: '2px solid #E17A4D' }}
+        >
+          <div className="absolute right-0 top-0 opacity-[0.05] transform translate-x-1/4 -translate-y-1/4">
+            <Wallet className="w-28 h-28 text-[#F2EFEA]" />
+          </div>
+          <div className="flex flex-row items-center justify-between pb-1">
+            <h3 className="font-fraunces text-header-card text-[#8A8790]">Current Balance</h3>
+            <Wallet className="h-4 w-4 text-[#8A8790]" />
+          </div>
+          <div className="font-inter font-bold font-tnum text-number-card text-[#F2EFEA] text-3xl mt-1">
+            ₹{totalBalance.toLocaleString('en-IN')}
+          </div>
+        </div>
+
+        {/* Smaller reference cards */}
+        <div className="glass-card p-3 rounded-[20px] flex flex-col justify-between" style={{ borderTop: '2px solid #7FB69E' }}>
+          <div className="flex flex-row items-center justify-between pb-1">
+            <h3 className="font-fraunces text-header-card text-[#8A8790] text-xs">Credited</h3>
+            <TrendingUp className="h-3.5 w-3.5 text-[#7FB69E]" />
+          </div>
+          <div className="font-inter font-bold font-tnum text-lg text-[#F2EFEA]">₹{totalCredited.toLocaleString('en-IN')}</div>
+        </div>
+
+        <div className="glass-card p-3 rounded-[20px] flex flex-col justify-between" style={{ borderTop: '2px solid #C4595A' }}>
+          <div className="flex flex-row items-center justify-between pb-1">
+            <h3 className="font-fraunces text-header-card text-[#8A8790] text-xs">This Month</h3>
+            <TrendingDown className="h-3.5 w-3.5 text-[#C4595A]" />
+          </div>
+          <div className="font-inter font-bold font-tnum text-lg text-[#F2EFEA]">₹{totalSpentThisMonth.toLocaleString('en-IN')}</div>
+        </div>
+
+        <div className="col-span-2 glass-card p-3 px-4 rounded-[20px] flex flex-row items-center gap-3" style={{ borderTop: '2px solid #8AA9C4' }}>
+          <Activity className="h-4 w-4 text-[#8AA9C4] shrink-0" />
+          <div>
+            <p className="font-fraunces text-header-card text-[#8A8790] text-xs">Transactions this month</p>
+            <p className="font-inter font-bold font-tnum text-lg text-[#F2EFEA]">{transactionCount}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Stipend widget ───────────────────────── */}
+      <StipendWidget />
+
+      {/* ── Budget overview ──────────────────────── */}
       <BudgetOverview />
 
+      {/* ── Spending by Category + Recent Expenses ── */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <div className="col-span-2 lg:col-span-3 space-y-4">
-          <h2 className="text-xl font-semibold tracking-tight">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '3px', height: '16px', backgroundColor: '#E8B84B', borderRadius: '2px' }} />
-              <span>Spending by Category</span>
-            </div>
+        <div className="col-span-2 lg:col-span-3 space-y-3">
+          <h2 className="font-fraunces text-header-section text-[#F2EFEA] flex items-center gap-2">
+            <div style={{ width: 3, height: 18, backgroundColor: '#E17A4D', borderRadius: 2 }} />
+            <span>Spending by Category</span>
           </h2>
           <DashboardChart data={spendingByCategory} />
         </div>
 
-        <div className="col-span-2 lg:col-span-4 space-y-4">
-          <h2 className="text-xl font-semibold tracking-tight">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '3px', height: '16px', backgroundColor: '#E8B84B', borderRadius: '2px' }} />
-              <span>Recent Expenses</span>
-            </div>
+        <div className="col-span-2 lg:col-span-4 space-y-3">
+          <h2 className="font-fraunces text-header-section text-[#F2EFEA] flex items-center gap-2">
+            <div style={{ width: 3, height: 18, backgroundColor: '#E17A4D', borderRadius: 2 }} />
+            <span>Recent Expenses</span>
           </h2>
-          <Card className="shadow-md border-muted/50 overflow-hidden">
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader className="bg-muted/30">
-                  <TableRow>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Note</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentExpenses && recentExpenses.length > 0 ? (
-                    recentExpenses.map((expense) => (
-                      <TableRow key={expense.id} className="hover:bg-muted/50 transition-colors">
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span
-                              style={{
-                                display: 'inline-block',
-                                width: '8px',
-                                height: '8px',
-                                borderRadius: '50%',
-                                backgroundColor:
-                                  expense.category?.name === 'Travel' ? '#6B9FE8'
-                                  : expense.category?.name === 'Food' ? '#5DBE8A'
-                                  : '#E8B84B',
-                                flexShrink: 0,
-                              }}
-                            />
-                            <span className="text-lg bg-background rounded-full p-1 shadow-sm border">{expense.category?.icon}</span>
-                            <span className="font-medium">{expense.category?.name}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground whitespace-nowrap">
-                          {format(new Date(expense.date), 'dd MMM yyyy')}
-                        </TableCell>
-                        <TableCell className="max-w-[150px] truncate">
-                          {expense.note || '-'}
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          ₹{Number(expense.amount).toLocaleString('en-IN')}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center h-32 text-muted-foreground">
-                        No recent expenses
+          <div className="solid-list-card rounded-[20px] border border-[rgba(255,255,255,0.09)]">
+            <Table>
+              <TableHeader className="bg-[#2B2C33]">
+                <TableRow className="border-b border-[rgba(255,255,255,0.09)]">
+                  <TableHead className="font-fraunces text-[#8A8790]">Category</TableHead>
+                  <TableHead className="font-fraunces text-[#8A8790]">Date</TableHead>
+                  <TableHead className="font-fraunces text-[#8A8790]">Note</TableHead>
+                  <TableHead className="font-fraunces text-[#8A8790] text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentExpenses && recentExpenses.length > 0 ? (
+                  recentExpenses.map((expense) => (
+                    <TableRow key={expense.id} className="border-b border-[rgba(255,255,255,0.06)] hover:bg-[#2B2C33]/50 transition-colors">
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span
+                            style={{
+                              display: 'inline-block', width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                              backgroundColor:
+                                expense.category?.name === 'Travel' ? '#8AA9C4'
+                                : expense.category?.name === 'Food' ? '#7FB69E'
+                                : '#E17A4D',
+                            }}
+                          />
+                          <span className="text-lg bg-[#2B2C33] rounded-full p-1 border border-[rgba(255,255,255,0.09)]">{expense.category?.icon}</span>
+                          <span className="font-fraunces text-sm font-medium text-[#F2EFEA]">{expense.category?.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-body-muted-luma text-xs whitespace-nowrap font-inter font-tnum">
+                        {format(new Date(expense.date), 'dd MMM yyyy')}
+                      </TableCell>
+                      <TableCell className="max-w-[150px] truncate text-body-muted-luma text-xs">{expense.note || '-'}</TableCell>
+                      <TableCell className="text-right font-inter font-bold font-tnum text-sm text-[#F2EFEA]">
+                        ₹{Number(expense.amount).toLocaleString('en-IN')}
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center h-32 text-body-muted-luma">
+                      No recent expenses
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
+
     </div>
   )
 }
