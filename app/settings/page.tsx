@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Settings as SettingsIcon, Save } from 'lucide-react'
+import { Settings as SettingsIcon, Save, Bell, Clock, Send } from 'lucide-react'
 import LogoutButton from '@/components/LogoutButton'
+import { subscribeToPushNotifications } from '@/lib/subscribePush'
+import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const [amount, setAmount] = useState('')
@@ -155,6 +157,182 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+      {/* Notification Settings */}
+      <NotificationSettingsSection />
+    </div>
+  )
+}
+
+function NotificationSettingsSection() {
+  const [dailyReminderEnabled, setDailyReminderEnabled] = useState(false)
+  const [dailyReminderTime, setDailyReminderTime] = useState('20:00')
+  const [eodSummaryEnabled, setEodSummaryEnabled] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [testing, setTesting] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  useEffect(() => {
+    fetch('/api/notifications/settings')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && typeof data.daily_reminder_enabled === 'boolean') {
+          setDailyReminderEnabled(data.daily_reminder_enabled)
+          setDailyReminderTime(data.daily_reminder_time || '20:00')
+          setEodSummaryEnabled(data.eod_summary_enabled ?? true)
+        }
+      })
+      .catch(console.error)
+  }, [])
+
+  const handleToggleDailyReminder = async (enabled: boolean) => {
+    setDailyReminderEnabled(enabled)
+    if (enabled) {
+      const ok = await subscribeToPushNotifications()
+      if (!ok) {
+        toast.error('Notification permissions are required for daily reminders')
+      }
+    }
+    saveSettings(enabled, dailyReminderTime, eodSummaryEnabled)
+  }
+
+  const handleToggleEodSummary = async (enabled: boolean) => {
+    setEodSummaryEnabled(enabled)
+    if (enabled) {
+      const ok = await subscribeToPushNotifications()
+      if (!ok) {
+        toast.error('Notification permissions are required for end-of-day summaries')
+      }
+    }
+    saveSettings(dailyReminderEnabled, dailyReminderTime, enabled)
+  }
+
+  const handleTimeChange = (time: string) => {
+    setDailyReminderTime(time)
+    saveSettings(dailyReminderEnabled, time, eodSummaryEnabled)
+  }
+
+  const saveSettings = async (reminderEnabled: boolean, time: string, eodEnabled: boolean) => {
+    setSaving(true)
+    setMessage(null)
+    try {
+      const res = await fetch('/api/notifications/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          daily_reminder_enabled: reminderEnabled,
+          daily_reminder_time: time,
+          eod_summary_enabled: eodEnabled,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
+        }),
+      })
+      if (res.ok) {
+        toast.success('Notification preferences updated')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to update notification settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSendTestPush = async () => {
+    setTesting(true)
+    try {
+      const subscribed = await subscribeToPushNotifications()
+      if (!subscribed) {
+        toast.error('Notification permission denied or unavailable')
+        setTesting(false)
+        return
+      }
+
+      const res = await fetch('/api/notifications/test', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        toast.success('Test notification sent to your device!')
+      } else {
+        toast.error(data.error || 'Failed to send test notification')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('An error occurred sending test notification')
+    } finally {
+      setTesting(false)
+    }
+  }
+
+  return (
+    <div className="max-w-2xl">
+      <Card className="glass-card shadow-md">
+        <CardHeader>
+          <CardTitle className="text-header-section flex items-center gap-2">
+            <Bell className="h-5 w-5 text-[#E17A4D]" />
+            Push Notifications
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Daily Reminder Toggle */}
+          <div className="flex items-center justify-between pb-4 border-b border-[rgba(255,255,255,0.09)]">
+            <div>
+              <Label className="text-[#F2EFEA] font-medium text-base">Daily Expense Reminder</Label>
+              <p className="text-xs text-body-muted-luma mt-0.5">
+                Receive a push notification if you haven&#39;t logged an expense by your target time
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              checked={dailyReminderEnabled}
+              onChange={(e) => handleToggleDailyReminder(e.target.checked)}
+              className="w-5 h-5 accent-[#E17A4D] cursor-pointer"
+            />
+          </div>
+
+          {/* Reminder Time Picker */}
+          {dailyReminderEnabled && (
+            <div className="space-y-2 pb-4 border-b border-[rgba(255,255,255,0.09)]">
+              <Label htmlFor="reminderTime" className="text-[#F2EFEA] text-sm flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-[#8A8790]" />
+                Remind me at
+              </Label>
+              <Input
+                id="reminderTime"
+                type="time"
+                value={dailyReminderTime}
+                onChange={(e) => handleTimeChange(e.target.value)}
+                className="max-w-[160px] bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA]"
+              />
+            </div>
+          )}
+
+          {/* EOD Summary Toggle */}
+          <div className="flex items-center justify-between pb-4 border-b border-[rgba(255,255,255,0.09)]">
+            <div>
+              <Label className="text-[#F2EFEA] font-medium text-base">End-of-day Summary</Label>
+              <p className="text-xs text-body-muted-luma mt-0.5">
+                Receive a daily evening summary of today&#39;s total spending and budget status
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              checked={eodSummaryEnabled}
+              onChange={(e) => handleToggleEodSummary(e.target.checked)}
+              className="w-5 h-5 accent-[#E17A4D] cursor-pointer"
+            />
+          </div>
+
+          {/* Send Test Notification Button */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSendTestPush}
+            disabled={testing}
+            className="btn-secondary-luma w-full"
+          >
+            <Send className="h-4 w-4 mr-2" />
+            {testing ? 'Sending...' : 'Send Test Notification'}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }
