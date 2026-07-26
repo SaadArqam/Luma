@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import Link from 'next/link'
 
 export default function SignupPage() {
   const [name, setName] = useState('')
@@ -43,40 +44,54 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0C0C0C] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-[#1B1C21] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Terracotta ambient glow behind logo */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%',
+          height: '320px',
+          background: 'radial-gradient(ellipse at top, rgba(225, 122, 77, 0.12) 0%, transparent 60%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div className="w-full max-w-sm relative z-10">
         {/* Logo */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold tracking-tight text-white">
-            Paisa<span style={{ color: '#E8B84B' }}>Track</span>
+        <div className="text-center mb-8">
+          <h1 className="font-fraunces text-3xl font-bold tracking-tight text-[#F2EFEA]">
+            Paisa<span className="text-[#E17A4D]">Track</span>
           </h1>
-          <p className="text-[#555] text-sm mt-2">Your personal finance manager</p>
+          <p className="text-body-muted-luma text-sm mt-1.5">Your personal finance manager</p>
         </div>
 
         {/* Card */}
-        <div className="bg-[#141414] border border-[#1E1E1E] rounded-2xl p-7">
+        <div className="glass-card p-7 rounded-[20px]" style={{ borderTop: '2px solid #E17A4D' }}>
           {success ? (
             <div className="text-center py-4">
               <div className="text-4xl mb-4">✉️</div>
-              <h2 className="text-lg font-semibold text-white mb-2">Check your email</h2>
-              <p className="text-sm text-[#555]">
-                We sent a confirmation link to <span className="text-[#E8B84B]">{email}</span>.
+              <h2 className="font-fraunces text-header-section text-[#F2EFEA] mb-2">Check your email</h2>
+              <p className="text-body-muted-luma text-sm">
+                We sent a confirmation link to <span className="text-[#E17A4D] font-medium">{email}</span>.
                 Click the link to activate your account.
               </p>
-              <a
+              <Link
                 href="/login"
-                className="inline-block mt-6 text-sm font-medium"
-                style={{ color: '#E8B84B' }}
+                className="inline-block mt-6 text-sm font-medium text-[#E17A4D] hover:underline"
               >
                 Back to Sign In
-              </a>
+              </Link>
             </div>
           ) : (
             <>
-              <h2 className="text-lg font-semibold text-white mb-6">Create account</h2>
+              <h2 className="font-fraunces text-header-section text-[#F2EFEA] mb-6">Create account</h2>
 
               {error && (
-                <div className="bg-rose-500/10 border border-rose-500/20 rounded-lg px-4 py-2.5 text-rose-400 text-sm mb-4">
+                <div className="bg-[rgba(196,89,90,0.12)] border border-[#C4595A]/30 rounded-[12px] px-4 py-2.5 text-[#C4595A] text-sm mb-4 font-inter">
                   {error}
                 </div>
               )}
@@ -84,7 +99,7 @@ export default function SignupPage() {
               <div className="space-y-4">
                 {/* Name */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-medium tracking-widest uppercase text-[#3A3A3A]">
+                  <label className="text-[11px] font-semibold tracking-wider uppercase text-[#8A8790]">
                     Full Name
                   </label>
                   <input
@@ -93,13 +108,13 @@ export default function SignupPage() {
                     onChange={e => setName(e.target.value)}
                     placeholder="Saad Arqam"
                     autoComplete="name"
-                    className="w-full h-11 bg-[#101010] border border-[#1E1E1E] rounded-xl px-4 text-sm text-white placeholder-[#333] outline-none focus:border-[#E8B84B] transition-colors"
+                    className="input-luma"
                   />
                 </div>
 
                 {/* Email */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-medium tracking-widest uppercase text-[#3A3A3A]">
+                  <label className="text-[11px] font-semibold tracking-wider uppercase text-[#8A8790]">
                     Email
                   </label>
                   <input
@@ -108,13 +123,13 @@ export default function SignupPage() {
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     autoComplete="email"
-                    className="w-full h-11 bg-[#101010] border border-[#1E1E1E] rounded-xl px-4 text-sm text-white placeholder-[#333] outline-none focus:border-[#E8B84B] transition-colors"
+                    className="input-luma"
                   />
                 </div>
 
                 {/* Password */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-medium tracking-widest uppercase text-[#3A3A3A]">
+                  <label className="text-[11px] font-semibold tracking-wider uppercase text-[#8A8790]">
                     Password
                   </label>
                   <input
@@ -124,7 +139,7 @@ export default function SignupPage() {
                     placeholder="••••••••"
                     autoComplete="new-password"
                     onKeyDown={e => e.key === 'Enter' && handleSignup()}
-                    className="w-full h-11 bg-[#101010] border border-[#1E1E1E] rounded-xl px-4 text-sm text-white placeholder-[#333] outline-none focus:border-[#E8B84B] transition-colors"
+                    className="input-luma"
                   />
                 </div>
 
@@ -132,24 +147,23 @@ export default function SignupPage() {
                 <button
                   onClick={handleSignup}
                   disabled={loading || !email || !password}
-                  className="w-full h-12 rounded-xl text-sm font-semibold text-[#0C0C0C] transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ backgroundColor: '#E8B84B' }}
+                  className="btn-primary-luma w-full mt-2"
                 >
                   {loading ? 'Creating account...' : 'Create Account'}
                 </button>
 
                 {/* Divider */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-[#1E1E1E]" />
-                  <span className="text-xs text-[#3A3A3A]">or</span>
-                  <div className="flex-1 h-px bg-[#1E1E1E]" />
+                <div className="flex items-center gap-3 py-1">
+                  <div className="flex-1 h-px bg-[rgba(255,255,255,0.09)]" />
+                  <span className="text-xs text-[#8A8790]">or</span>
+                  <div className="flex-1 h-px bg-[rgba(255,255,255,0.09)]" />
                 </div>
 
                 {/* Google button */}
                 <button
                   onClick={handleGoogleLogin}
                   disabled={googleLoading}
-                  className="w-full h-12 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl text-sm font-medium text-white flex items-center justify-center gap-2.5 hover:border-[#333] hover:bg-[#1E1E1E] transition-colors disabled:opacity-50"
+                  className="btn-secondary-luma w-full"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -161,11 +175,11 @@ export default function SignupPage() {
                 </button>
               </div>
 
-              <p className="text-center text-sm text-[#555] mt-6">
+              <p className="text-center text-sm text-[#8A8790] mt-6">
                 Already have an account?{' '}
-                <a href="/login" className="font-medium" style={{ color: '#E8B84B' }}>
+                <Link href="/login" className="font-medium text-[#E17A4D] hover:underline">
                   Sign in
-                </a>
+                </Link>
               </p>
             </>
           )}

@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { format } from 'date-fns'
 import { Category, ExpenseWithCategory } from '@/types'
 import { toast } from 'sonner'
+import { getCategoryColor } from '@/lib/category-colors'
 
 function getDefaultNextDueDate(): string {
   const d = new Date()
@@ -530,6 +531,10 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
+                            <span
+                              className="inline-block w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: getCategoryColor(expense.category?.name || expense.category?.id || 'default') }}
+                            />
                             <span className="text-lg bg-[#2B2C33] rounded-full p-1 border border-[rgba(255,255,255,0.09)]" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               {expense.category?.icon}
                             </span>

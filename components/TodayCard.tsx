@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useQuickAddStore } from '@/lib/quickAddStore'
 import Link from 'next/link'
+import { Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 interface TodayData {
   spentToday: number
@@ -30,6 +32,7 @@ export function TodayCard() {
   const { open } = useQuickAddStore()
   const [data, setData] = useState<TodayData | null>(null)
   const [pulse, setPulse] = useState(false)
+  const [tip, setTip] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/dashboard/today')
@@ -44,6 +47,15 @@ export function TodayCard() {
         }
       })
       .catch(console.error)
+
+    fetch('/api/daily-tip')
+      .then(r => r.json())
+      .then((d) => {
+        if (d && d.tip) setTip(d.tip)
+      })
+      .catch(() => {
+        // Fail silently — don't show an error
+      })
   }, [])
 
   const hasBudget = data !== null && data.totalDailyBudget > 0
@@ -155,6 +167,21 @@ export function TodayCard() {
               Set a daily budget in Categories →
             </Link>
           </div>
+        )}
+
+        {/* Daily AI tip / nudge */}
+        {tip && (
+          <motion.div
+            className="flex items-start gap-2 pt-3.5 mt-3.5 border-t border-[rgba(255,255,255,0.07)]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#8A8790] shrink-0 mt-0.5" />
+            <p className="text-[13px] text-[#8A8790] line-clamp-2 leading-relaxed font-inter">
+              {tip}
+            </p>
+          </motion.div>
         )}
       </div>
 

@@ -8,6 +8,7 @@ import MigrationBanner from '@/components/MigrationBanner'
 import { startOfMonth, endOfMonth, format } from 'date-fns'
 import { TrendingUp, TrendingDown, Activity, Wallet } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { getCategoryColor } from '@/lib/category-colors'
 
 export const dynamic = 'force-dynamic'
 
@@ -178,12 +179,9 @@ export default async function DashboardPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span
+                            className="inline-block w-2 h-2 rounded-full shrink-0"
                             style={{
-                              display: 'inline-block', width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                              backgroundColor:
-                                expense.category?.name === 'Travel' ? '#8AA9C4'
-                                : expense.category?.name === 'Food' ? '#7FB69E'
-                                : '#E17A4D',
+                              backgroundColor: getCategoryColor(expense.category?.name || expense.category?.id || 'default'),
                             }}
                           />
                           <span className="text-lg bg-[#2B2C33] rounded-full p-1 border border-[rgba(255,255,255,0.09)]">{expense.category?.icon}</span>

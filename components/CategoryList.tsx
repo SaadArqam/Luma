@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Category } from '@/types'
+import { getCategoryColor } from '@/lib/category-colors'
 
 export function CategoryList({ initialCategories }: { initialCategories: Category[] }) {
   const router = useRouter()
@@ -105,6 +106,7 @@ export function CategoryList({ initialCategories }: { initialCategories: Categor
             style={{
               backgroundColor: '#2B2C33',
               border: category.daily_budget ? '1px solid rgba(225, 122, 77, 0.40)' : '1px solid rgba(255, 255, 255, 0.09)',
+              borderTop: `3px solid ${getCategoryColor(category.name)}`,
             }}
           >
             <CardContent className="p-6 flex flex-col items-center justify-center gap-3">
