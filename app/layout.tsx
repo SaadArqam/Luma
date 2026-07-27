@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     template: "%s | PaisaTrack",
   },
   description:
-    "Track your daily expenses, manage your balance, set budgets, and stay on top of recurring payments.",
+    "Track your daily expenses, manage your balance, set budgets, and keep an eye on your daily spending.",
   applicationName: "PaisaTrack",
   authors: [{ name: "PaisaTrack" }],
   keywords: ["expense tracker", "budget", "finance", "personal finance", "spending tracker"],

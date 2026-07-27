@@ -7,13 +7,17 @@ import { Label } from '@/components/ui/label'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { zonedDateString } from '@/lib/dates'
+import { AccountPicker } from '@/components/AccountPicker'
+import type { AccountOption } from '@/lib/accounts'
 
-export function AddBalanceForm() {
+export function AddBalanceForm({ accounts }: { accounts: AccountOption[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [amount, setAmount] = useState('')
   const [note, setNote] = useState('')
   const [date, setDate] = useState(() => zonedDateString())
+  // Preselect the account marked default in Settings.
+  const [accountId, setAccountId] = useState(() => accounts.find((a) => a.is_default)?.id ?? accounts[0]?.id ?? '')
   const [errorMsg, setErrorMsg] = useState('')
 
   async function onSubmit(e: React.FormEvent) {
@@ -27,7 +31,7 @@ export function AddBalanceForm() {
       const res = await fetch('/api/balance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: Number(amount), note, type: 'credit', date })
+        body: JSON.stringify({ amount: Number(amount), note, type: 'credit', date, account_id: accountId || null })
       })
 
       if (res.ok) {
@@ -86,6 +90,12 @@ export function AddBalanceForm() {
               className="input-luma"
             />
           </div>
+          <AccountPicker
+            id="balance-account"
+            accounts={accounts}
+            value={accountId}
+            onChange={setAccountId}
+          />
           <div className="space-y-2">
             <Label htmlFor="note">Note (Optional)</Label>
             <input

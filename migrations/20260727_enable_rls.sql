@@ -2,7 +2,7 @@
 -- Enable Row Level Security across the schema.
 --
 -- Context: supabase-schema.sql and disable-rls.sql explicitly DISABLED RLS on
--- categories, expenses, balance_entries, stipend_config and recurring_expenses.
+-- categories, expenses, balance_entries and stipend_config.
 -- Several server-rendered pages also queried those tables with no user filter,
 -- so one account's financial data was reachable from another's session. The
 -- app-level filters are fixed in the same change as this migration; this file
@@ -49,7 +49,6 @@
 --   SELECT 'expenses' t, count(*) FROM expenses WHERE user_id IS NULL
 --   UNION ALL SELECT 'categories',        count(*) FROM categories        WHERE user_id IS NULL
 --   UNION ALL SELECT 'balance_entries',   count(*) FROM balance_entries   WHERE user_id IS NULL
---   UNION ALL SELECT 'recurring_expenses',count(*) FROM recurring_expenses WHERE user_id IS NULL
 --   UNION ALL SELECT 'stipend_config',    count(*) FROM stipend_config    WHERE user_id IS NULL;
 
 BEGIN;
@@ -120,9 +119,9 @@ END $$;
 -- ----------------------------------------------------------------------------
 -- 3. Tables with no user_id column.
 --
---    None of the nine tables this app queries (expenses, categories,
---    balance_entries, stipend_config, recurring_expenses, user_settings,
---    daily_tips, push_subscriptions, notification_preferences) land here — they
+--    None of the eight tables this app queries (expenses, categories,
+--    balance_entries, stipend_config, user_settings, daily_tips,
+--    push_subscriptions, notification_preferences) land here — they
 --    all carry user_id and were handled above. Anything remaining is therefore
 --    unused by the app, so it gets RLS enabled with NO policy, which denies all
 --    access to anon and authenticated while leaving service_role working.

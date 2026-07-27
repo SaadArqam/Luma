@@ -1,9 +1,13 @@
+import type { AccountRef } from '@/lib/accounts'
+
 export interface BalanceEntry {
   id: string;
   amount: number;
   note: string | null;
   type: 'credit' | 'debit';
   created_at: string;
+  account_id: string | null;
+  account?: AccountRef | null;
 }
 
 export interface Category {
@@ -21,6 +25,8 @@ export interface Expense {
   date: string;
   category_id: string;
   created_at: string;
+  account_id: string | null;
+  account?: AccountRef | null;
 }
 
 export interface ExpenseWithCategory extends Expense {
@@ -62,20 +68,3 @@ export interface StipendStats {
   willRunOut: boolean;
 }
 
-export interface RecurringExpense {
-  id: string
-  name: string
-  amount: number
-  category_id: string | null
-  frequency: 'weekly' | 'monthly' | 'custom'
-  custom_days: number | null
-  next_due_date: string
-  is_active: boolean
-  created_at: string
-  categories?: { name: string; icon: string }
-}
-
-export interface RecurringWithStatus extends RecurringExpense {
-  days_until_due: number
-  status: 'overdue' | 'urgent' | 'upcoming' | 'normal'
-}

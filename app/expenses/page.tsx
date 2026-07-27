@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { ExpenseManager } from '@/components/ExpenseManager'
+import { getAccountOptions, ACCOUNT_REF_SELECT } from '@/lib/accounts'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,9 +10,16 @@ export default async function ExpensesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  // Accounts first: this bootstraps a default account for a brand-new user, so
+  // the form below always has something to attach the expense to.
+  const accounts = await getAccountOptions(supabase, user.id)
+
   const [{ data: categories }, { data: expenses }] = await Promise.all([
     supabase.from('categories').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
-    supabase.from('expenses').select('*, category:categories(*)').eq('user_id', user.id).order('date', { ascending: false }),
+    supabase.from('expenses')
+      .select(`*, category:categories(*), ${ACCOUNT_REF_SELECT}`)
+      .eq('user_id', user.id)
+      .order('date', { ascending: false }),
   ])
 
   return (
@@ -21,7 +29,11 @@ export default async function ExpensesPage() {
         <p className="text-body-muted-luma mt-2">Track and manage your spending</p>
       </div>
 
-      <ExpenseManager categories={categories || []} initialExpenses={expenses || []} />
+      <ExpenseManager
+        categories={categories || []}
+        initialExpenses={expenses || []}
+        accounts={accounts}
+      />
     </div>
   )
 }

@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useQuickAddStore } from '@/lib/quickAddStore'
 import { useExpenseSync } from '@/lib/expenseSync'
 import { zonedDateString } from '@/lib/dates'
+import { AccountPicker } from '@/components/AccountPicker'
+import type { AccountRef } from '@/lib/accounts'
 
 interface Category {
   id: string
@@ -21,6 +23,8 @@ export function QuickAddSheet() {
   const addTodayDelta = useExpenseSync((s) => s.addTodayDelta)
   const consumeTodayDelta = useExpenseSync((s) => s.consumeTodayDelta)
   const [categories, setCategories] = useState<Category[]>([])
+  const [accounts, setAccounts] = useState<(AccountRef & { is_default: boolean })[]>([])
+  const [accountId, setAccountId] = useState('')
   const [loading, setLoading] = useState(false)
   const [categoryId, setCategoryId] = useState('')
   const [amount, setAmount] = useState('')
@@ -30,14 +34,25 @@ export function QuickAddSheet() {
   const [date, setDate] = useState(() => zonedDateString())
 
   useEffect(() => {
-    if (isOpen) {
-      fetch('/api/categories')
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) setCategories(data)
-        })
-        .catch(console.error)
-    }
+    if (!isOpen) return
+
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setCategories(data)
+      })
+      .catch(console.error)
+
+    // Preselect the default account. Fetched on open rather than on mount so a
+    // newly added account shows up without a reload.
+    fetch('/api/accounts')
+      .then((res) => res.json())
+      .then((data: (AccountRef & { is_default: boolean })[]) => {
+        if (!Array.isArray(data)) return
+        setAccounts(data)
+        setAccountId((prev) => prev || data.find((a) => a.is_default)?.id || data[0]?.id || '')
+      })
+      .catch(console.error)
   }, [isOpen])
 
   const handleSubmit = async () => {
@@ -61,6 +76,7 @@ export function QuickAddSheet() {
           note: note.trim(),
           date,
           category_id: categoryId,
+          account_id: accountId || null,
         }),
       })
 
@@ -171,6 +187,13 @@ export function QuickAddSheet() {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="input-luma"
+              />
+
+              <AccountPicker
+                id="quickadd-account"
+                accounts={accounts}
+                value={accountId}
+                onChange={setAccountId}
               />
 
               <button

@@ -20,7 +20,6 @@ export async function POST() {
       'expenses',
       'categories',
       'balance_entries',
-      'recurring_expenses',
       'stipend_config',
     ]
 

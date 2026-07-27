@@ -4,11 +4,10 @@ import { create } from 'zustand'
  * Cross-component refresh signal for expense mutations.
  *
  * Why this exists: the Home page is a server component, but the Today card,
- * budget bars, stipend widget and recurring list are all CLIENT components
- * that load their own data in `useEffect(..., [])`. `router.refresh()` only
- * re-runs the server render — it does NOT remount client components or re-run
- * their effects — so before this store those four panels kept showing stale
- * numbers until a hard reload.
+ * budget bars and stipend widget are all CLIENT components that load their own
+ * data in `useEffect(..., [])`. `router.refresh()` only re-runs the server
+ * render — it does NOT remount client components or re-run their effects — so
+ * before this store those panels kept showing stale numbers until a reload.
  *
  * Consumers put `version` in their effect's dependency array; anything that
  * mutates expenses calls `bump()` after the server confirms the write.

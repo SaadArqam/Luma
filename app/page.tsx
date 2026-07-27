@@ -4,7 +4,6 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { DashboardChart } from '@/components/DashboardChart'
 import { StipendWidget } from '@/components/StipendWidget'
 import { BudgetOverview } from '@/components/BudgetOverview'
-import { RecurringSection } from '@/components/RecurringSection'
 import { TodayCard } from '@/components/TodayCard'
 import MigrationBanner from '@/components/MigrationBanner'
 import { startOfMonth, endOfMonth, format } from 'date-fns'
@@ -15,7 +14,7 @@ import { getCategoryColor } from '@/lib/category-colors'
 export const dynamic = 'force-dynamic'
 
 // Tables that can hold rows orphaned from before auth was added (see app/api/migrate/route.ts).
-const CLAIMABLE_TABLES = ['expenses', 'categories', 'balance_entries', 'recurring_expenses', 'stipend_config'] as const
+const CLAIMABLE_TABLES = ['expenses', 'categories', 'balance_entries', 'stipend_config'] as const
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -121,9 +120,6 @@ export default async function DashboardPage() {
 
       {/* ── Today Card + Quick Add + Streak ─────── */}
       <TodayCard />
-
-      {/* ── Recurring upcoming payments ──────────── */}
-      <RecurringSection />
 
       {/* ── Stat cards (demoted — reference info) ── */}
       <div className="grid grid-cols-2 gap-3">

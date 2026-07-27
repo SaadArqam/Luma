@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { AddBalanceForm } from '@/components/AddBalanceForm'
+import { AccountTag } from '@/components/AccountPicker'
+import { getAccountOptions, ACCOUNT_REF_SELECT } from '@/lib/accounts'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,9 +15,13 @@ export default async function BalancePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  // Accounts first: bootstraps a default account for a brand-new user so the
+  // form always has something to attach the entry to.
+  const accounts = await getAccountOptions(supabase, user.id)
+
   const { data: history } = await supabase
     .from('balance_entries')
-    .select('*')
+    .select(`*, ${ACCOUNT_REF_SELECT}`)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -29,7 +35,7 @@ export default async function BalancePage() {
 
       <div className="grid gap-8 tablet:grid-cols-3">
         <div className="min-w-0 tablet:col-span-1">
-          <AddBalanceForm />
+          <AddBalanceForm accounts={accounts} />
         </div>
 
         <div className="min-w-0 tablet:col-span-2 space-y-4">
@@ -65,6 +71,7 @@ export default async function BalancePage() {
                         ) : (
                           <Badge className="badge-danger-luma border-none shadow-none font-medium">Debit</Badge>
                         )}
+                        {entry.account && <AccountTag account={entry.account} />}
                       </div>
                     </div>
                   ))
@@ -83,6 +90,7 @@ export default async function BalancePage() {
                       <TableHead className="font-fraunces text-luma-muted">Date</TableHead>
                       <TableHead className="font-fraunces text-luma-muted">Type</TableHead>
                       <TableHead className="font-fraunces text-luma-muted">Note</TableHead>
+                      <TableHead className="font-fraunces text-luma-muted">Account</TableHead>
                       <TableHead className="font-fraunces text-luma-muted text-right">Amount</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -107,6 +115,9 @@ export default async function BalancePage() {
                           <TableCell className="text-body-muted-luma text-xs">
                             <div className="max-w-[150px] truncate">{entry.note || '-'}</div>
                           </TableCell>
+                          <TableCell>
+                            <AccountTag account={entry.account} />
+                          </TableCell>
                           <TableCell
                             className={`text-right font-inter font-bold font-tnum text-sm ${entry.type === 'credit' ? 'text-luma-success' : 'text-luma-danger'}`}
                           >
@@ -116,7 +127,7 @@ export default async function BalancePage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center h-32 text-body-muted-luma">
+                        <TableCell colSpan={5} className="text-center h-32 text-body-muted-luma">
                           No history found
                         </TableCell>
                       </TableRow>

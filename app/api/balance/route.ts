@@ -8,9 +8,18 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const json = await request.json()
-    const { amount, note, type, date } = json
+    const { amount, note, type, date, account_id } = json
 
-    const insertData: Record<string, any> = { amount, note, type, user_id: user.id }
+    if (account_id) {
+      const { data: account } = await supabase
+        .from('accounts').select('id')
+        .eq('id', account_id).eq('user_id', user.id).maybeSingle()
+      if (!account) return NextResponse.json({ error: 'Account not found' }, { status: 400 })
+    }
+
+    const insertData: Record<string, any> = {
+      amount, note, type, user_id: user.id, account_id: account_id ?? null,
+    }
     if (date) {
       insertData.created_at = new Date(date).toISOString()
     }

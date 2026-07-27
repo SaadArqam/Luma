@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Settings as SettingsIcon, Save, Bell, Clock, Send } from 'lucide-react'
+import Link from 'next/link'
+import { Settings as SettingsIcon, Save, Bell, Clock, Send, Landmark, ChevronRight } from 'lucide-react'
 import LogoutButton from '@/components/LogoutButton'
 import { subscribeToPushNotifications } from '@/lib/subscribePush'
 import { toast } from 'sonner'
@@ -142,6 +143,30 @@ export default function SettingsPage() {
                 </div>
               </div>
             )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Bank / cash accounts */}
+      <div className="max-w-2xl">
+        <Card className="glass-card shadow-md">
+          <CardHeader>
+            <CardTitle className="text-header-section">Accounts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/settings/accounts"
+              className="flex items-center gap-3 min-h-[56px] rounded-[14px] px-3 -mx-1 hover:bg-luma-raised/50 transition-colors"
+            >
+              <Landmark className="w-4 h-4 text-luma-accent shrink-0" />
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-medium text-luma-text">Bank &amp; cash accounts</span>
+                <span className="block text-body-muted-luma text-xs">
+                  Add accounts and choose which one is used by default
+                </span>
+              </span>
+              <ChevronRight className="w-4 h-4 text-luma-muted shrink-0" />
+            </Link>
           </CardContent>
         </Card>
       </div>

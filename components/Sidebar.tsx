@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Home, Wallet, Tag, Receipt, RefreshCw, Settings, BarChart2 } from 'lucide-react'
+import { Home, Wallet, Tag, Receipt, Settings, BarChart2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 
@@ -12,11 +12,15 @@ const mainNavItems = [
   { name: 'Add Balance', href: '/balance', icon: Wallet },
   { name: 'Categories', href: '/categories', icon: Tag },
   { name: 'Expenses', href: '/expenses', icon: Receipt },
-  { name: 'Recurring', href: '/recurring', icon: RefreshCw },
   { name: 'Reports', href: '/reports', icon: BarChart2 },
 ]
 
 const settingsItem = { name: 'Settings', href: '/settings', icon: Settings }
+
+/** A sub-route keeps its parent nav item highlighted (/settings/accounts → Settings). */
+function isActivePath(pathname: string, href: string): boolean {
+  return pathname === href || (href !== '/' && pathname.startsWith(`${href}/`))
+}
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -49,7 +53,7 @@ export function Sidebar() {
 
       <nav className="flex-1 flex flex-col gap-1 px-2">
         {mainNavItems.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = isActivePath(pathname, item.href)
           return (
             <Link
               key={item.name}
@@ -67,7 +71,7 @@ export function Sidebar() {
         <Link
           href={settingsItem.href}
           title={settingsItem.name}
-          className={linkClass(pathname === settingsItem.href)}
+          className={linkClass(isActivePath(pathname, settingsItem.href))}
         >
           <settingsItem.icon size={20} strokeWidth={1.5} />
         </Link>

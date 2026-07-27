@@ -27,11 +27,21 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const json = await request.json()
-    const { amount, note, date, category_id } = json
+    const { amount, note, date, category_id, account_id } = json
+
+    // The composite FK (user_id, account_id) already makes it impossible to
+    // attach a transaction to someone else's account, but check here so a bad
+    // id returns a clear message instead of a constraint violation.
+    if (account_id) {
+      const { data: account } = await supabase
+        .from('accounts').select('id')
+        .eq('id', account_id).eq('user_id', user.id).maybeSingle()
+      if (!account) return NextResponse.json({ error: 'Account not found' }, { status: 400 })
+    }
 
     const { data, error } = await supabase
       .from('expenses')
-      .insert({ amount, note, date, category_id, user_id: user.id })
+      .insert({ amount, note, date, category_id, account_id: account_id ?? null, user_id: user.id })
       .select()
       .single()
 

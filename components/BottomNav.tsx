@@ -92,9 +92,17 @@ export default function BottomNav() {
   const path = usePathname()
   const router = useRouter()
 
+  // Sub-routes must light up their parent tab — /settings/accounts is still
+  // "Settings". An exact match alone returned -1 there, which fell through to 0
+  // and lit up Home instead. '/' is excluded from the prefix test because it
+  // would otherwise match every path.
   const activeIndex = Math.max(
     0,
-    links.findIndex((l) => l.href === path)
+    links.reduce(
+      (best, l, i) =>
+        path === l.href || (l.href !== '/' && path.startsWith(`${l.href}/`)) ? i : best,
+      -1
+    )
   )
 
   const rowRef = useRef<HTMLDivElement | null>(null)

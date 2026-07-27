@@ -15,14 +15,14 @@ import { Category, ExpenseWithCategory } from '@/types'
 import { toast } from 'sonner'
 import { getCategoryColor } from '@/lib/category-colors'
 import { zonedDateString } from '@/lib/dates'
+import { AccountPicker, AccountTag } from '@/components/AccountPicker'
+import type { AccountOption } from '@/lib/accounts'
 
-function getDefaultNextDueDate(): string {
-  // A month from today in IST — same reason as the expense date below.
-  const [y, m, d] = zonedDateString().split('-').map(Number)
-  return new Date(Date.UTC(y, m, d)).toISOString().slice(0, 10)
-}
-
-export function ExpenseManager({ categories, initialExpenses }: { categories: Category[], initialExpenses: ExpenseWithCategory[] }) {
+export function ExpenseManager({ categories, initialExpenses, accounts }: {
+  categories: Category[]
+  initialExpenses: ExpenseWithCategory[]
+  accounts: AccountOption[]
+}) {
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)
@@ -31,6 +31,8 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
   // IST calendar date, so an expense logged at 01:00 IST defaults to today.
   const [date, setDate] = useState(() => zonedDateString())
   const [categoryId, setCategoryId] = useState('')
+  // Preselect the account marked default in Settings.
+  const [accountId, setAccountId] = useState(() => accounts.find((a) => a.is_default)?.id ?? accounts[0]?.id ?? '')
   const [errorMsg, setErrorMsg] = useState('')
 
   // Local category list — seeded from server prop, updated after inline creation
@@ -42,11 +44,6 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
   const [newCatEmoji, setNewCatEmoji] = useState('💰')
   const [creatingCat, setCreatingCat] = useState(false)
 
-  const [isRecurring, setIsRecurring] = useState(false)
-  const [recurringName, setRecurringName] = useState('')
-  const [recurringNextDue, setRecurringNextDue] = useState(getDefaultNextDueDate())
-  const [recurringFrequency, setRecurringFrequency] = useState<'weekly' | 'monthly' | 'custom'>('monthly')
-  const [recurringCustomDays, setRecurringCustomDays] = useState('30')
 
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterMonth, setFilterMonth] = useState(() => zonedDateString().slice(0, 7))
@@ -55,17 +52,13 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
   async function onAddSubmit() {
     setErrorMsg('')
     if (!amount || isNaN(Number(amount)) || !categoryId || !date) return
-    if (isRecurring && !recurringName.trim()) {
-      setErrorMsg('Payment name is required for recurring expenses')
-      return
-    }
 
     setLoading(true)
     try {
       const res = await fetch('/api/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: Number(amount), note, date, category_id: categoryId })
+        body: JSON.stringify({ amount: Number(amount), note, date, category_id: categoryId, account_id: accountId || null })
       })
 
       if (!res.ok) {
@@ -74,57 +67,26 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
         return
       }
 
-      if (isRecurring) {
-        const recurringRes = await fetch('/api/recurring', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: recurringName.trim(),
-            amount: Number(amount),
-            category_id: categoryId,
-            frequency: recurringFrequency,
-            custom_days: recurringFrequency === 'custom' ? Number(recurringCustomDays) || 30 : null,
-            next_due_date: recurringNextDue,
-          }),
-        })
-
-        if (!recurringRes.ok) {
-          const data = await recurringRes.json()
-          setErrorMsg(data.error || 'Expense added but failed to set recurring reminder')
-          router.refresh()
-          return
-        }
-
-        toast.success('Expense added + recurring reminder set')
-      }
-
       setAmount('')
       setNote('')
       setCategoryId('')
-      setIsRecurring(false)
-      setRecurringName('')
-      setRecurringNextDue(getDefaultNextDueDate())
-      setRecurringFrequency('monthly')
-      setRecurringCustomDays('30')
       router.refresh()
 
-      if (!isRecurring) {
-        try {
-          const budgetRes = await fetch('/api/budget/stats')
-          const budgetStats = await budgetRes.json()
-          const categoryBudget = budgetStats.find((b: { categoryId: string }) => b.categoryId === categoryId)
+      try {
+        const budgetRes = await fetch('/api/budget/stats')
+        const budgetStats = await budgetRes.json()
+        const categoryBudget = budgetStats.find((b: { categoryId: string }) => b.categoryId === categoryId)
 
-          if (categoryBudget) {
-            const categoryName = categories.find(c => c.id === categoryId)?.name || 'this category'
-            if (categoryBudget.status === 'danger') {
-              toast.error(`You've exceeded today's ${categoryName} budget!`)
-            } else if (categoryBudget.status === 'warning') {
-              toast.warning(`You've used 80%+ of today's ${categoryName} budget`)
-            }
+        if (categoryBudget) {
+          const categoryName = categories.find(c => c.id === categoryId)?.name || 'this category'
+          if (categoryBudget.status === 'danger') {
+            toast.error(`You've exceeded today's ${categoryName} budget!`)
+          } else if (categoryBudget.status === 'warning') {
+            toast.warning(`You've used 80%+ of today's ${categoryName} budget`)
           }
-        } catch (budgetError) {
-          console.error('Budget check failed:', budgetError)
         }
+      } catch (budgetError) {
+        console.error('Budget check failed:', budgetError)
       }
     } catch (error) {
       console.error(error)
@@ -330,6 +292,12 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                   className="input-luma"
                 />
               </div>
+              <AccountPicker
+                id="expense-account"
+                accounts={accounts}
+                value={accountId}
+                onChange={setAccountId}
+              />
               <div className="space-y-2">
                 <Label htmlFor="note">Note (Optional)</Label>
                 <input
@@ -340,78 +308,6 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                   placeholder="e.g., Dinner, Taxi"
                   className="input-luma"
                 />
-              </div>
-
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
-                  <input
-                    type="checkbox"
-                    checked={isRecurring}
-                    onChange={(e) => setIsRecurring(e.target.checked)}
-                    className="w-4 h-4"
-                    style={{ accentColor: 'var(--luma-accent)' }}
-                  />
-                  <span className="text-sm font-medium text-luma-text">Recurring payment</span>
-                </label>
-
-                <div
-                  className="overflow-hidden transition-all duration-300 ease-out"
-                  style={{ maxHeight: isRecurring ? '400px' : '0', opacity: isRecurring ? 1 : 0 }}
-                >
-                  <div className="space-y-4 pt-2 border-t border-border">
-                    <div className="space-y-2">
-                      <Label htmlFor="recurringName">Payment name</Label>
-                      <input
-                        id="recurringName"
-                        type="text"
-                        value={recurringName}
-                        onChange={(e) => setRecurringName(e.target.value)}
-                        placeholder="e.g., Tiffin Service"
-                        className="input-luma"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="recurringNextDue">Next due date</Label>
-                      <input
-                        id="recurringNextDue"
-                        type="date"
-                        value={recurringNextDue}
-                        onChange={(e) => setRecurringNextDue(e.target.value)}
-                        className="input-luma"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="recurringFrequency">Repeats</Label>
-                      <Select
-                        value={recurringFrequency}
-                        onValueChange={(val) => setRecurringFrequency((val || 'monthly') as 'weekly' | 'monthly' | 'custom')}
-                      >
-                        <SelectTrigger id="recurringFrequency" className="bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="custom">Custom interval</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {recurringFrequency === 'custom' && (
-                      <div className="space-y-2">
-                        <Label htmlFor="recurringCustomDays">Every X days</Label>
-                        <Input
-                          id="recurringCustomDays"
-                          type="number"
-                          min="1"
-                          value={recurringCustomDays}
-                          onChange={(e) => setRecurringCustomDays(e.target.value)}
-                          placeholder="30"
-                          className="bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
 
               <button
@@ -502,6 +398,12 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                       <span className="text-body-muted-luma font-inter font-tnum shrink-0">
                         {format(new Date(expense.date), 'dd MMM yyyy')}
                       </span>
+                      {expense.account && (
+                        <>
+                          <span className="text-body-muted-luma shrink-0">·</span>
+                          <AccountTag account={expense.account} />
+                        </>
+                      )}
                     </div>
                   </div>
                 ))
@@ -520,6 +422,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                     <TableHead className="font-fraunces text-luma-muted">Date</TableHead>
                     <TableHead className="font-fraunces text-luma-muted">Category</TableHead>
                     <TableHead className="font-fraunces text-luma-muted">Note</TableHead>
+                    <TableHead className="font-fraunces text-luma-muted">Account</TableHead>
                     <TableHead className="font-fraunces text-luma-muted text-right">Amount</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
@@ -546,6 +449,9 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         <TableCell className="text-body-muted-luma text-xs">
                           <div className="max-w-[150px] truncate">{expense.note || '-'}</div>
                         </TableCell>
+                        <TableCell>
+                          <AccountTag account={expense.account} />
+                        </TableCell>
                         <TableCell className="text-right font-inter font-bold font-tnum text-sm text-luma-text">
                           ₹{Number(expense.amount).toLocaleString('en-IN')}
                         </TableCell>
@@ -563,7 +469,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center h-32 text-body-muted-luma">
+                      <TableCell colSpan={6} className="text-center h-32 text-body-muted-luma">
                         No expenses found for this period
                       </TableCell>
                     </TableRow>
