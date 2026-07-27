@@ -47,14 +47,14 @@ export default function MigrationBanner({
   if (!hasClaimableData || dismissed) return null
 
   return (
-    <div className="flex items-center gap-3 glass-card border border-[#E17A4D]/30 bg-[rgba(225,122,77,0.08)] rounded-[16px] px-4 py-3 text-sm">
+    <div className="flex items-center gap-3 glass-card border border-luma-accent/30 bg-luma-accent/10 rounded-[16px] px-4 py-3 text-sm">
       <span className="text-lg">📦</span>
-      <p className="flex-1 text-[#8A8790]">
-        You have existing data — <button onClick={handleMigrate} disabled={loading} className="text-[#E17A4D] font-medium hover:underline disabled:opacity-50">
+      <p className="flex-1 text-luma-muted">
+        You have existing data — <button onClick={handleMigrate} disabled={loading} className="text-luma-accent font-medium hover:underline disabled:opacity-50">
           {loading ? 'Claiming...' : 'click here to claim it'}
         </button> for your account.
       </p>
-      <button onClick={handleDismiss} className="text-[#8A8790] hover:text-[#F2EFEA] text-xs ml-2">✕</button>
+      <button onClick={handleDismiss} className="text-luma-muted hover:text-luma-text text-xs ml-2">✕</button>
     </div>
   )
 }

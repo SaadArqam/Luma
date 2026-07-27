@@ -18,6 +18,9 @@ const inter = Inter({
 });
 
 export const viewport: Viewport = {
+  // Renders to <meta name="theme-color">, which takes a literal color — var()
+  // does not resolve here. Keep in sync with --luma-canvas in app/globals.css
+  // (and with manifest.ts, which has the same constraint).
   themeColor: [
     { media: "(prefers-color-scheme: dark)", color: "#1B1C21" },
     { media: "(prefers-color-scheme: light)", color: "#1B1C21" },
@@ -81,7 +84,7 @@ export default function RootLayout({
       className={`dark ${fraunces.variable} ${inter.variable} antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen flex flex-col tablet:flex-row tablet:items-start bg-[#1B1C21] text-[#F2EFEA]">
+      <body className="min-h-screen flex flex-col tablet:flex-row tablet:items-start bg-luma-canvas text-luma-text">
         <LenisProvider>
           <Sidebar />
           <main className="flex-1 min-w-0 dock-clearance">

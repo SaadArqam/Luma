@@ -4,6 +4,76 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ── Luma design tokens ───────────────────────────────────────────────────
+   THE single source of truth for every color in the app. Values mirror the
+   `colors:` block of .claude/DESIGN-luma.md 1:1 — when a token changes there,
+   change it HERE and nowhere else.
+
+   Never hardcode a hex/rgba in a component. Use either:
+     • a Tailwind utility  — text-luma-muted, bg-luma-raised, border-luma-hairline
+     • the raw var         — style={{ color: 'var(--luma-muted)' }}
+   Both resolve to the same variable, so a token edit propagates everywhere.
+
+   Var name ← DESIGN-luma.md key (short where the utility already implies it):
+     --luma-surface        ← surface-solid
+     --luma-raised         ← surface-solid-raised
+     --luma-hairline       ← border-hairline
+     --luma-text/muted/faint ← text-primary/text-muted/text-faint
+   ------------------------------------------------------------------------ */
+:root {
+  --luma-canvas: #1B1C21;
+  --luma-glass: rgba(46, 47, 56, 0.75);
+  --luma-glass-thin: rgba(46, 47, 56, 0.48);
+  --luma-glass-thick: rgba(46, 47, 56, 0.88);
+  --luma-surface: #2A2B32;
+  --luma-raised: #35363F;
+  --luma-hairline: rgba(255, 255, 255, 0.14);
+  --luma-hairline-strong: rgba(255, 255, 255, 0.22);
+  --luma-specular: rgba(255, 255, 255, 0.09);
+  --luma-text: #F5F1EA;
+  --luma-muted: #9C99A2;
+  --luma-faint: #6C6A73;
+  --luma-accent: #ED7D3F;
+  --luma-accent-pressed: #D4652B;
+  --luma-accent-glow: rgba(237, 125, 63, 0.28);
+  --luma-accent-border: rgba(237, 125, 63, 0.55);
+  --luma-accent-shadow: rgba(237, 125, 63, 0.45);
+  --luma-success: #6FC49B;
+  --luma-success-glow: rgba(111, 196, 155, 0.22);
+  --luma-warning: #EFA84A;
+  --luma-warning-glow: rgba(239, 168, 74, 0.22);
+  --luma-danger: #D65458;
+  --luma-danger-glow: rgba(214, 84, 88, 0.22);
+  --luma-info: #8AA9C4;
+}
+
+@theme inline {
+  --color-luma-canvas: var(--luma-canvas);
+  --color-luma-glass: var(--luma-glass);
+  --color-luma-glass-thin: var(--luma-glass-thin);
+  --color-luma-glass-thick: var(--luma-glass-thick);
+  --color-luma-surface: var(--luma-surface);
+  --color-luma-raised: var(--luma-raised);
+  --color-luma-hairline: var(--luma-hairline);
+  --color-luma-hairline-strong: var(--luma-hairline-strong);
+  --color-luma-specular: var(--luma-specular);
+  --color-luma-text: var(--luma-text);
+  --color-luma-muted: var(--luma-muted);
+  --color-luma-faint: var(--luma-faint);
+  --color-luma-accent: var(--luma-accent);
+  --color-luma-accent-pressed: var(--luma-accent-pressed);
+  --color-luma-accent-glow: var(--luma-accent-glow);
+  --color-luma-accent-border: var(--luma-accent-border);
+  --color-luma-accent-shadow: var(--luma-accent-shadow);
+  --color-luma-success: var(--luma-success);
+  --color-luma-success-glow: var(--luma-success-glow);
+  --color-luma-warning: var(--luma-warning);
+  --color-luma-warning-glow: var(--luma-warning-glow);
+  --color-luma-danger: var(--luma-danger);
+  --color-luma-danger-glow: var(--luma-danger-glow);
+  --color-luma-info: var(--luma-info);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -51,47 +121,29 @@
   --breakpoint-tablet: 835px;
 }
 
-:root {
-  --background: #1B1C21;
-  --foreground: #F2EFEA;
-  --card: rgba(38, 39, 46, 0.72);
-  --card-foreground: #F2EFEA;
-  --popover: #232429;
-  --popover-foreground: #F2EFEA;
-  --primary: #E17A4D;
-  --primary-foreground: #1B1C21;
-  --secondary: #2B2C33;
-  --secondary-foreground: #F2EFEA;
-  --muted: #232429;
-  --muted-foreground: #8A8790;
-  --accent: #E17A4D;
-  --accent-foreground: #1B1C21;
-  --destructive: #C4595A;
-  --border: rgba(255, 255, 255, 0.09);
-  --input: #232429;
-  --ring: #E17A4D;
-  --radius: 0.875rem;
-}
-
+/* shadcn's semantic layer is a thin alias over the Luma tokens above — it must
+   never carry its own literals, or a token change would only land in half the
+   UI. There is no light mode in this system, so :root and .dark are identical. */
+:root,
 .dark {
-  --background: #1B1C21;
-  --foreground: #F2EFEA;
-  --card: rgba(38, 39, 46, 0.72);
-  --card-foreground: #F2EFEA;
-  --popover: #232429;
-  --popover-foreground: #F2EFEA;
-  --primary: #E17A4D;
-  --primary-foreground: #1B1C21;
-  --secondary: #2B2C33;
-  --secondary-foreground: #F2EFEA;
-  --muted: #232429;
-  --muted-foreground: #8A8790;
-  --accent: #E17A4D;
-  --accent-foreground: #1B1C21;
-  --destructive: #C4595A;
-  --border: rgba(255, 255, 255, 0.09);
-  --input: #232429;
-  --ring: #E17A4D;
+  --background: var(--luma-canvas);
+  --foreground: var(--luma-text);
+  --card: var(--luma-glass);
+  --card-foreground: var(--luma-text);
+  --popover: var(--luma-surface);
+  --popover-foreground: var(--luma-text);
+  --primary: var(--luma-accent);
+  --primary-foreground: var(--luma-canvas);
+  --secondary: var(--luma-raised);
+  --secondary-foreground: var(--luma-text);
+  --muted: var(--luma-surface);
+  --muted-foreground: var(--luma-muted);
+  --accent: var(--luma-accent);
+  --accent-foreground: var(--luma-canvas);
+  --destructive: var(--luma-danger);
+  --border: var(--luma-hairline);
+  --input: var(--luma-surface);
+  --ring: var(--luma-accent);
   --radius: 0.875rem;
 }
 
@@ -100,8 +152,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    background-color: #1B1C21;
-    color: #F2EFEA;
+    background-color: var(--luma-canvas);
+    color: var(--luma-text);
     font-family: var(--font-inter), Inter, system-ui, sans-serif;
   }
   html {
@@ -185,15 +237,15 @@
   font-size: 13px;
   font-weight: 400;
   line-height: 1.45;
-  color: #8A8790;
+  color: var(--luma-muted);
 }
 
 /* ── Glass Card (stat cards, today card, budget overview) ──── */
 .glass-card {
-  background: rgba(38, 39, 46, 0.72);
+  background: var(--luma-glass);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--luma-hairline);
   border-radius: 20px;
   position: relative;
   overflow: hidden;
@@ -206,22 +258,22 @@
   left: 12px;
   right: 12px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  background: linear-gradient(90deg, transparent, var(--luma-specular), transparent);
   pointer-events: none;
 }
 
 /* ── Solid List Card (Recent Expenses table, dense lists) ────── */
 .solid-list-card {
-  background: #232429;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: var(--luma-surface);
+  border: 1px solid var(--luma-hairline);
   border-radius: 20px;
   overflow: hidden;
 }
 
 /* ── Buttons ─────────────────────────────────────────────── */
 .btn-primary-luma {
-  background-color: #E17A4D;
-  color: #1B1C21;
+  background-color: var(--luma-accent);
+  color: var(--luma-canvas);
   font-family: var(--font-inter), Inter, sans-serif;
   font-size: 15px;
   font-weight: 600;
@@ -235,19 +287,19 @@
   transition: all 150ms ease;
   cursor: pointer;
   border: none;
-  box-shadow: 0 4px 20px rgba(225, 122, 77, 0.35);
+  box-shadow: 0 4px 20px var(--luma-accent-shadow);
 }
 
 .btn-primary-luma:active {
   transform: scale(0.95);
-  background-color: #C9663B;
-  box-shadow: 0 2px 10px rgba(225, 122, 77, 0.25);
+  background-color: var(--luma-accent-pressed);
+  box-shadow: 0 2px 10px var(--luma-accent-shadow);
 }
 
 .btn-secondary-luma {
   background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #F2EFEA;
+  border: 1px solid var(--luma-hairline-strong);
+  color: var(--luma-text);
   font-family: var(--font-inter), Inter, sans-serif;
   font-size: 15px;
   font-weight: 600;
@@ -266,7 +318,7 @@
 }
 
 .terracotta-glow {
-  box-shadow: 0 0 20px rgba(225, 122, 77, 0.25);
+  box-shadow: 0 0 20px var(--luma-accent-shadow);
 }
 
 /* ── Inputs (Wallet/Categories/Expenses/Settings forms) ──── */
@@ -274,37 +326,37 @@
   width: 100%;
   height: 48px;
   padding: 0 16px;
-  background-color: #2B2C33;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background-color: var(--luma-raised);
+  border: 1px solid var(--luma-hairline);
   border-radius: 10px;
-  color: #F2EFEA;
+  color: var(--luma-text);
   font-size: 14px;
   outline: none;
   transition: border-color 150ms ease;
 }
 
 .input-luma:focus {
-  border-color: rgba(225, 122, 77, 0.40);
+  border-color: var(--luma-accent-border);
 }
 
 .input-luma::placeholder {
-  color: #5C5A60;
+  color: var(--luma-faint);
 }
 
 /* ── Status badges (glow background, tinted text) ────────── */
 .badge-success-luma {
-  background-color: rgba(127, 182, 158, 0.16);
-  color: #7FB69E;
+  background-color: var(--luma-success-glow);
+  color: var(--luma-success);
 }
 
 .badge-warning-luma {
-  background-color: rgba(224, 164, 88, 0.16);
-  color: #E0A458;
+  background-color: var(--luma-warning-glow);
+  color: var(--luma-warning);
 }
 
 .badge-danger-luma {
-  background-color: rgba(196, 89, 90, 0.16);
-  color: #C4595A;
+  background-color: var(--luma-danger-glow);
+  color: var(--luma-danger);
 }
 
 /* ── Glass Sidebar (desktop ≥ 835px) ─────────────────────────────────── */
@@ -314,10 +366,10 @@
   margin: 12px;
   height: calc(100vh - 24px);
   border-radius: 20px;
-  background: rgba(38, 39, 46, 0.72);
+  background: var(--luma-glass);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--luma-hairline);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
@@ -357,10 +409,10 @@
   z-index: 100;
   width: calc(100% - 32px);
   max-width: 420px;
-  background: rgba(38, 39, 46, 0.72);
+  background: var(--luma-glass);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--luma-hairline);
   border-radius: 28px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   padding: 8px 12px;
@@ -378,7 +430,7 @@
   left: 12px;
   right: 12px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  background: linear-gradient(90deg, transparent, var(--luma-specular), transparent);
   pointer-events: none;
 }
 
@@ -411,7 +463,7 @@
   width: 40px;
   height: 40px;
   border-radius: 14px;
-  background: rgba(225, 122, 77, 0.18);
+  background: var(--luma-accent-glow);
   pointer-events: none;
   transition: opacity 200ms ease;
 }
@@ -425,7 +477,7 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  color: #8A8790;
+  color: var(--luma-muted);
   transition: color 200ms ease,
               transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
   border-radius: 14px;
@@ -435,5 +487,5 @@
 /* Colour only — magnification is now driven per-icon by the drag gesture, so a
    static scale here would compound with the motion transform. */
 .dock-item--active {
-  color: #E17A4D;
+  color: var(--luma-accent);
 }

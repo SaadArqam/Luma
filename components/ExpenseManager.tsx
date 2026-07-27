@@ -222,7 +222,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                     }
                   }}
                 >
-                  <SelectTrigger id="category" className="bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] focus-visible:border-[rgba(225,122,77,0.40)]">
+                  <SelectTrigger id="category" className="bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -235,7 +235,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                       </SelectItem>
                     ))}
                     <SelectItem value="__new__">
-                      <span style={{ color: '#E17A4D', fontWeight: 600 }}>+ Create new category</span>
+                      <span style={{ color: 'var(--luma-accent)', fontWeight: 600 }}>+ Create new category</span>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -243,8 +243,8 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                 {/* Inline create-category form */}
                 {showNewCategory && (
                   <div style={{
-                    backgroundColor: '#232429',
-                    border: '1px solid rgba(255,255,255,0.09)',
+                    backgroundColor: 'var(--luma-surface)',
+                    border: '1px solid var(--luma-hairline)',
                     borderRadius: '12px',
                     padding: '12px',
                     marginTop: '8px',
@@ -259,8 +259,8 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         placeholder="💰"
                         style={{
                           width: '50px', height: '40px', textAlign: 'center', fontSize: '18px',
-                          backgroundColor: '#2B2C33', border: '1px solid rgba(255,255,255,0.09)',
-                          borderRadius: '8px', color: '#F2EFEA', outline: 'none'
+                          backgroundColor: 'var(--luma-raised)', border: '1px solid var(--luma-hairline)',
+                          borderRadius: '8px', color: 'var(--luma-text)', outline: 'none'
                         }}
                       />
                       <input
@@ -269,9 +269,9 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         placeholder="Category name"
                         onKeyDown={e => { if (e.key === 'Enter' && newCatName.trim()) handleCreateCategory() }}
                         style={{
-                          flex: 1, height: '40px', backgroundColor: '#2B2C33',
-                          border: '1px solid rgba(255,255,255,0.09)', borderRadius: '8px',
-                          padding: '0 12px', color: '#F2EFEA', fontSize: '13px', outline: 'none'
+                          flex: 1, height: '40px', backgroundColor: 'var(--luma-raised)',
+                          border: '1px solid var(--luma-hairline)', borderRadius: '8px',
+                          padding: '0 12px', color: 'var(--luma-text)', fontSize: '13px', outline: 'none'
                         }}
                       />
                     </div>
@@ -280,7 +280,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         onClick={handleCreateCategory}
                         disabled={!newCatName.trim() || creatingCat}
                         style={{
-                          flex: 1, height: '38px', backgroundColor: '#E17A4D', color: '#1B1C21',
+                          flex: 1, height: '38px', backgroundColor: 'var(--luma-accent)', color: 'var(--luma-canvas)',
                           border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
                           cursor: !newCatName.trim() || creatingCat ? 'not-allowed' : 'pointer',
                           opacity: !newCatName.trim() || creatingCat ? 0.6 : 1,
@@ -295,8 +295,8 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                           setNewCatEmoji('💰')
                         }}
                         style={{
-                          flex: 1, height: '38px', backgroundColor: 'transparent', color: '#8A8790',
-                          border: '1px solid rgba(255,255,255,0.16)', borderRadius: '8px', fontSize: '13px', cursor: 'pointer'
+                          flex: 1, height: '38px', backgroundColor: 'transparent', color: 'var(--luma-muted)',
+                          border: '1px solid var(--luma-hairline-strong)', borderRadius: '8px', fontSize: '13px', cursor: 'pointer'
                         }}
                       >
                         Cancel
@@ -347,9 +347,9 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                     checked={isRecurring}
                     onChange={(e) => setIsRecurring(e.target.checked)}
                     className="w-4 h-4"
-                    style={{ accentColor: '#E17A4D' }}
+                    style={{ accentColor: 'var(--luma-accent)' }}
                   />
-                  <span className="text-sm font-medium text-[#F2EFEA]">Recurring payment</span>
+                  <span className="text-sm font-medium text-luma-text">Recurring payment</span>
                 </label>
 
                 <div
@@ -384,7 +384,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                         value={recurringFrequency}
                         onValueChange={(val) => setRecurringFrequency((val || 'monthly') as 'weekly' | 'monthly' | 'custom')}
                       >
-                        <SelectTrigger id="recurringFrequency" className="bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] focus-visible:border-[rgba(225,122,77,0.40)]">
+                        <SelectTrigger id="recurringFrequency" className="bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -404,7 +404,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                           value={recurringCustomDays}
                           onChange={(e) => setRecurringCustomDays(e.target.value)}
                           placeholder="30"
-                          className="bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] focus-visible:border-[rgba(225,122,77,0.40)]"
+                          className="bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
                         />
                       </div>
                     )}
@@ -436,17 +436,17 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                   placeholder="Search expenses..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-[160px] bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] focus-visible:border-[rgba(225,122,77,0.40)]"
+                  className="w-full sm:w-[160px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
                 />
                 <div className="flex gap-2 min-w-0">
                   <Input
                     type="month"
                     value={filterMonth}
                     onChange={(e) => setFilterMonth(e.target.value)}
-                    className="flex-1 min-w-0 sm:flex-initial sm:w-[160px] bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] focus-visible:border-[rgba(225,122,77,0.40)]"
+                    className="flex-1 min-w-0 sm:flex-initial sm:w-[160px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
                   />
                   <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val || 'all')}>
-                    <SelectTrigger className="flex-1 min-w-0 sm:flex-initial sm:w-[160px] bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] focus-visible:border-[rgba(225,122,77,0.40)]">
+                    <SelectTrigger className="flex-1 min-w-0 sm:flex-initial sm:w-[160px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -469,19 +469,19 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                 filteredExpenses.map((expense) => (
                   <div
                     key={expense.id}
-                    className="px-3 py-3 border-b border-[rgba(255,255,255,0.09)] last:border-b-0"
+                    className="px-3 py-3 border-b border-luma-hairline last:border-b-0"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-lg bg-[#2B2C33] rounded-full p-1 border border-[rgba(255,255,255,0.09)] shrink-0" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span className="text-lg bg-luma-raised rounded-full p-1 border border-luma-hairline shrink-0" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           {expense.category?.icon}
                         </span>
-                        <span className="font-fraunces text-sm font-medium text-[#F2EFEA] truncate">
+                        <span className="font-fraunces text-sm font-medium text-luma-text truncate">
                           {expense.category?.name}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
-                        <span className="text-number-inline text-[#F2EFEA]">
+                        <span className="text-number-inline text-luma-text">
                           ₹{Number(expense.amount).toLocaleString('en-IN')}
                         </span>
                         <Button
@@ -513,19 +513,19 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
             {/* Tablet / desktop (>= 640px): original table */}
             <div className="solid-list-card hidden sm:block">
               <Table>
-                <TableHeader className="bg-[#2B2C33]">
-                  <TableRow className="border-b border-[rgba(255,255,255,0.09)]">
-                    <TableHead className="font-fraunces text-[#8A8790]">Date</TableHead>
-                    <TableHead className="font-fraunces text-[#8A8790]">Category</TableHead>
-                    <TableHead className="font-fraunces text-[#8A8790]">Note</TableHead>
-                    <TableHead className="font-fraunces text-[#8A8790] text-right">Amount</TableHead>
+                <TableHeader className="bg-luma-raised">
+                  <TableRow className="border-b border-luma-hairline">
+                    <TableHead className="font-fraunces text-luma-muted">Date</TableHead>
+                    <TableHead className="font-fraunces text-luma-muted">Category</TableHead>
+                    <TableHead className="font-fraunces text-luma-muted">Note</TableHead>
+                    <TableHead className="font-fraunces text-luma-muted text-right">Amount</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredExpenses.length > 0 ? (
                     filteredExpenses.map((expense) => (
-                      <TableRow key={expense.id} className="border-b border-[rgba(255,255,255,0.06)] hover:bg-[#2B2C33]/50 transition-colors">
+                      <TableRow key={expense.id} className="border-b border-luma-specular hover:bg-luma-raised/50 transition-colors">
                         <TableCell className="text-body-muted-luma text-xs whitespace-nowrap font-inter font-tnum">
                           {format(new Date(expense.date), 'dd MMM yyyy')}
                         </TableCell>
@@ -535,16 +535,16 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
                               className="inline-block w-2 h-2 rounded-full shrink-0"
                               style={{ backgroundColor: getCategoryColor(expense.category?.name || expense.category?.id || 'default') }}
                             />
-                            <span className="text-lg bg-[#2B2C33] rounded-full p-1 border border-[rgba(255,255,255,0.09)]" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span className="text-lg bg-luma-raised rounded-full p-1 border border-luma-hairline" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                               {expense.category?.icon}
                             </span>
-                            <span className="font-fraunces text-sm font-medium text-[#F2EFEA]">{expense.category?.name}</span>
+                            <span className="font-fraunces text-sm font-medium text-luma-text">{expense.category?.name}</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-body-muted-luma text-xs">
                           <div className="max-w-[150px] truncate">{expense.note || '-'}</div>
                         </TableCell>
-                        <TableCell className="text-right font-inter font-bold font-tnum text-sm text-[#F2EFEA]">
+                        <TableCell className="text-right font-inter font-bold font-tnum text-sm text-luma-text">
                           ₹{Number(expense.amount).toLocaleString('en-IN')}
                         </TableCell>
                         <TableCell>
@@ -572,7 +572,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
 
             <div className="mt-4 flex justify-between items-center bg-muted/30 p-4 rounded-lg border">
               <span className="text-body-muted-luma">Total for selected period:</span>
-              <span className="font-inter font-bold font-tnum text-number-card text-[#F2EFEA]">
+              <span className="font-inter font-bold font-tnum text-number-card text-luma-text">
                 ₹{totalFiltered.toLocaleString('en-IN')}
               </span>
             </div>

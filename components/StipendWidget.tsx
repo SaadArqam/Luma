@@ -48,8 +48,8 @@ export function StipendWidget() {
     return (
       <div className="glass-card p-6 rounded-[20px]">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-[#2B2C33] rounded w-1/3"></div>
-          <div className="h-8 bg-[#2B2C33] rounded w-1/2"></div>
+          <div className="h-4 bg-luma-raised rounded w-1/3"></div>
+          <div className="h-8 bg-luma-raised rounded w-1/2"></div>
         </div>
       </div>
     )
@@ -58,11 +58,11 @@ export function StipendWidget() {
   // If stipend is not configured
   if (!stats || stats.stipendAmount === null) {
     return (
-      <div className="glass-card p-5 rounded-[20px] border border-[#E17A4D]/30 bg-[rgba(225,122,77,0.08)]">
+      <div className="glass-card p-5 rounded-[20px] border border-luma-accent/30 bg-luma-accent/10">
         <div className="flex items-center gap-3">
-          <Settings className="h-5 w-5 text-[#E17A4D] shrink-0" />
+          <Settings className="h-5 w-5 text-luma-accent shrink-0" />
           <div className="flex-1">
-            <p className="text-body-luma font-medium text-[#F2EFEA]">Set up your stipend in Settings to unlock spending insights</p>
+            <p className="text-body-luma font-medium text-luma-text">Set up your stipend in Settings to unlock spending insights</p>
           </div>
           <Link href="/settings">
             <button className="btn-primary-luma py-2.5 px-4 text-xs font-semibold h-auto min-h-0 shrink-0">
@@ -85,22 +85,22 @@ export function StipendWidget() {
       {/* Row 1: Days Until Stipend & Cycle Progress */}
       <div className="grid grid-cols-2 gap-3">
         <div className="glass-card p-4 rounded-[20px]">
-          <h3 className="font-fraunces text-header-card text-[#8A8790] flex items-center gap-2 mb-1">
-            <Calendar className="h-4 w-4 text-[#8A8790]" />
+          <h3 className="font-fraunces text-header-card text-luma-muted flex items-center gap-2 mb-1">
+            <Calendar className="h-4 w-4 text-luma-muted" />
             Days Until Stipend
           </h3>
-          <div className="font-inter font-bold font-tnum text-3xl text-[#F2EFEA]">{stats.daysUntilNextStipend}</div>
+          <div className="font-inter font-bold font-tnum text-3xl text-luma-text">{stats.daysUntilNextStipend}</div>
           <p className="text-body-muted-luma text-xs mt-1">
             {stats.creditDay}{getOrdinalSuffix(stats.creditDay)} of the month
           </p>
         </div>
 
         <div className="glass-card p-4 rounded-[20px]">
-          <h3 className="font-fraunces text-header-card text-[#8A8790] mb-1">Cycle Progress</h3>
-          <div className="font-inter font-bold font-tnum text-xl text-[#F2EFEA] mb-2">{progressPercent}%</div>
-          <div className="w-full bg-[#2B2C33] rounded-full h-2">
+          <h3 className="font-fraunces text-header-card text-luma-muted mb-1">Cycle Progress</h3>
+          <div className="font-inter font-bold font-tnum text-xl text-luma-text mb-2">{progressPercent}%</div>
+          <div className="w-full bg-luma-raised rounded-full h-2">
             <div
-              className="bg-[#E17A4D] h-2 rounded-full transition-all duration-500"
+              className="bg-luma-accent h-2 rounded-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -113,16 +113,16 @@ export function StipendWidget() {
       {/* Row 2: Safe to Spend/day & You're Spending/day */}
       <div className="grid grid-cols-2 gap-3">
         <div className="glass-card p-4 rounded-[20px]">
-          <h3 className="font-fraunces text-header-card text-[#8A8790] mb-1">Safe to Spend/day</h3>
-          <div className="font-inter font-bold font-tnum text-xl text-[#7FB69E]">
+          <h3 className="font-fraunces text-header-card text-luma-muted mb-1">Safe to Spend/day</h3>
+          <div className="font-inter font-bold font-tnum text-xl text-luma-success">
             {formatCurrency(stats.safeSpendPerDay)}
           </div>
           <p className="text-body-muted-luma text-xs mt-1">Based on remaining balance</p>
         </div>
 
         <div className="glass-card p-4 rounded-[20px]">
-          <h3 className="font-fraunces text-header-card text-[#8A8790] mb-1">You&#39;re Spending/day</h3>
-          <div className={`font-inter font-bold font-tnum text-xl ${isOverSafeLimit ? 'text-[#C4595A]' : 'text-[#7FB69E]'}`}>
+          <h3 className="font-fraunces text-header-card text-luma-muted mb-1">You&#39;re Spending/day</h3>
+          <div className={`font-inter font-bold font-tnum text-xl ${isOverSafeLimit ? 'text-luma-danger' : 'text-luma-success'}`}>
             {formatCurrency(stats.actualSpendPerDay)}
           </div>
           <p className="text-body-muted-luma text-xs mt-1">
@@ -134,30 +134,30 @@ export function StipendWidget() {
       {/* Row 3: Alert Card */}
       <div className={`glass-card p-4 rounded-[20px] ${
         stats.willRunOut 
-          ? 'border-[#C4595A]/30 bg-[rgba(196,89,90,0.12)]' 
+          ? 'border-luma-danger/30 bg-luma-danger-glow' 
           : stats.isOverspending 
-            ? 'border-[#E0A458]/30 bg-[rgba(224,164,88,0.12)]' 
-            : 'border-[#7FB69E]/30 bg-[rgba(127,182,158,0.12)]'
+            ? 'border-luma-warning/30 bg-luma-warning-glow' 
+            : 'border-luma-success/30 bg-luma-success-glow'
       }`}>
         <div className="flex items-start gap-3">
           {stats.willRunOut ? (
-            <AlertTriangle className="h-5 w-5 text-[#C4595A] shrink-0 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-luma-danger shrink-0 mt-0.5" />
           ) : stats.isOverspending ? (
-            <TrendingUp className="h-5 w-5 text-[#E0A458] shrink-0 mt-0.5" />
+            <TrendingUp className="h-5 w-5 text-luma-warning shrink-0 mt-0.5" />
           ) : (
-            <CheckCircle2 className="h-5 w-5 text-[#7FB69E] shrink-0 mt-0.5" />
+            <CheckCircle2 className="h-5 w-5 text-luma-success shrink-0 mt-0.5" />
           )}
           <div className="flex-1">
             {stats.willRunOut ? (
-              <p className="text-sm font-medium text-[#C4595A] font-inter font-tnum">
+              <p className="text-sm font-medium text-luma-danger font-inter font-tnum">
                 ⚠️ At this rate you&#39;ll run out {formatCurrency(Math.abs(stats.projectedBalanceOnPayday || 0))} before your next stipend
               </p>
             ) : stats.isOverspending ? (
-              <p className="text-sm font-medium text-[#E0A458] font-inter font-tnum">
+              <p className="text-sm font-medium text-luma-warning font-inter font-tnum">
                 📊 Spending {formatCurrency((stats.actualSpendPerDay || 0) - (stats.safeSpendPerDay || 0))}/day over your safe limit
               </p>
             ) : (
-              <p className="text-sm font-medium text-[#7FB69E] font-inter font-tnum">
+              <p className="text-sm font-medium text-luma-success font-inter font-tnum">
                 ✅ You&#39;re on track! Projected {formatCurrency(stats.projectedBalanceOnPayday)} left on stipend day
               </p>
             )}
@@ -167,8 +167,8 @@ export function StipendWidget() {
 
       {/* Row 4: Projected Balance */}
       <div className="glass-card p-4 rounded-[20px]">
-        <h3 className="font-fraunces text-header-card text-[#8A8790] mb-1">Projected Balance on Stipend Day</h3>
-        <div className={`font-inter font-bold font-tnum text-2xl ${(stats.projectedBalanceOnPayday || 0) < 0 ? 'text-[#C4595A]' : 'text-[#7FB69E]'}`}>
+        <h3 className="font-fraunces text-header-card text-luma-muted mb-1">Projected Balance on Stipend Day</h3>
+        <div className={`font-inter font-bold font-tnum text-2xl ${(stats.projectedBalanceOnPayday || 0) < 0 ? 'text-luma-danger' : 'text-luma-success'}`}>
           {formatCurrency(stats.projectedBalanceOnPayday)}
         </div>
       </div>

@@ -52,12 +52,14 @@ export function DashboardChart({ data }: { data: ChartData[] }) {
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.color}
-                    stroke={isHovered ? '#E17A4D' : 'none'}
                     strokeWidth={isHovered ? 2 : 0}
                     className="transition-all duration-200"
                     style={{
+                      /* stroke via style, not the SVG attribute — var() only
+                         resolves in CSS properties. */
+                      stroke: isHovered ? 'var(--luma-accent)' : 'none',
                       opacity: activeIndex !== null && !isHovered ? 0.65 : 1,
-                      filter: isHovered ? 'drop-shadow(0 0 10px rgba(225, 122, 77, 0.45))' : 'none',
+                      filter: isHovered ? 'drop-shadow(0 0 10px var(--luma-accent-shadow))' : 'none',
                       cursor: 'pointer',
                     }}
                   />
@@ -68,20 +70,20 @@ export function DashboardChart({ data }: { data: ChartData[] }) {
               formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Spent']}
               contentStyle={{
                 borderRadius: '14px',
-                backgroundColor: '#232429',
-                border: '1px solid rgba(255, 255, 255, 0.09)',
-                color: '#F2EFEA',
+                backgroundColor: 'var(--luma-surface)',
+                border: '1px solid var(--luma-hairline)',
+                color: 'var(--luma-text)',
                 fontFamily: 'var(--font-inter), sans-serif',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
               }}
-              itemStyle={{ color: '#F2EFEA', fontWeight: 600 }}
+              itemStyle={{ color: 'var(--luma-text)', fontWeight: 600 }}
             />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
       {/* Custom categorical-colored Legend grid */}
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 border-t border-[rgba(255,255,255,0.06)]">
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-2 border-t border-luma-specular">
         {chartData.map((item, index) => {
           const isHovered = activeIndex === index
           return (
@@ -96,10 +98,10 @@ export function DashboardChart({ data }: { data: ChartData[] }) {
                 className="w-2.5 h-2.5 rounded-full shrink-0 transition-all duration-200"
                 style={{
                   backgroundColor: item.color,
-                  boxShadow: isHovered ? '0 0 8px #E17A4D' : 'none',
+                  boxShadow: isHovered ? '0 0 8px var(--luma-accent)' : 'none',
                 }}
               />
-              <span className="font-fraunces text-[#F2EFEA] truncate max-w-[110px]">
+              <span className="font-fraunces text-luma-text truncate max-w-[110px]">
                 {item.icon} {item.name}
               </span>
             </div>

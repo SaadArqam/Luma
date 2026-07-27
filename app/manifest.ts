@@ -10,8 +10,12 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
-    background_color: '#0C0C0C',
-    theme_color: '#0C0C0C',
+    // The PWA manifest is serialized to JSON, so these can't be var(--luma-canvas)
+    // like everything else — they must stay literal. Keep them equal to
+    // --luma-canvas in app/globals.css, or the splash/status bar will not match
+    // the app background.
+    background_color: '#1B1C21',
+    theme_color: '#1B1C21',
     categories: ['finance', 'productivity'],
     lang: 'en',
     dir: 'ltr',

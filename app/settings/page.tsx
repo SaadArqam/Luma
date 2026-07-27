@@ -64,7 +64,7 @@ export default function SettingsPage() {
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
       <div className="pt-2 pb-2">
-        <h1 className="font-fraunces text-header-display text-[#F2EFEA] flex items-center gap-3">
+        <h1 className="font-fraunces text-header-display text-luma-text flex items-center gap-3">
           <SettingsIcon className="h-8 w-8" />
           Settings
         </h1>
@@ -89,7 +89,7 @@ export default function SettingsPage() {
                   required
                   min="0"
                   step="0.01"
-                  className="text-lg bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] focus-visible:border-[rgba(225,122,77,0.40)]"
+                  className="text-lg bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
                 />
               </div>
 
@@ -104,7 +104,7 @@ export default function SettingsPage() {
                   required
                   min="1"
                   max="31"
-                  className="text-lg bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA] focus-visible:border-[rgba(225,122,77,0.40)]"
+                  className="text-lg bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
                 />
                 <p className="text-sm text-body-muted-luma">
                   The day of the month when your stipend arrives
@@ -114,8 +114,8 @@ export default function SettingsPage() {
               {message && (
                 <div className={`p-3 rounded-lg ${
                   message.type === 'success'
-                    ? 'bg-[rgba(127,182,158,0.16)] text-[#7FB69E] border border-[rgba(127,182,158,0.30)]'
-                    : 'bg-[rgba(196,89,90,0.16)] text-[#C4595A] border border-[rgba(196,89,90,0.30)]'
+                    ? 'bg-luma-success-glow text-luma-success border border-luma-success/30'
+                    : 'bg-luma-danger-glow text-luma-danger border border-luma-danger/30'
                 }`}>
                   {message.text}
                 </div>
@@ -129,15 +129,15 @@ export default function SettingsPage() {
 
             {currentConfig && (
               <div className="mt-6 pt-6 border-t">
-                <h3 className="font-semibold mb-3 text-[#F2EFEA]">Current Configuration</h3>
+                <h3 className="font-semibold mb-3 text-luma-text">Current Configuration</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-body-muted-luma">Monthly Stipend:</span>
-                    <span className="font-inter font-tnum font-medium text-[#F2EFEA]">₹{Number(currentConfig.amount).toLocaleString('en-IN')}</span>
+                    <span className="font-inter font-tnum font-medium text-luma-text">₹{Number(currentConfig.amount).toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-body-muted-luma">Credit Day:</span>
-                    <span className="font-inter font-tnum font-medium text-[#F2EFEA]">{currentConfig.credit_day}{getOrdinalSuffix(currentConfig.credit_day)} of the month</span>
+                    <span className="font-inter font-tnum font-medium text-luma-text">{currentConfig.credit_day}{getOrdinalSuffix(currentConfig.credit_day)} of the month</span>
                   </div>
                 </div>
               </div>
@@ -266,15 +266,15 @@ function NotificationSettingsSection() {
       <Card className="glass-card shadow-md">
         <CardHeader>
           <CardTitle className="text-header-section flex items-center gap-2">
-            <Bell className="h-5 w-5 text-[#E17A4D]" />
+            <Bell className="h-5 w-5 text-luma-accent" />
             Push Notifications
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Daily Reminder Toggle */}
-          <div className="flex items-center justify-between pb-4 border-b border-[rgba(255,255,255,0.09)]">
+          <div className="flex items-center justify-between pb-4 border-b border-luma-hairline">
             <div>
-              <Label className="text-[#F2EFEA] font-medium text-base">Daily Expense Reminder</Label>
+              <Label className="text-luma-text font-medium text-base">Daily Expense Reminder</Label>
               <p className="text-xs text-body-muted-luma mt-0.5">
                 Receive a push notification if you haven&#39;t logged an expense by your target time
               </p>
@@ -283,15 +283,15 @@ function NotificationSettingsSection() {
               type="checkbox"
               checked={dailyReminderEnabled}
               onChange={(e) => handleToggleDailyReminder(e.target.checked)}
-              className="w-5 h-5 accent-[#E17A4D] cursor-pointer"
+              className="w-5 h-5 accent-luma-accent cursor-pointer"
             />
           </div>
 
           {/* Reminder Time Picker */}
           {dailyReminderEnabled && (
-            <div className="space-y-2 pb-4 border-b border-[rgba(255,255,255,0.09)]">
-              <Label htmlFor="reminderTime" className="text-[#F2EFEA] text-sm flex items-center gap-1.5">
-                <Clock className="h-4 w-4 text-[#8A8790]" />
+            <div className="space-y-2 pb-4 border-b border-luma-hairline">
+              <Label htmlFor="reminderTime" className="text-luma-text text-sm flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-luma-muted" />
                 Remind me at
               </Label>
               <Input
@@ -299,15 +299,15 @@ function NotificationSettingsSection() {
                 type="time"
                 value={dailyReminderTime}
                 onChange={(e) => handleTimeChange(e.target.value)}
-                className="max-w-[160px] bg-[#2B2C33] border-[rgba(255,255,255,0.09)] text-[#F2EFEA]"
+                className="max-w-[160px] bg-luma-raised border-luma-hairline text-luma-text"
               />
             </div>
           )}
 
           {/* EOD Summary Toggle */}
-          <div className="flex items-center justify-between pb-4 border-b border-[rgba(255,255,255,0.09)]">
+          <div className="flex items-center justify-between pb-4 border-b border-luma-hairline">
             <div>
-              <Label className="text-[#F2EFEA] font-medium text-base">End-of-day Summary</Label>
+              <Label className="text-luma-text font-medium text-base">End-of-day Summary</Label>
               <p className="text-xs text-body-muted-luma mt-0.5">
                 Receive a daily evening summary of today&#39;s total spending and budget status
               </p>
@@ -316,7 +316,7 @@ function NotificationSettingsSection() {
               type="checkbox"
               checked={eodSummaryEnabled}
               onChange={(e) => handleToggleEodSummary(e.target.checked)}
-              className="w-5 h-5 accent-[#E17A4D] cursor-pointer"
+              className="w-5 h-5 accent-luma-accent cursor-pointer"
             />
           </div>
 

@@ -112,8 +112,8 @@ export default function ReportsPage() {
               width: '11px',
               height: '11px',
               borderRadius: '2px',
-              backgroundColor: isFuture ? 'transparent' : color || '#2B2C33',
-              border: (!isFuture && !color) ? '1px solid rgba(255,255,255,0.09)' : 'none',
+              backgroundColor: isFuture ? 'transparent' : color || 'var(--luma-raised)',
+              border: (!isFuture && !color) ? '1px solid var(--luma-hairline)' : 'none',
               flexShrink: 0,
               cursor: isFuture ? 'default' : 'pointer'
             }}
@@ -138,11 +138,11 @@ export default function ReportsPage() {
             { label: 'Daily average', value: `₹${stats.dailyAverage.toLocaleString('en-IN')}`, sub: 'when spending' },
           ].map(s => (
             <div key={s.label} className="glass-card" style={{ padding: '12px 14px', borderRadius: '12px' }}>
-              <div className="text-caption-luma" style={{ color: '#8A8790', textTransform: 'uppercase', marginBottom: '4px' }}>
+              <div className="text-caption-luma" style={{ color: 'var(--luma-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {s.label}
               </div>
-              <div className="text-number-card" style={{ color: '#F2EFEA' }}>
-                {s.value} <span style={{ fontSize: '11px', color: '#8A8790', fontWeight: 400 }}>{s.sub}</span>
+              <div className="text-number-card" style={{ color: 'var(--luma-text)' }}>
+                {s.value} <span style={{ fontSize: '11px', color: 'var(--luma-muted)', fontWeight: 400 }}>{s.sub}</span>
               </div>
             </div>
           ))}
@@ -155,7 +155,7 @@ export default function ReportsPage() {
               position: 'absolute',
               left: `${mp.col * 14}px`,
               fontSize: '10px',
-              color: '#8A8790'
+              color: 'var(--luma-muted)'
             }}>{mp.label}</span>
           ))}
         </div>
@@ -176,12 +176,12 @@ export default function ReportsPage() {
               position: 'absolute',
               left: `${tooltip.x}px`,
               top: `${tooltip.y}px`,
-              backgroundColor: '#2B2C33',
-              border: '1px solid rgba(255,255,255,0.09)',
+              backgroundColor: 'var(--luma-raised)',
+              border: '1px solid var(--luma-hairline)',
               borderRadius: '8px',
               padding: '6px 10px',
               fontSize: '12px',
-              color: '#F2EFEA',
+              color: 'var(--luma-text)',
               pointerEvents: 'none',
               zIndex: 50,
               whiteSpace: 'nowrap',
@@ -194,7 +194,7 @@ export default function ReportsPage() {
             {/* Day labels */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginRight: '4px', paddingTop: '0px' }}>
               {['','M','','W','','F',''].map((d, i) => (
-                <div key={i} style={{ fontSize: '9px', color: '#5C5A60', height: '11px', lineHeight: '11px', width: '14px' }}>{d}</div>
+                <div key={i} style={{ fontSize: '9px', color: 'var(--luma-faint)', height: '11px', lineHeight: '11px', width: '14px' }}>{d}</div>
               ))}
             </div>
             {/* Columns */}
@@ -206,15 +206,15 @@ export default function ReportsPage() {
 
         {/* Legend */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '10px', justifyContent: 'flex-end' }}>
-          <span style={{ fontSize: '10px', color: '#5C5A60' }}>Less</span>
+          <span style={{ fontSize: '10px', color: 'var(--luma-faint)' }}>Less</span>
           {[null, '#1a3a0e', '#3d7a22', '#5aa032', '#7dc845'].map((c, i) => (
             <div key={i} style={{
               width: '11px', height: '11px', borderRadius: '2px',
-              backgroundColor: c || '#2B2C33',
-              border: !c ? '1px solid rgba(255,255,255,0.09)' : 'none'
+              backgroundColor: c || 'var(--luma-raised)',
+              border: !c ? '1px solid var(--luma-hairline)' : 'none'
             }} />
           ))}
-          <span style={{ fontSize: '10px', color: '#5C5A60' }}>More</span>
+          <span style={{ fontSize: '10px', color: 'var(--luma-faint)' }}>More</span>
         </div>
       </div>
     )
@@ -232,16 +232,16 @@ export default function ReportsPage() {
             const height = Math.max((m.amount / max) * 100, 4)
             return (
               <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' }}>
-                <div className="font-inter font-tnum" style={{ fontSize: '9px', color: '#8A8790' }}>
+                <div className="font-inter font-tnum" style={{ fontSize: '9px', color: 'var(--luma-muted)' }}>
                   ₹{m.amount >= 1000 ? `${Math.round(m.amount/1000)}k` : m.amount}
                 </div>
                 <div style={{
                   width: '100%',
                   height: `${height}%`,
-                  backgroundColor: isCurrentMonth ? '#E17A4D' : '#2B2C33',
+                  backgroundColor: isCurrentMonth ? 'var(--luma-accent)' : 'var(--luma-raised)',
                   borderRadius: '4px 4px 0 0',
                   transition: 'height 500ms ease',
-                  border: isCurrentMonth ? 'none' : '1px solid rgba(255,255,255,0.09)'
+                  border: isCurrentMonth ? 'none' : '1px solid var(--luma-hairline)'
                 }} />
               </div>
             )
@@ -252,7 +252,7 @@ export default function ReportsPage() {
             <div key={m.month} style={{
               flex: 1,
               fontSize: '9px',
-              color: i === monthlyData.monthly.length - 1 ? '#E17A4D' : '#5C5A60',
+              color: i === monthlyData.monthly.length - 1 ? 'var(--luma-accent)' : 'var(--luma-faint)',
               textAlign: 'center',
               fontWeight: i === monthlyData.monthly.length - 1 ? 600 : 400
             }}>{m.label}</div>
@@ -275,23 +275,23 @@ export default function ReportsPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{
-                    width: '28px', height: '28px', backgroundColor: '#2B2C33',
-                    border: '1px solid rgba(255,255,255,0.09)', borderRadius: '8px',
+                    width: '28px', height: '28px', backgroundColor: 'var(--luma-raised)',
+                    border: '1px solid var(--luma-hairline)', borderRadius: '8px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
                   }}>{c.icon}</div>
-                  <span className="font-fraunces" style={{ fontSize: '13px', fontWeight: 500, color: '#F2EFEA' }}>{c.name}</span>
+                  <span className="font-fraunces" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--luma-text)' }}>{c.name}</span>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div className="font-inter font-tnum" style={{ fontSize: '13px', fontWeight: 500, color: '#F2EFEA' }}>
+                  <div className="font-inter font-tnum" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--luma-text)' }}>
                     ₹{c.amount.toLocaleString('en-IN')}
                   </div>
-                  <div style={{ fontSize: '10px', color: '#8A8790' }}>{pct}%</div>
+                  <div style={{ fontSize: '10px', color: 'var(--luma-muted)' }}>{pct}%</div>
                 </div>
               </div>
-              <div style={{ backgroundColor: '#2B2C33', borderRadius: '2px', height: '3px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: 'var(--luma-raised)', borderRadius: '2px', height: '3px', overflow: 'hidden' }}>
                 <div style={{
                   width: `${pct}%`, height: '3px',
-                  backgroundColor: '#E17A4D',
+                  backgroundColor: 'var(--luma-accent)',
                   borderRadius: '2px',
                   transition: 'width 500ms ease'
                 }} />
@@ -307,32 +307,32 @@ export default function ReportsPage() {
   // inside backdrop-filter is the perf risk DESIGN-luma.md calls out.
   const SectionCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <div style={{
-      backgroundColor: '#232429',
-      border: '1px solid rgba(255,255,255,0.09)',
+      backgroundColor: 'var(--luma-surface)',
+      border: '1px solid var(--luma-hairline)',
       borderRadius: '16px',
       padding: '16px',
       marginBottom: '12px',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-        <div style={{ width: '3px', height: '14px', backgroundColor: '#E17A4D', borderRadius: '2px' }} />
-        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: '#8A8790' }}>{title}</span>
+        <div style={{ width: '3px', height: '14px', backgroundColor: 'var(--luma-accent)', borderRadius: '2px' }} />
+        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--luma-muted)' }}>{title}</span>
       </div>
       {children}
     </div>
   )
 
   return (
-    <div style={{ backgroundColor: '#1B1C21', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: 'var(--luma-canvas)', minHeight: '100vh' }}>
       <div style={{ maxWidth: '640px', margin: '0 auto', padding: '20px 16px' }}>
         {/* Header */}
         <div style={{ marginBottom: '20px' }}>
-          <h1 className="font-fraunces text-header-display text-[#F2EFEA]" style={{ margin: 0 }}>Reports</h1>
-          <div style={{ width: '36px', height: '3px', backgroundColor: '#E17A4D', borderRadius: '2px', marginTop: '6px' }} />
+          <h1 className="font-fraunces text-header-display text-luma-text" style={{ margin: 0 }}>Reports</h1>
+          <div style={{ width: '36px', height: '3px', backgroundColor: 'var(--luma-accent)', borderRadius: '2px', marginTop: '6px' }} />
           <p className="text-body-muted-luma" style={{ marginTop: '6px' }}>Your spending patterns at a glance</p>
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: '#8A8790', fontSize: '14px' }}>
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--luma-muted)', fontSize: '14px' }}>
             Loading your data...
           </div>
         ) : (

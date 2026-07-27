@@ -44,7 +44,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1B1C21] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-luma-canvas flex items-center justify-center p-4 relative overflow-hidden">
       {/* Terracotta ambient glow behind logo */}
       <div
         aria-hidden="true"
@@ -55,7 +55,7 @@ export default function SignupPage() {
           transform: 'translateX(-50%)',
           width: '100%',
           height: '320px',
-          background: 'radial-gradient(ellipse at top, rgba(225, 122, 77, 0.12) 0%, transparent 60%)',
+          background: 'radial-gradient(ellipse at top, color-mix(in srgb, var(--luma-accent) 18%, transparent) 0%, transparent 60%)',
           pointerEvents: 'none',
         }}
       />
@@ -63,35 +63,35 @@ export default function SignupPage() {
       <div className="w-full max-w-sm relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="font-fraunces text-3xl font-bold tracking-tight text-[#F2EFEA]">
-            Paisa<span className="text-[#E17A4D]">Track</span>
+          <h1 className="font-fraunces text-3xl font-bold tracking-tight text-luma-text">
+            Paisa<span className="text-luma-accent">Track</span>
           </h1>
           <p className="text-body-muted-luma text-sm mt-1.5">Your personal finance manager</p>
         </div>
 
         {/* Card */}
-        <div className="glass-card p-7 rounded-[20px]" style={{ borderTop: '2px solid #E17A4D' }}>
+        <div className="glass-card p-7 rounded-[20px]" style={{ borderTop: '2px solid var(--luma-accent)' }}>
           {success ? (
             <div className="text-center py-4">
               <div className="text-4xl mb-4">✉️</div>
-              <h2 className="font-fraunces text-header-section text-[#F2EFEA] mb-2">Check your email</h2>
+              <h2 className="font-fraunces text-header-section text-luma-text mb-2">Check your email</h2>
               <p className="text-body-muted-luma text-sm">
-                We sent a confirmation link to <span className="text-[#E17A4D] font-medium">{email}</span>.
+                We sent a confirmation link to <span className="text-luma-accent font-medium">{email}</span>.
                 Click the link to activate your account.
               </p>
               <Link
                 href="/login"
-                className="inline-block mt-6 text-sm font-medium text-[#E17A4D] hover:underline"
+                className="inline-block mt-6 text-sm font-medium text-luma-accent hover:underline"
               >
                 Back to Sign In
               </Link>
             </div>
           ) : (
             <>
-              <h2 className="font-fraunces text-header-section text-[#F2EFEA] mb-6">Create account</h2>
+              <h2 className="font-fraunces text-header-section text-luma-text mb-6">Create account</h2>
 
               {error && (
-                <div className="bg-[rgba(196,89,90,0.12)] border border-[#C4595A]/30 rounded-[12px] px-4 py-2.5 text-[#C4595A] text-sm mb-4 font-inter">
+                <div className="bg-luma-danger-glow border border-luma-danger/30 rounded-[12px] px-4 py-2.5 text-luma-danger text-sm mb-4 font-inter">
                   {error}
                 </div>
               )}
@@ -99,7 +99,7 @@ export default function SignupPage() {
               <div className="space-y-4">
                 {/* Name */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold tracking-wider uppercase text-[#8A8790]">
+                  <label className="text-[11px] font-semibold tracking-wider uppercase text-luma-muted">
                     Full Name
                   </label>
                   <input
@@ -114,7 +114,7 @@ export default function SignupPage() {
 
                 {/* Email */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold tracking-wider uppercase text-[#8A8790]">
+                  <label className="text-[11px] font-semibold tracking-wider uppercase text-luma-muted">
                     Email
                   </label>
                   <input
@@ -129,7 +129,7 @@ export default function SignupPage() {
 
                 {/* Password */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold tracking-wider uppercase text-[#8A8790]">
+                  <label className="text-[11px] font-semibold tracking-wider uppercase text-luma-muted">
                     Password
                   </label>
                   <input
@@ -154,9 +154,9 @@ export default function SignupPage() {
 
                 {/* Divider */}
                 <div className="flex items-center gap-3 py-1">
-                  <div className="flex-1 h-px bg-[rgba(255,255,255,0.09)]" />
-                  <span className="text-xs text-[#8A8790]">or</span>
-                  <div className="flex-1 h-px bg-[rgba(255,255,255,0.09)]" />
+                  <div className="flex-1 h-px bg-luma-hairline" />
+                  <span className="text-xs text-luma-muted">or</span>
+                  <div className="flex-1 h-px bg-luma-hairline" />
                 </div>
 
                 {/* Google button */}
@@ -175,9 +175,9 @@ export default function SignupPage() {
                 </button>
               </div>
 
-              <p className="text-center text-sm text-[#8A8790] mt-6">
+              <p className="text-center text-sm text-luma-muted mt-6">
                 Already have an account?{' '}
-                <Link href="/login" className="font-medium text-[#E17A4D] hover:underline">
+                <Link href="/login" className="font-medium text-luma-accent hover:underline">
                   Sign in
                 </Link>
               </p>

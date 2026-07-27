@@ -72,20 +72,20 @@ export function RecurringSection() {
   if (items.length === 0) return null
 
   const getDueColor = (status: RecurringWithStatus['status']) => {
-    if (status === 'overdue') return '#C4595A'
-    if (status === 'urgent') return '#E0A458'
-    return '#8A8790'
+    if (status === 'overdue') return 'var(--luma-danger)'
+    if (status === 'urgent') return 'var(--luma-warning)'
+    return 'var(--luma-muted)'
   }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="font-fraunces text-header-card text-[#8A8790]">
+        <h2 className="font-fraunces text-header-card text-luma-muted">
           Upcoming Payments
         </h2>
         <Link
           href="/recurring"
-          className="text-xs text-[#E17A4D] font-medium flex items-center gap-1 hover:underline transition-colors"
+          className="text-xs text-luma-accent font-medium flex items-center gap-1 hover:underline transition-colors"
         >
           Manage <ArrowRight className="h-3 w-3" />
         </Link>
@@ -95,14 +95,14 @@ export function RecurringSection() {
         {items.map((item, index) => (
           <div
             key={item.id}
-            className={`flex items-center gap-3 px-4 py-3 ${index < items.length - 1 ? 'border-b border-[rgba(255,255,255,0.09)]' : ''}`}
+            className={`flex items-center gap-3 px-4 py-3 ${index < items.length - 1 ? 'border-b border-luma-hairline' : ''}`}
           >
-            <div className="w-9 h-9 bg-[#2B2C33] border border-[rgba(255,255,255,0.09)] rounded-xl flex items-center justify-center text-lg shrink-0">
+            <div className="w-9 h-9 bg-luma-raised border border-luma-hairline rounded-xl flex items-center justify-center text-lg shrink-0">
               {item.categories?.icon || '💰'}
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="font-fraunces text-sm font-medium truncate text-[#F2EFEA]">{item.name}</p>
+              <p className="font-fraunces text-sm font-medium truncate text-luma-text">{item.name}</p>
               <p className="text-body-muted-luma text-xs uppercase">{item.frequency}</p>
             </div>
 
@@ -114,7 +114,7 @@ export function RecurringSection() {
             </p>
 
             <div className="text-right shrink-0 flex flex-col items-end gap-1.5">
-              <p className="font-inter font-tnum text-sm font-semibold text-[#F2EFEA]">
+              <p className="font-inter font-tnum text-sm font-semibold text-luma-text">
                 ₹{Number(item.amount).toLocaleString('en-IN')}
               </p>
               <button
@@ -122,8 +122,8 @@ export function RecurringSection() {
                 onClick={() => handlePay(item.id)}
                 className={`h-7 px-3 text-xs font-semibold rounded-full transition-all active:scale-95 ${
                   item.status === 'overdue' || item.status === 'urgent'
-                    ? 'bg-[#E17A4D] text-[#1B1C21] hover:bg-[#C9663B]'
-                    : 'bg-transparent border border-[rgba(255,255,255,0.16)] text-[#F2EFEA] hover:bg-white/5'
+                    ? 'bg-luma-accent text-luma-canvas hover:bg-luma-accent-pressed'
+                    : 'bg-transparent border border-luma-hairline-strong text-luma-text hover:bg-white/5'
                 }`}
               >
                 {payingId === item.id ? (

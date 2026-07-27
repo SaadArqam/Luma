@@ -37,14 +37,14 @@ export function Sidebar() {
     cn(
       'w-10 h-10 rounded-xl flex items-center justify-center mx-auto transition-all duration-150 cursor-pointer',
       isActive
-        ? 'text-[#E17A4D] bg-[rgba(225,122,77,0.18)]'
-        : 'text-[#8A8790] hover:text-[#F2EFEA] hover:bg-white/5'
+        ? 'text-luma-accent bg-luma-accent-glow'
+        : 'text-luma-muted hover:text-luma-text hover:bg-white/5'
     )
 
   return (
     <aside className="glass-sidebar hidden tablet:flex flex-col w-14 shrink-0">
       <div className="py-5 mb-2 flex items-center justify-center">
-        <span className="font-fraunces font-bold text-sm text-[#E17A4D]">P</span>
+        <span className="font-fraunces font-bold text-sm text-luma-accent">P</span>
       </div>
 
       <nav className="flex-1 flex flex-col gap-1 px-2">
@@ -77,7 +77,7 @@ export function Sidebar() {
           <Link
             href="/settings"
             title="Account"
-            className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto bg-[rgba(225,122,77,0.18)] text-[#E17A4D] text-xs font-bold hover:bg-[rgba(225,122,77,0.25)] transition-colors"
+            className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto bg-luma-accent-glow text-luma-accent text-xs font-bold hover:bg-luma-accent/40 transition-colors"
           >
             {userInitial}
           </Link>

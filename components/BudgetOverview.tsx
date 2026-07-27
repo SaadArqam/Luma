@@ -46,9 +46,9 @@ export function BudgetOverview() {
 
   const getStatusColor = (status: 'safe' | 'warning' | 'danger') => {
     switch (status) {
-      case 'safe': return '#7FB69E'
-      case 'warning': return '#E0A458'
-      case 'danger': return '#C4595A'
+      case 'safe': return 'var(--luma-success)'
+      case 'warning': return 'var(--luma-warning)'
+      case 'danger': return 'var(--luma-danger)'
     }
   }
 
@@ -58,8 +58,8 @@ export function BudgetOverview() {
     return (
       <div className="glass-card p-6 rounded-[20px]">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-[#2B2C33] rounded w-1/3"></div>
-          <div className="h-8 bg-[#2B2C33] rounded w-full"></div>
+          <div className="h-4 bg-luma-raised rounded w-1/3"></div>
+          <div className="h-8 bg-luma-raised rounded w-full"></div>
         </div>
       </div>
     )
@@ -68,7 +68,7 @@ export function BudgetOverview() {
   if (stats.length === 0) {
     return (
       <div className="glass-card p-6 rounded-[20px]">
-        <h2 className="font-fraunces text-header-section text-[#F2EFEA] mb-3">Today's Budget</h2>
+        <h2 className="font-fraunces text-header-section text-luma-text mb-3">Today's Budget</h2>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-body-muted-luma">No budgets set — go to Categories to set daily limits</p>
           <Link href="/categories">
@@ -85,8 +85,8 @@ export function BudgetOverview() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h2 className="font-fraunces text-header-section text-[#F2EFEA] flex items-center gap-2">
-            <div style={{ width: '3px', height: '18px', backgroundColor: '#E17A4D', borderRadius: '2px' }} />
+          <h2 className="font-fraunces text-header-section text-luma-text flex items-center gap-2">
+            <div style={{ width: '3px', height: '18px', backgroundColor: 'var(--luma-accent)', borderRadius: '2px' }} />
             <span>Today's Budget</span>
           </h2>
           <p className="text-body-muted-luma text-xs mt-0.5">As of {format(currentTime, 'h:mm a')}</p>
@@ -105,9 +105,9 @@ export function BudgetOverview() {
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <span className="text-2xl bg-[#2B2C33] p-2 rounded-full flex items-center justify-center w-10 h-10">{stat.categoryIcon}</span>
+                <span className="text-2xl bg-luma-raised p-2 rounded-full flex items-center justify-center w-10 h-10">{stat.categoryIcon}</span>
                 <div>
-                  <h3 className="font-fraunces text-header-card text-[#F2EFEA]">{stat.categoryName}</h3>
+                  <h3 className="font-fraunces text-header-card text-luma-text">{stat.categoryName}</h3>
                   <p className="text-body-muted-luma text-xs font-inter font-tnum">
                     {formatCurrency(stat.spentToday)} spent of {formatCurrency(stat.dailyBudget)} today
                   </p>
@@ -115,20 +115,20 @@ export function BudgetOverview() {
               </div>
               <div className="flex items-center gap-2">
                 {stat.status === 'danger' && (
-                  <Badge className="bg-[#C4595A] text-[#F2EFEA] border-none">
+                  <Badge className="bg-luma-danger text-luma-text border-none">
                     Over Budget!
                   </Badge>
                 )}
                 {stat.status === 'warning' && (
-                  <Badge className="bg-[#E0A458] text-[#1B1C21] border-none font-semibold">
+                  <Badge className="bg-luma-warning text-luma-canvas border-none font-semibold">
                     Almost there
                   </Badge>
                 )}
-                <span className="font-inter font-bold font-tnum text-sm text-[#F2EFEA]">{Math.round(stat.percentageUsed)}%</span>
+                <span className="font-inter font-bold font-tnum text-sm text-luma-text">{Math.round(stat.percentageUsed)}%</span>
               </div>
             </div>
 
-            <div className="w-full bg-[#2B2C33] rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-luma-raised rounded-full h-2 overflow-hidden">
               <div
                 className="h-2 rounded-full transition-all duration-500"
                 style={{
@@ -140,11 +140,11 @@ export function BudgetOverview() {
 
             <div className="mt-2 text-xs font-inter font-tnum">
               {stat.remainingBudget < 0 ? (
-                <p className="text-[#C4595A] font-medium">
+                <p className="text-luma-danger font-medium">
                   {formatCurrency(Math.abs(stat.remainingBudget))} over today's limit
                 </p>
               ) : (
-                <p className="text-[#7FB69E] font-medium">
+                <p className="text-luma-success font-medium">
                   {formatCurrency(stat.remainingBudget)} left today
                 </p>
               )}

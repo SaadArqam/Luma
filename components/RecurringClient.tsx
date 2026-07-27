@@ -87,8 +87,8 @@ function RecurringClient({ initialData }: { initialData: RecurringExpense[] }) {
   }
 
   const getDueColor = (status: RecurringWithStatus['status']) => {
-    if (status === 'overdue') return '#C4595A'
-    if (status === 'urgent') return '#E0A458'
+    if (status === 'overdue') return 'var(--luma-danger)'
+    if (status === 'urgent') return 'var(--luma-warning)'
     return undefined
   }
 
@@ -97,9 +97,9 @@ function RecurringClient({ initialData }: { initialData: RecurringExpense[] }) {
       <Card className="glass-card mx-4">
         <CardContent className="p-8 text-center">
           <div style={{ marginBottom: '16px' }}>
-            <RefreshCw size={48} strokeWidth={1.5} className="mx-auto text-[#8A8790]" />
+            <RefreshCw size={48} strokeWidth={1.5} className="mx-auto text-luma-muted" />
           </div>
-          <p className="text-lg font-semibold mb-2 text-[#F2EFEA]">No recurring payments</p>
+          <p className="text-lg font-semibold mb-2 text-luma-text">No recurring payments</p>
           <p className="text-sm text-body-muted-luma mb-5">Add recurring expenses like rent, tiffin, subscriptions</p>
           <Link href="/expenses">
             <button className="btn-primary-luma" style={{ height: '48px', minHeight: '48px', padding: '0 24px' }}>
@@ -117,28 +117,28 @@ function RecurringClient({ initialData }: { initialData: RecurringExpense[] }) {
         <Card key={item.id} className="glass-card overflow-hidden">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-[#2B2C33] border border-[rgba(255,255,255,0.09)] rounded-xl flex items-center justify-center text-lg shrink-0">
+              <div className="w-10 h-10 bg-luma-raised border border-luma-hairline rounded-xl flex items-center justify-center text-lg shrink-0">
                 {item.categories?.icon || '💰'}
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-[#F2EFEA]">{item.name}</p>
-                  <span className="text-[10px] uppercase tracking-wide text-[#8A8790] bg-[#2B2C33] border border-[rgba(255,255,255,0.09)] px-1.5 py-0.5 rounded-md">
+                  <p className="text-sm font-medium text-luma-text">{item.name}</p>
+                  <span className="text-[10px] uppercase tracking-wide text-luma-muted bg-luma-raised border border-luma-hairline px-1.5 py-0.5 rounded-md">
                     {item.frequency}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                  <p className="font-inter font-tnum text-sm font-medium text-[#F2EFEA]">
+                  <p className="font-inter font-tnum text-sm font-medium text-luma-text">
                     ₹{Number(item.amount).toLocaleString('en-IN')}
                   </p>
-                  <span className="text-[#8A8790] text-xs">·</span>
-                  <p className="font-inter font-tnum text-[10px] text-[#8A8790] uppercase tracking-wide">
+                  <span className="text-luma-muted text-xs">·</span>
+                  <p className="font-inter font-tnum text-[10px] text-luma-muted uppercase tracking-wide">
                     {format(new Date(item.next_due_date), 'dd MMM yyyy')}
                   </p>
                 </div>
                 <p
-                  className={`text-xs font-medium mt-1 ${!getDueColor(item.status) ? 'text-[#8A8790]' : ''}`}
+                  className={`text-xs font-medium mt-1 ${!getDueColor(item.status) ? 'text-luma-muted' : ''}`}
                   style={getDueColor(item.status) ? { color: getDueColor(item.status) } : undefined}
                 >
                   {formatDueLabel(item.days_until_due)}
@@ -152,7 +152,7 @@ function RecurringClient({ initialData }: { initialData: RecurringExpense[] }) {
                   variant={item.status === 'overdue' || item.status === 'urgent' ? 'default' : 'outline'}
                   style={
                     item.status === 'overdue' || item.status === 'urgent'
-                      ? { backgroundColor: '#E17A4D', color: '#1B1C21' }
+                      ? { backgroundColor: 'var(--luma-accent)', color: 'var(--luma-canvas)' }
                       : undefined
                   }
                   disabled={payingId === item.id}
@@ -166,7 +166,7 @@ function RecurringClient({ initialData }: { initialData: RecurringExpense[] }) {
                 </Button>
                 <button
                   type="button"
-                  className="text-[10px] uppercase tracking-widest text-[#8A8790] hover:text-[#C4595A] transition-colors duration-150 min-h-[44px] flex items-center justify-center gap-1"
+                  className="text-[10px] uppercase tracking-widest text-luma-muted hover:text-luma-danger transition-colors duration-150 min-h-[44px] flex items-center justify-center gap-1"
                   disabled={deletingId === item.id}
                   onClick={() => handleDelete(item.id)}
                 >

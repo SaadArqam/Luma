@@ -84,9 +84,9 @@ export function QuickAddSheet() {
 
           {/* Bottom Sheet Modal — z-210, surface-glass-thick, safe bottom padding */}
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-[210] rounded-t-[28px] border-t border-x border-[rgba(255,255,255,0.12)] overflow-hidden shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-[210] rounded-t-[28px] border-t border-x border-luma-hairline overflow-hidden shadow-2xl"
             style={{
-              background: 'rgba(38, 39, 46, 0.92)',
+              background: 'var(--luma-glass-thick)',
               backdropFilter: 'blur(24px)',
               WebkitBackdropFilter: 'blur(24px)',
             }}
@@ -96,10 +96,10 @@ export function QuickAddSheet() {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           >
             {/* Grab handle */}
-            <div className="w-10 h-1 bg-[rgba(255,255,255,0.2)] rounded-full mx-auto mt-3 mb-4" />
+            <div className="w-10 h-1 bg-luma-hairline-strong rounded-full mx-auto mt-3 mb-4" />
 
             <div className="px-5 mb-4">
-              <h2 className="font-fraunces text-header-section text-[#F2EFEA]">Add Expense</h2>
+              <h2 className="font-fraunces text-header-section text-luma-text">Add Expense</h2>
             </div>
 
             <div
@@ -111,18 +111,18 @@ export function QuickAddSheet() {
                 onChange={(e) => setCategoryId(e.target.value)}
                 className="input-luma cursor-pointer"
               >
-                <option value="" disabled className="bg-[#232429] text-[#8A8790]">
+                <option value="" disabled className="bg-luma-surface text-luma-muted">
                   Select category
                 </option>
                 {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id} className="bg-[#232429] text-[#F2EFEA]">
+                  <option key={cat.id} value={cat.id} className="bg-luma-surface text-luma-text">
                     {cat.icon} {cat.name}
                   </option>
                 ))}
               </select>
 
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-inter font-tnum text-lg text-[#8A8790]">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-inter font-tnum text-lg text-luma-muted">
                   ₹
                 </span>
                 <input
