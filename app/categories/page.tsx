@@ -10,13 +10,18 @@ export default async function CategoriesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  let { data: categories } = await supabase
+  const initial = await supabase
     .from('categories')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
 
-  if (!categories || categories.length === 0) {
+  const categoriesError = initial.error
+  let categories = initial.data
+
+  if (categoriesError) console.error('[categories] query failed:', categoriesError)
+
+  if (!categoriesError && (!categories || categories.length === 0)) {
     // Seeded per user. Without user_id these rows were created unowned, which
     // is how orphan rows got into the table in the first place.
     const defaultCategories = [
@@ -25,7 +30,11 @@ export default async function CategoriesPage() {
       { name: 'Shopping', icon: '🛍️', user_id: user.id }
     ]
 
-    await supabase.from('categories').insert(defaultCategories)
+    // This error used to be swallowed, which made a failed seed look like an
+    // empty account: while categories.name was globally unique, a second user's
+    // seed collided with the first user's rows and the page showed nothing.
+    const { error: seedError } = await supabase.from('categories').insert(defaultCategories)
+    if (seedError) console.error('[categories] seeding defaults failed:', seedError)
 
     const { data: newCategories } = await supabase
       .from('categories')
