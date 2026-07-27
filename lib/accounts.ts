@@ -28,8 +28,22 @@ export type AccountRef = {
 
 export const ACCOUNT_SELECT = 'id, name, bank_name, bank_domain, account_type, is_default, created_at'
 
-/** Embedded on transaction rows so history can show which account they belong to. */
-export const ACCOUNT_REF_SELECT = 'account:accounts(id, name, bank_name, bank_domain)'
+/**
+ * Embedded on transaction rows so history can show which account they belong to.
+ *
+ * The `!constraint` hint is NOT optional. Each transaction table has TWO foreign
+ * keys to accounts — the plain `account_id` one and the composite
+ * `(user_id, account_id)` ownership one — and with more than one relationship
+ * PostgREST refuses to guess: it rejects the WHOLE query with PGRST201 rather
+ * than embedding. Because the call sites read `data` without checking `error`,
+ * that surfaced as empty expense and balance history, which looks exactly like
+ * data loss. Name the constraint and the ambiguity disappears.
+ */
+const ACCOUNT_REF_COLUMNS = 'id, name, bank_name, bank_domain'
+export const ACCOUNT_REF_SELECT_EXPENSES =
+  `account:accounts!expenses_account_id_fkey(${ACCOUNT_REF_COLUMNS})`
+export const ACCOUNT_REF_SELECT_BALANCE =
+  `account:accounts!balance_entries_account_id_fkey(${ACCOUNT_REF_COLUMNS})`
 
 /**
  * Guarantee the user has at least one account.

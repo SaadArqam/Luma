@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { ExpenseManager } from '@/components/ExpenseManager'
-import { getAccountOptions, ACCOUNT_REF_SELECT } from '@/lib/accounts'
+import { getAccountOptions, ACCOUNT_REF_SELECT_EXPENSES } from '@/lib/accounts'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,13 +14,20 @@ export default async function ExpensesPage() {
   // the form below always has something to attach the expense to.
   const accounts = await getAccountOptions(supabase, user.id)
 
-  const [{ data: categories }, { data: expenses }] = await Promise.all([
+  const [{ data: categories, error: categoriesError }, { data: expenses, error: expensesError }] = await Promise.all([
     supabase.from('categories').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
     supabase.from('expenses')
-      .select(`*, category:categories(*), ${ACCOUNT_REF_SELECT}`)
+      .select(`*, category:categories(*), ${ACCOUNT_REF_SELECT_EXPENSES}`)
       .eq('user_id', user.id)
       .order('date', { ascending: false }),
   ])
+
+  // Never let a failed query render as an empty list — that is indistinguishable
+  // from "you have no data" and is exactly how a broken embed once looked like
+  // lost records.
+  if (categoriesError) console.error('[expenses] categories query failed:', categoriesError)
+  if (expensesError) console.error('[expenses] expenses query failed:', expensesError)
+  const loadError = expensesError?.message ?? categoriesError?.message ?? null
 
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full overflow-x-hidden">
@@ -33,6 +40,7 @@ export default async function ExpensesPage() {
         categories={categories || []}
         initialExpenses={expenses || []}
         accounts={accounts}
+        loadError={loadError}
       />
     </div>
   )

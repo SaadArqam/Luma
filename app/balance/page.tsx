@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { AddBalanceForm } from '@/components/AddBalanceForm'
 import { AccountTag } from '@/components/AccountPicker'
-import { getAccountOptions, ACCOUNT_REF_SELECT } from '@/lib/accounts'
+import { getAccountOptions, ACCOUNT_REF_SELECT_BALANCE } from '@/lib/accounts'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,11 +19,13 @@ export default async function BalancePage() {
   // form always has something to attach the entry to.
   const accounts = await getAccountOptions(supabase, user.id)
 
-  const { data: history } = await supabase
+  const { data: history, error: historyError } = await supabase
     .from('balance_entries')
-    .select(`*, ${ACCOUNT_REF_SELECT}`)
+    .select(`*, ${ACCOUNT_REF_SELECT_BALANCE}`)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
+
+  if (historyError) console.error('[balance] history query failed:', historyError)
 
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto w-full overflow-x-hidden">
@@ -77,7 +79,7 @@ export default async function BalancePage() {
                   ))
                 ) : (
                   <div className="h-32 flex items-center justify-center text-body-muted-luma">
-                    No history found
+                    {historyError ? "Couldn't load history — please retry" : 'No history found'}
                   </div>
                 )}
               </div>
@@ -128,7 +130,7 @@ export default async function BalancePage() {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center h-32 text-body-muted-luma">
-                          No history found
+                          {historyError ? "Couldn't load history — please retry" : 'No history found'}
                         </TableCell>
                       </TableRow>
                     )}

@@ -18,10 +18,12 @@ import { zonedDateString } from '@/lib/dates'
 import { AccountPicker, AccountTag } from '@/components/AccountPicker'
 import type { AccountOption } from '@/lib/accounts'
 
-export function ExpenseManager({ categories, initialExpenses, accounts }: {
+export function ExpenseManager({ categories, initialExpenses, accounts, loadError = null }: {
   categories: Category[]
   initialExpenses: ExpenseWithCategory[]
   accounts: AccountOption[]
+  /** Set when the server query failed, so an error is never shown as "no data". */
+  loadError?: string | null
 }) {
   const router = useRouter()
 
@@ -432,8 +434,8 @@ export function ExpenseManager({ categories, initialExpenses, accounts }: {
                   </div>
                 ))
               ) : (
-                <div className="h-32 flex items-center justify-center text-center text-body-muted-luma">
-                  No expenses found for this period
+                <div className="h-32 flex items-center justify-center text-center px-4 text-body-muted-luma">
+                  {loadError ? "Couldn't load your expenses — please retry" : 'No expenses found for this period'}
                 </div>
               )}
             </div>
@@ -494,7 +496,7 @@ export function ExpenseManager({ categories, initialExpenses, accounts }: {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center h-32 text-body-muted-luma">
-                        No expenses found for this period
+                        {loadError ? "Couldn't load your expenses — please retry" : 'No expenses found for this period'}
                       </TableCell>
                     </TableRow>
                   )}

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { getAccountOptions, ACCOUNT_REF_SELECT } from '@/lib/accounts'
+import { getAccountOptions, ACCOUNT_REF_SELECT_EXPENSES } from '@/lib/accounts'
 import { BalanceCard, type AccountBalanceRow } from '@/components/BalanceCard'
 import { AccountTag } from '@/components/AccountPicker'
 import { DashboardChart } from '@/components/DashboardChart'
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
       .gte('date', monthStart.toISOString())
       .lte('date', monthEnd.toISOString()),
     supabase.from('expenses')
-      .select(`*, category:categories(*), ${ACCOUNT_REF_SELECT}`)
+      .select(`*, category:categories(*), ${ACCOUNT_REF_SELECT_EXPENSES}`)
       .eq('user_id', user.id).order('date', { ascending: false }).limit(5),
     supabase.from('user_settings').select('migration_banner_dismissed').eq('user_id', user.id).maybeSingle(),
     // Orphan-row counts drive the migration banner. They must go through
@@ -88,6 +88,10 @@ export default async function DashboardPage() {
   const credits = creditsRes.data
   const debits = debitsRes.data
   const recentExpenses = recentExpensesRes.data
+  if (recentExpensesRes.error) console.error('[dashboard] recent expenses query failed:', recentExpensesRes.error)
+  if (creditsRes.error || debitsRes.error || allAmountsRes.error) {
+    console.error('[dashboard] balance queries failed:', creditsRes.error ?? debitsRes.error ?? allAmountsRes.error)
+  }
   const bannerDismissed = settingsRes.data?.migration_banner_dismissed ?? false
   const hasClaimableData = claimableRes.some((r) => (r.count ?? 0) > 0)
 
