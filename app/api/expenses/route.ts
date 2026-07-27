@@ -32,16 +32,26 @@ export async function POST(request: Request) {
     // The composite FK (user_id, account_id) already makes it impossible to
     // attach a transaction to someone else's account, but check here so a bad
     // id returns a clear message instead of a constraint violation.
-    if (account_id) {
+    let resolvedAccountId: string | null = account_id ?? null
+
+    if (resolvedAccountId) {
       const { data: account } = await supabase
         .from('accounts').select('id')
-        .eq('id', account_id).eq('user_id', user.id).maybeSingle()
+        .eq('id', resolvedAccountId).eq('user_id', user.id).maybeSingle()
       if (!account) return NextResponse.json({ error: 'Account not found' }, { status: 400 })
+    } else {
+      // Fall back to the default account rather than writing an unassigned row.
+      // A client running cached JS from before the account picker shipped sends
+      // no account_id, and those rows are what produced the "Unassigned" bucket.
+      const { data: fallback } = await supabase
+        .from('accounts').select('id')
+        .eq('user_id', user.id).eq('is_default', true).maybeSingle()
+      resolvedAccountId = fallback?.id ?? null
     }
 
     const { data, error } = await supabase
       .from('expenses')
-      .insert({ amount, note, date, category_id, account_id: account_id ?? null, user_id: user.id })
+      .insert({ amount, note, date, category_id, account_id: resolvedAccountId, user_id: user.id })
       .select()
       .single()
 

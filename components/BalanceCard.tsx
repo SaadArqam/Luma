@@ -30,6 +30,8 @@ export function BalanceCard({ total, accounts }: { total: number; accounts: Acco
   const [open, setOpen] = useState(false)
   // With a single account the breakdown just restates the total.
   const canExpand = accounts.length > 1
+  // "Unassigned" is a bucket, not an account — don't let it inflate the count.
+  const realAccountCount = accounts.filter((a) => a.id !== null).length
 
   return (
     <div
@@ -52,10 +54,10 @@ export function BalanceCard({ total, accounts }: { total: number; accounts: Acco
           className="w-full text-left"
           style={{ minHeight: 44 }}
         >
-          <Summary total={total} count={accounts.length} chevron={open ? 'up' : 'down'} />
+          <Summary total={total} count={realAccountCount} chevron={open ? 'up' : 'down'} />
         </button>
       ) : (
-        <Summary total={total} count={accounts.length} />
+        <Summary total={total} count={realAccountCount} />
       )}
 
       {canExpand && (
@@ -102,7 +104,7 @@ function Summary({ total, count, chevron }: { total: number; count: number; chev
         <div className="flex items-center gap-1.5">
           {chevron && (
             <span className="text-caption-luma text-luma-muted">
-              {count} accounts
+              {count} {count === 1 ? 'account' : 'accounts'}
             </span>
           )}
           {chevron ? (
