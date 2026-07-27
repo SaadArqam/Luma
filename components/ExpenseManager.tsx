@@ -14,11 +14,12 @@ import { format } from 'date-fns'
 import { Category, ExpenseWithCategory } from '@/types'
 import { toast } from 'sonner'
 import { getCategoryColor } from '@/lib/category-colors'
+import { zonedDateString } from '@/lib/dates'
 
 function getDefaultNextDueDate(): string {
-  const d = new Date()
-  d.setMonth(d.getMonth() + 1)
-  return d.toISOString().split('T')[0]
+  // A month from today in IST — same reason as the expense date below.
+  const [y, m, d] = zonedDateString().split('-').map(Number)
+  return new Date(Date.UTC(y, m, d)).toISOString().slice(0, 10)
 }
 
 export function ExpenseManager({ categories, initialExpenses }: { categories: Category[], initialExpenses: ExpenseWithCategory[] }) {
@@ -27,7 +28,8 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
   const [loading, setLoading] = useState(false)
   const [amount, setAmount] = useState('')
   const [note, setNote] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  // IST calendar date, so an expense logged at 01:00 IST defaults to today.
+  const [date, setDate] = useState(() => zonedDateString())
   const [categoryId, setCategoryId] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -47,7 +49,7 @@ export function ExpenseManager({ categories, initialExpenses }: { categories: Ca
   const [recurringCustomDays, setRecurringCustomDays] = useState('30')
 
   const [filterCategory, setFilterCategory] = useState('all')
-  const [filterMonth, setFilterMonth] = useState(new Date().toISOString().slice(0, 7))
+  const [filterMonth, setFilterMonth] = useState(() => zonedDateString().slice(0, 7))
   const [searchQuery, setSearchQuery] = useState('')
 
   async function onAddSubmit() {

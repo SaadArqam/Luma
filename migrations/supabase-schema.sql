@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 );
 
 -- Disable RLS for development
-ALTER TABLE accounts DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE accounts DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 1. Categories Table
 CREATE TABLE IF NOT EXISTS categories (
@@ -47,7 +47,7 @@ ALTER TABLE categories ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT N
 ALTER TABLE categories ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 
 -- Disable RLS for development (or create policies)
-ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE categories DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 2. Expenses Table
 CREATE TABLE IF NOT EXISTS expenses (
@@ -76,7 +76,7 @@ ALTER TABLE expenses ADD COLUMN IF NOT EXISTS recurring_transaction_id UUID REFE
 ALTER TABLE expenses ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- Disable RLS for development
-ALTER TABLE expenses DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE expenses DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 3. Balance Entries Table
 CREATE TABLE IF NOT EXISTS balance_entries (
@@ -106,7 +106,7 @@ ALTER TABLE balance_entries ADD COLUMN IF NOT EXISTS date TIMESTAMPTZ DEFAULT NO
 ALTER TABLE balance_entries ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- Disable RLS for development
-ALTER TABLE balance_entries DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE balance_entries DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 4. Budgets Table
 CREATE TABLE IF NOT EXISTS budgets (
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS budgets (
 );
 
 -- Disable RLS for development
-ALTER TABLE budgets DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE budgets DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 5. Budget Categories (join table)
 CREATE TABLE IF NOT EXISTS budget_categories (
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS budget_categories (
 );
 
 -- Disable RLS for development
-ALTER TABLE budget_categories DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE budget_categories DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 6. Stipend Config Table (singleton)
 CREATE TABLE IF NOT EXISTS stipend_config (
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS stipend_config (
 ALTER TABLE stipend_config ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 
 -- Disable RLS for development
-ALTER TABLE stipend_config DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE stipend_config DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 7. Recurring Transactions Table
 CREATE TABLE IF NOT EXISTS recurring_transactions (
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS recurring_transactions (
 );
 
 -- Disable RLS for development
-ALTER TABLE recurring_expenses DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE recurring_expenses DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 8. Merchants Table (preparation)
 CREATE TABLE IF NOT EXISTS merchants (
@@ -190,7 +190,7 @@ CREATE TABLE IF NOT EXISTS merchants (
 );
 
 -- Disable RLS for development
-ALTER TABLE merchants DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE merchants DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 9. Capture Sessions Table
 CREATE TABLE IF NOT EXISTS capture_sessions (
@@ -210,7 +210,7 @@ CREATE TABLE IF NOT EXISTS capture_sessions (
 );
 
 -- Disable RLS for development
-ALTER TABLE capture_sessions DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE capture_sessions DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);

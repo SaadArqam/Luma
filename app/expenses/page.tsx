@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { ExpenseManager } from '@/components/ExpenseManager'
 
@@ -5,10 +6,12 @@ export const dynamic = 'force-dynamic'
 
 export default async function ExpensesPage() {
   const supabase = await createClient()
-  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
   const [{ data: categories }, { data: expenses }] = await Promise.all([
-    supabase.from('categories').select('*').order('created_at', { ascending: true }),
-    supabase.from('expenses').select('*, category:categories(*)').order('date', { ascending: false }),
+    supabase.from('categories').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
+    supabase.from('expenses').select('*, category:categories(*)').eq('user_id', user.id).order('date', { ascending: false }),
   ])
 
   return (

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { useExpenseSync } from '@/lib/expenseSync'
 
 interface BudgetStat {
   categoryId: string
@@ -18,12 +19,19 @@ interface BudgetStat {
 }
 
 export function BudgetOverview() {
+  const version = useExpenseSync((s) => s.version)
   const [stats, setStats] = useState<BudgetStat[]>([])
   const [loading, setLoading] = useState(true)
   const [currentTime, setCurrentTime] = useState(new Date())
 
+  // Keyed on `version` so the bars re-read after an expense is added.
   useEffect(() => {
     fetchStats()
+  }, [version])
+
+  // Separate effect: the clock tick must not be torn down and restarted every
+  // time an expense is added.
+  useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(interval)
   }, [])

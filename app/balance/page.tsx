@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { AddBalanceForm } from '@/components/AddBalanceForm'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -9,10 +10,13 @@ export const dynamic = 'force-dynamic'
 
 export default async function BalancePage() {
   const supabase = await createClient()
-  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
   const { data: history } = await supabase
     .from('balance_entries')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   return (

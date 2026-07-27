@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
+import { zonedDateString, startOfZonedDay, endOfZonedDayExclusive, zonedDayStart, addDays } from '@/lib/dates'
 
 export async function GET() {
   try {
@@ -9,9 +10,12 @@ export async function GET() {
       return NextResponse.json({ tip: null })
     }
 
-    const todayStr = new Date().toISOString().split('T')[0]
+    const now = new Date()
+    const todayStr = zonedDateString(now)
 
-    // 1. Check if tip already exists for this user for today's date
+    // 1. Check if tip already exists for this user for today's date.
+    // `daily_tips.date` is a real DATE column, so an equality match is correct
+    // here — unlike `expenses.date`, which is TIMESTAMPTZ (see below).
     const { data: existingRow } = await supabase
       .from('daily_tips')
       .select('tip_text')
@@ -23,15 +27,22 @@ export async function GET() {
       return NextResponse.json({ tip: existingRow.tip_text })
     }
 
-    // 2. Gather user's data for today / this week
-    const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
+    // 2. Gather user's data for today / this week.
+    // `expenses.date` is TIMESTAMPTZ. The previous `.eq('date', todayStr)` cast
+    // the bare date to midnight UTC, so it only matched rows stored at exactly
+    // that instant and silently under-reported today's spend. Match the IST day
+    // as a half-open instant range instead.
+    const dayStart = startOfZonedDay(now)
+    const dayEnd = endOfZonedDayExclusive(now)
+    const weekStart = zonedDayStart(addDays(todayStr, -6))
 
     const [todayExpRes, budgetRes, weekExpRes] = await Promise.all([
       supabase
         .from('expenses')
         .select('amount, category:categories(name)')
         .eq('user_id', user.id)
-        .eq('date', todayStr),
+        .gte('date', dayStart.toISOString())
+        .lt('date', dayEnd.toISOString()),
       supabase
         .from('categories')
         .select('daily_budget')
@@ -41,7 +52,8 @@ export async function GET() {
         .from('expenses')
         .select('amount, category:categories(name)')
         .eq('user_id', user.id)
-        .gte('date', sevenDaysAgo),
+        .gte('date', weekStart.toISOString())
+        .lt('date', dayEnd.toISOString()),
     ])
 
     const todayExpenses = todayExpRes.data || []

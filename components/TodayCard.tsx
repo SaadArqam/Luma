@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useQuickAddStore } from '@/lib/quickAddStore'
+import { useExpenseSync } from '@/lib/expenseSync'
 import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -30,16 +31,28 @@ function formatINR(n: number): string {
 
 export function TodayCard() {
   const { open } = useQuickAddStore()
+  const version = useExpenseSync((s) => s.version)
+  const todayDelta = useExpenseSync((s) => s.todayDelta)
   const [data, setData] = useState<TodayData | null>(null)
   const [pulse, setPulse] = useState(false)
   const [tip, setTip] = useState<string | null>(null)
 
+  // Core numbers. Re-runs whenever an expense is added anywhere in the app —
+  // `router.refresh()` alone cannot do this, since it never re-runs the effects
+  // of a client component.
   useEffect(() => {
+    // Snapshot the optimistic delta this response will already include, so a
+    // second expense added while this request is in flight keeps its own.
+    const applied = useExpenseSync.getState().todayDelta
+    let cancelled = false
+
     fetch('/api/dashboard/today')
       .then(r => r.json())
       .then((d) => {
+        if (cancelled) return
         if (d && typeof d.spentToday === 'number') {
           setData(d)
+          if (applied !== 0) useExpenseSync.getState().consumeTodayDelta(applied)
           if (!d.hasExpensesToday) {
             setTimeout(() => setPulse(true), 600)
             setTimeout(() => setPulse(false), 2000)
@@ -48,6 +61,13 @@ export function TodayCard() {
       })
       .catch(console.error)
 
+    return () => { cancelled = true }
+  }, [version])
+
+  // The AI tip is deliberately a separate effect: it is slow on the first load
+  // of each day (live model call, then cached per-user per-day in the DB) and
+  // must never gate the ring. It also does not need refetching on every add.
+  useEffect(() => {
     fetch('/api/daily-tip')
       .then(r => r.json())
       .then((d) => {
@@ -58,9 +78,13 @@ export function TodayCard() {
       })
   }, [])
 
+  // Everything below reads `spentToday`, never `data.spentToday`, so the ring,
+  // the remaining figure and the status colour all move together the instant an
+  // expense is submitted — then settle onto the server value when it lands.
+  const spentToday = data !== null ? data.spentToday + todayDelta : 0
   const hasBudget = data !== null && data.totalDailyBudget > 0
-  const pct = hasBudget ? Math.min((data!.spentToday / data!.totalDailyBudget) * 100, 110) : 0
-  const remaining = hasBudget ? data!.totalDailyBudget - data!.spentToday : 0
+  const pct = hasBudget ? Math.min((spentToday / data!.totalDailyBudget) * 100, 110) : 0
+  const remaining = hasBudget ? data!.totalDailyBudget - spentToday : 0
   const dashOffset = CIRC - (CIRC * Math.min(pct, 100)) / 100
   const ringColor = getRingColor(pct)
 
@@ -110,19 +134,19 @@ export function TodayCard() {
                   strokeWidth={STROKE}
                   strokeLinecap="round"
                   strokeDasharray={CIRC}
-                  strokeDashoffset={data.spentToday === 0 ? CIRC : dashOffset}
+                  strokeDashoffset={spentToday === 0 ? CIRC : dashOffset}
                   style={{
-                    stroke: data.spentToday === 0 ? 'var(--luma-hairline)' : ringColor,
+                    stroke: spentToday === 0 ? 'var(--luma-hairline)' : ringColor,
                     transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1), stroke 0.4s ease',
                   }}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
                 <span className="font-inter font-bold font-tnum text-luma-text" style={{ fontSize: 17, lineHeight: 1.2 }}>
-                  {data.spentToday === 0 ? 'Nothing' : formatINR(data.spentToday)}
+                  {spentToday === 0 ? 'Nothing' : formatINR(spentToday)}
                 </span>
                 <span style={{ fontSize: 10, color: 'var(--luma-muted)', lineHeight: 1.3 }}>
-                  {data.spentToday === 0 ? 'logged yet' : `of ${formatINR(data.totalDailyBudget)}`}
+                  {spentToday === 0 ? 'logged yet' : `of ${formatINR(data.totalDailyBudget)}`}
                 </span>
               </div>
             </div>
@@ -131,7 +155,7 @@ export function TodayCard() {
               <p className="font-fraunces text-header-card" style={{ color: 'var(--luma-muted)', marginBottom: 4 }}>
                 Today
               </p>
-              {data.spentToday === 0 ? (
+              {spentToday === 0 ? (
                 <p style={{ fontSize: 15, color: 'var(--luma-muted)', lineHeight: 1.4 }}>
                   Nothing logged today yet
                 </p>
@@ -159,10 +183,10 @@ export function TodayCard() {
               Today
             </p>
             <p className="font-inter font-bold font-tnum" style={{ fontSize: 36, color: 'var(--luma-text)', lineHeight: 1 }}>
-              {data.spentToday === 0 ? '₹0' : formatINR(data.spentToday)}
+              {spentToday === 0 ? '₹0' : formatINR(spentToday)}
             </p>
             <p style={{ fontSize: 13, color: 'var(--luma-muted)', marginTop: 6 }}>
-              {data.spentToday === 0 ? 'Nothing logged today yet' : 'spent today'}
+              {spentToday === 0 ? 'Nothing logged today yet' : 'spent today'}
             </p>
             <Link
               href="/categories"

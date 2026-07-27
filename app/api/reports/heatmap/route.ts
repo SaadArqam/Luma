@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-server'
+import { zonedDateString } from '@/lib/dates'
 
 export async function GET(request: Request) {
   const supabase = await createClient()
@@ -23,7 +24,8 @@ export async function GET(request: Request) {
   // Group by date
   const grouped: Record<string, number> = {}
   data?.forEach(e => {
-    const date = new Date(e.date).toISOString().split('T')[0]
+    // Bucket into IST days so the heatmap agrees with the Today card.
+    const date = zonedDateString(new Date(e.date))
     grouped[date] = (grouped[date] || 0) + Number(e.amount)
   })
 

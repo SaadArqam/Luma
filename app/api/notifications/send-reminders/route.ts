@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { sendPushToUser } from '@/lib/sendPush'
+import { zonedDayRange } from '@/lib/dates'
 
 export async function GET(req: Request) {
   return handleReminders(req)
@@ -25,7 +26,9 @@ async function handleReminders(req: Request) {
   }
 
   try {
-    const supabase = await createClient()
+    // Service-role: a cron has no user session, so under RLS the anon client
+    // would read zero preference rows and this route would silently no-op.
+    const supabase = createAdminClient()
 
     // 1. Query all users with daily_reminder_enabled = true
     const { data: prefs, error } = await supabase
@@ -72,12 +75,17 @@ async function handleReminders(req: Request) {
 
       // Match within a 14-minute window (since GitHub Actions cron runs every 15 minutes)
       if (diff <= 14) {
-        // Check if user has logged any expense today in their local timezone
+        // Check if user has logged any expense today in their local timezone.
+        // `expenses.date` is TIMESTAMPTZ, so match the local day as an instant
+        // range — `.eq('date', localDateString)` only caught rows stored at
+        // exactly midnight UTC and wrongly reported "nothing logged today".
+        const { start, end } = zonedDayRange(localDateString, timezone)
         const { count } = await supabase
           .from('expenses')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', pref.user_id)
-          .eq('date', localDateString)
+          .gte('date', start.toISOString())
+          .lt('date', end.toISOString())
 
         if (!count || count === 0) {
           const res = await sendPushToUser(pref.user_id, {

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Calendar, TrendingUp, AlertTriangle, CheckCircle2, Settings } from 'lucide-react'
 import Link from 'next/link'
+import { useExpenseSync } from '@/lib/expenseSync'
 
 interface StipendStats {
   stipendAmount: number | null
@@ -20,12 +21,14 @@ interface StipendStats {
 }
 
 export function StipendWidget() {
+  const version = useExpenseSync((s) => s.version)
   const [stats, setStats] = useState<StipendStats | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Keyed on `version` — spending changes what's left of the stipend.
   useEffect(() => {
     fetchStats()
-  }, [])
+  }, [version])
 
   const fetchStats = async () => {
     try {

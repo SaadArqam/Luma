@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import RecurringClient from '@/components/RecurringClient'
 
@@ -5,6 +6,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function RecurringPage() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: recurring } = await supabase
     .from('recurring_expenses')
@@ -12,6 +15,7 @@ export default async function RecurringPage() {
       *,
       categories(name, icon)
     `)
+    .eq('user_id', user.id)
     .eq('is_active', true)
     .order('next_due_date', { ascending: true })
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
+import { zonedDateString } from '@/lib/dates'
 import { calculateNextDueDate } from '@/lib/recurring-utils'
 
 export async function POST(
@@ -26,7 +27,9 @@ export async function POST(
     }
 
     // 2. Insert into expenses with user_id
-    const today = new Date().toISOString().split('T')[0]
+    // IST calendar date — a payment recorded at 01:00 IST belongs to today,
+    // not to yesterday's UTC date.
+    const today = zonedDateString()
     const { data: expense, error: insertError } = await supabase
       .from('expenses')
       .insert({

@@ -1,21 +1,28 @@
+import { zonedDateString, addDays } from './dates'
+
+// Due dates are calendar labels ('YYYY-MM-DD'), so all arithmetic here stays on
+// the label. The previous version mixed local-time setMonth/setHours with UTC
+// toISOString(), which gave different answers on a UTC server and an IST
+// browser for the same row.
 export function calculateNextDueDate(currentDue: string, frequency: string, customDays?: number): string {
-  const date = new Date(currentDue)
+  const day = currentDue.slice(0, 10)
   if (frequency === 'monthly') {
-    date.setMonth(date.getMonth() + 1)
-  } else if (frequency === 'weekly') {
-    date.setDate(date.getDate() + 7)
-  } else if (frequency === 'custom') {
-    date.setDate(date.getDate() + (customDays || 30))
+    const [y, m, d] = day.split('-').map(Number)
+    // Month index is 0-based, so passing `m` lands on the following month.
+    // Overflow rolls forward (31 Jan + 1 month → 3 Mar), matching setMonth.
+    return new Date(Date.UTC(y, m, d)).toISOString().slice(0, 10)
   }
-  return date.toISOString().split('T')[0]
+  if (frequency === 'weekly') return addDays(day, 7)
+  if (frequency === 'custom') return addDays(day, customDays || 30)
+  return day
 }
 
 export function getDaysUntilDue(nextDueDate: string): number {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const due = new Date(nextDueDate)
-  due.setHours(0, 0, 0, 0)
-  return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  // Both sides are IST calendar dates compared at UTC midnight, so the result
+  // is a whole number of days regardless of where this runs.
+  const today = Date.parse(`${zonedDateString()}T00:00:00Z`)
+  const due = Date.parse(`${nextDueDate.slice(0, 10)}T00:00:00Z`)
+  return Math.round((due - today) / 86400000)
 }
 
 export function getRecurringStatus(daysUntilDue: number): 'overdue' | 'urgent' | 'upcoming' | 'normal' {

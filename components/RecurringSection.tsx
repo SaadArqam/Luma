@@ -7,9 +7,11 @@ import { Loader2, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { RecurringExpense, RecurringWithStatus } from '@/types'
 import { getDaysUntilDue, getRecurringStatus, formatDueLabel } from '@/lib/recurring-utils'
+import { useExpenseSync } from '@/lib/expenseSync'
 
 export function RecurringSection() {
   const router = useRouter()
+  const bump = useExpenseSync((s) => s.bump)
   const [items, setItems] = useState<RecurringWithStatus[]>([])
   const [loading, setLoading] = useState(true)
   const [payingId, setPayingId] = useState<string | null>(null)
@@ -54,6 +56,10 @@ export function RecurringSection() {
       const res = await fetch(`/api/recurring/${id}/pay`, { method: 'POST' })
       if (res.ok) {
         toast.success('Payment recorded')
+        // Recording a payment inserts an expense dated today, so the Today card
+        // and budget bars have to be told as well — router.refresh() only
+        // re-runs the server render.
+        bump()
         router.refresh()
         fetchRecurring()
       } else {

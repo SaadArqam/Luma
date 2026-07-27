@@ -6,13 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Label } from '@/components/ui/label'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { zonedDateString } from '@/lib/dates'
 
 export function AddBalanceForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [amount, setAmount] = useState('')
   const [note, setNote] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(() => zonedDateString())
   const [errorMsg, setErrorMsg] = useState('')
 
   async function onSubmit(e: React.FormEvent) {
@@ -32,7 +33,7 @@ export function AddBalanceForm() {
       if (res.ok) {
         setAmount('')
         setNote('')
-        setDate(new Date().toISOString().split('T')[0])
+        setDate(zonedDateString())
         router.refresh()
       } else {
         const data = await res.json()

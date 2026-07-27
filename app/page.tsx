@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { DashboardChart } from '@/components/DashboardChart'
 import { StipendWidget } from '@/components/StipendWidget'
 import { BudgetOverview } from '@/components/BudgetOverview'
@@ -18,54 +20,85 @@ const CLAIMABLE_TABLES = ['expenses', 'categories', 'balance_entries', 'recurrin
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const userName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] ?? user?.email?.split('@')[0] ?? 'there'
+  // middleware.ts already redirects anonymous visitors; this narrows the type
+  // so every query below can be scoped to the signed-in user.
+  if (!user) redirect('/login')
+
+  const userName = (user.user_metadata?.full_name as string | undefined)?.split(' ')[0] ?? user.email?.split('@')[0] ?? 'there'
+
+  // The migration banner is a legacy nicety and must never be able to take the
+  // dashboard down. createAdminClient() throws when SUPABASE_SERVICE_ROLE_KEY
+  // is unset — which is exactly the state between deploying this code and
+  // adding the env var — so degrade to "no banner" instead of a 500.
+  // The cron and /api/migrate routes deliberately still throw: unlike the
+  // banner, they cannot do their job at all without the key.
+  let admin: ReturnType<typeof createAdminClient> | null = null
+  try {
+    admin = createAdminClient()
+  } catch (err) {
+    console.warn('[dashboard] orphan-row check skipped:', (err as Error).message)
+  }
+
+  const now = new Date()
+  const monthStart = startOfMonth(now)
+  const monthEnd   = endOfMonth(now)
 
   // Fetch summary data — run in parallel instead of sequentially to avoid a request waterfall.
-  const [creditsRes, debitsRes, expensesRes, recentExpensesRes, settingsRes, ...claimableRes] = await Promise.all([
-    supabase.from('balance_entries').select('amount').eq('type', 'credit'),
-    supabase.from('balance_entries').select('amount').eq('type', 'debit'),
-    supabase.from('expenses').select('amount, date, category:categories(id, name, icon)'),
-    supabase.from('expenses').select('*, category:categories(*)').order('date', { ascending: false }).limit(5),
-    user
-      ? supabase.from('user_settings').select('migration_banner_dismissed').eq('user_id', user.id).maybeSingle()
-      : Promise.resolve({ data: null as { migration_banner_dismissed: boolean } | null }),
-    ...CLAIMABLE_TABLES.map((table) =>
-      supabase.from(table).select('id', { count: 'exact', head: true }).is('user_id', null)
-    ),
+  //
+  // This block gates the whole page: nothing (including the Today card, which
+  // cannot start its own fetch until the HTML lands) renders until the slowest
+  // query here resolves. So it stays scoped and bounded:
+  //   • every query is filtered by user_id — previously they were not, which
+  //     both leaked other users' rows into the totals and made each scan grow
+  //     with the whole table rather than with one user's data
+  //   • the all-time total selects `amount` only, with no category join
+  //   • month stats are filtered in SQL rather than by pulling all history and
+  //     filtering in JS
+  const [creditsRes, debitsRes, allAmountsRes, monthExpensesRes, recentExpensesRes, settingsRes, ...claimableRes] = await Promise.all([
+    supabase.from('balance_entries').select('amount').eq('user_id', user.id).eq('type', 'credit'),
+    supabase.from('balance_entries').select('amount').eq('user_id', user.id).eq('type', 'debit'),
+    supabase.from('expenses').select('amount').eq('user_id', user.id),
+    supabase.from('expenses')
+      .select('amount, category:categories(id, name, icon)')
+      .eq('user_id', user.id)
+      .gte('date', monthStart.toISOString())
+      .lte('date', monthEnd.toISOString()),
+    supabase.from('expenses').select('*, category:categories(*)').eq('user_id', user.id).order('date', { ascending: false }).limit(5),
+    supabase.from('user_settings').select('migration_banner_dismissed').eq('user_id', user.id).maybeSingle(),
+    // Orphan-row counts drive the migration banner. They must go through
+    // service-role: `user_id IS NULL` rows match no owner policy, so under RLS
+    // the anon client always counts zero and the banner never appears.
+    ...(admin
+      ? CLAIMABLE_TABLES.map((table) =>
+          admin!.from(table).select('id', { count: 'exact', head: true }).is('user_id', null)
+        )
+      : []),
   ])
 
   const credits = creditsRes.data
   const debits = debitsRes.data
-  const allExpenses = expensesRes.data
   const recentExpenses = recentExpensesRes.data
   const bannerDismissed = settingsRes.data?.migration_banner_dismissed ?? false
   const hasClaimableData = claimableRes.some((r) => (r.count ?? 0) > 0)
 
   const totalCredited  = credits?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
   const totalDebited   = debits?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
-  const totalExpenses  = allExpenses?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
+  const totalExpenses  = allAmountsRes.data?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
   const totalBalance   = totalCredited - totalDebited - totalExpenses
 
-  // Current month stats
-  const now = new Date()
-  const monthStart = startOfMonth(now)
-  const monthEnd   = endOfMonth(now)
-
+  // Current month stats — the rows are already month-scoped by the query above.
   let totalSpentThisMonth = 0
   let transactionCount    = 0
   const categoryTotals: Record<string, { name: string; icon: string; total: number }> = {}
 
-  allExpenses?.forEach((expense: any) => {
-    const expDate = new Date(expense.date)
-    if (expDate >= monthStart && expDate <= monthEnd) {
-      const amt = Number(expense.amount)
-      totalSpentThisMonth += amt
-      transactionCount    += 1
-      const cat = expense.category
-      if (cat) {
-        if (!categoryTotals[cat.id]) categoryTotals[cat.id] = { name: cat.name, icon: cat.icon, total: 0 }
-        categoryTotals[cat.id].total += amt
-      }
+  monthExpensesRes.data?.forEach((expense: any) => {
+    const amt = Number(expense.amount)
+    totalSpentThisMonth += amt
+    transactionCount    += 1
+    const cat = expense.category
+    if (cat) {
+      if (!categoryTotals[cat.id]) categoryTotals[cat.id] = { name: cat.name, icon: cat.icon, total: 0 }
+      categoryTotals[cat.id].total += amt
     }
   })
 

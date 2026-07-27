@@ -1,5 +1,5 @@
 import webpush from 'web-push'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 
 export interface PushPayload {
   title: string
@@ -39,7 +39,10 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
     return { success: false, sentCount: 0, reason: 'VAPID keys not configured on server' }
   }
 
-  const supabase = await createClient()
+  // Service-role: this is called from the notification crons, which have no
+  // user session, and it must read subscriptions belonging to `userId` rather
+  // than to the caller. Every query below is scoped by hand.
+  const supabase = createAdminClient()
 
   // Fetch all push subscriptions for this user
   const { data: subs, error } = await supabase
@@ -78,7 +81,9 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
 
       // If subscription expired / uninstalled / revoked (410 Gone / 404 Not Found), remove from DB
       if (err?.statusCode === 410 || err?.statusCode === 404) {
-        await supabase.from('push_subscriptions').delete().eq('id', sub.id)
+        // user_id is redundant given `sub` came from this user's rows, but the
+        // service-role client has no RLS backstop, so scope every write.
+        await supabase.from('push_subscriptions').delete().eq('id', sub.id).eq('user_id', userId)
       }
     }
   }

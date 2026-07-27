@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { zonedDateString, addDays } from '@/lib/dates'
 
 type HeatmapData = {
   heatmap: Record<string, number>
@@ -53,9 +54,11 @@ export default function ReportsPage() {
     const { heatmap, stats } = heatmapData
     const maxAmount = Math.max(...Object.values(heatmap), 1)
     const weeks = Math.ceil(days / 7)
-    const today = new Date()
-    const startDate = new Date(today)
-    startDate.setDate(today.getDate() - (weeks * 7 - 1))
+    // Grid is built from IST date labels so the cells line up with the keys the
+    // API groups by. The old version stepped a local Date and then formatted it
+    // with toISOString(), which shifted every cell back a day in IST browsers.
+    const todayKey = zonedDateString()
+    const startKey = addDays(todayKey, -(weeks * 7 - 1))
 
     const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
     const cols = []
@@ -63,21 +66,25 @@ export default function ReportsPage() {
     const monthPositions: { label: string; col: number }[] = []
 
     for (let w = 0; w < weeks; w++) {
-      const weekDate = new Date(startDate)
-      weekDate.setDate(startDate.getDate() + w * 7)
-      if (weekDate.getMonth() !== lastMonth) {
-        monthPositions.push({ label: monthNames[weekDate.getMonth()], col: w })
-        lastMonth = weekDate.getMonth()
+      const weekKey = addDays(startKey, w * 7)
+      const weekMonth = Number(weekKey.slice(5, 7)) - 1
+      if (weekMonth !== lastMonth) {
+        monthPositions.push({ label: monthNames[weekMonth], col: w })
+        lastMonth = weekMonth
       }
 
       const cells = []
       for (let d = 0; d < 7; d++) {
-        const date = new Date(startDate)
-        date.setDate(startDate.getDate() + w * 7 + d)
-        const dateKey = date.toISOString().split('T')[0]
+        const dateKey = addDays(startKey, w * 7 + d)
         const amount = heatmap[dateKey] || 0
         const color = getColor(amount, maxAmount)
-        const isFuture = date > today
+        // 'YYYY-MM-DD' sorts lexicographically, so a string compare is a date compare.
+        const isFuture = dateKey > todayKey
+        // Parsed and formatted as UTC so the label renders the calendar date
+        // itself, with no second timezone shift applied on top of it.
+        const dateLabel = new Date(`${dateKey}T00:00:00Z`).toLocaleDateString('en-IN', {
+          day: 'numeric', month: 'short', timeZone: 'UTC',
+        })
 
         cells.push(
           <div
@@ -88,8 +95,8 @@ export default function ReportsPage() {
               const rect = (e.target as HTMLElement).getBoundingClientRect()
               const containerRect = (e.target as HTMLElement).closest('.heatmap-container')?.getBoundingClientRect()
               const text = amount
-                ? `${date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · ₹${amount.toLocaleString('en-IN')}`
-                : `${date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · No expenses`
+                ? `${dateLabel} · ₹${amount.toLocaleString('en-IN')}`
+                : `${dateLabel} · No expenses`
               setTooltip({
                 text,
                 x: rect.left - (containerRect?.left || 0),
@@ -102,8 +109,8 @@ export default function ReportsPage() {
               const rect = (e.target as HTMLElement).getBoundingClientRect()
               const containerRect = (e.target as HTMLElement).closest('.heatmap-container')?.getBoundingClientRect()
               const text = amount
-                ? `${date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · ₹${amount.toLocaleString('en-IN')}`
-                : `${date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · No expenses`
+                ? `${dateLabel} · ₹${amount.toLocaleString('en-IN')}`
+                : `${dateLabel} · No expenses`
               setTooltip(prev =>
                 prev?.text === text ? null : { text, x: rect.left - (containerRect?.left || 0), y: rect.top - (containerRect?.top || 0) - 36 }
               )

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuickAddStore } from '@/lib/quickAddStore'
+import { useExpenseSync } from '@/lib/expenseSync'
+import { zonedDateString } from '@/lib/dates'
 
 interface Category {
   id: string
@@ -15,12 +17,17 @@ interface Category {
 export function QuickAddSheet() {
   const router = useRouter()
   const { isOpen, close } = useQuickAddStore()
+  const bump = useExpenseSync((s) => s.bump)
+  const addTodayDelta = useExpenseSync((s) => s.addTodayDelta)
+  const consumeTodayDelta = useExpenseSync((s) => s.consumeTodayDelta)
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [categoryId, setCategoryId] = useState('')
   const [amount, setAmount] = useState('')
   const [note, setNote] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  // IST calendar date, not the browser's or UTC's — so an expense logged at
+  // 01:00 IST defaults to today rather than yesterday.
+  const [date, setDate] = useState(() => zonedDateString())
 
   useEffect(() => {
     if (isOpen) {
@@ -36,13 +43,21 @@ export function QuickAddSheet() {
   const handleSubmit = async () => {
     if (!amount || isNaN(Number(amount)) || !categoryId) return
 
+    const amountNum = Number(amount)
+    // Only an expense dated today moves the Today card. Both sides are the IST
+    // calendar date, matching what /api/dashboard/today counts.
+    const isToday = date === zonedDateString()
+
+    // Optimistic: move the number before the round-trip, roll back if it fails.
+    if (isToday) addTodayDelta(amountNum)
+
     setLoading(true)
     try {
       const res = await fetch('/api/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: Number(amount),
+          amount: amountNum,
           note: note.trim(),
           date,
           category_id: categoryId,
@@ -55,12 +70,18 @@ export function QuickAddSheet() {
         setCategoryId('')
         setNote('')
         close()
+        // Two different refresh mechanisms, both required:
+        //   bump()           → client components (Today card, budget bars, …)
+        //   router.refresh() → server-rendered totals on the Home page
+        bump()
         router.refresh()
       } else {
+        if (isToday) consumeTodayDelta(amountNum)
         const data = await res.json()
         toast.error(data.error || 'Failed to add expense')
       }
     } catch (err) {
+      if (isToday) consumeTodayDelta(amountNum)
       console.error(err)
       toast.error('An error occurred')
     } finally {

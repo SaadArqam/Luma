@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { sendPushToUser } from '@/lib/sendPush'
+import { zonedDayRange } from '@/lib/dates'
 
 // NOTE: Currently configured for single-timezone (Asia/Kolkata ~ 9:30 PM IST).
 // Once multi-region/non-IST users are added, this route should compute per-user local time.
@@ -27,7 +28,9 @@ async function handleEodSummary(req: Request) {
   }
 
   try {
-    const supabase = await createClient()
+    // Service-role: a cron has no user session, so under RLS the anon client
+    // would read zero preference rows and this route would silently no-op.
+    const supabase = createAdminClient()
 
     // 1. Query all users where eod_summary_enabled = true
     const { data: prefs, error } = await supabase
@@ -51,12 +54,16 @@ async function handleEodSummary(req: Request) {
         day: '2-digit',
       }).format(now)
 
-      // Fetch today's expenses
+      // Fetch today's expenses. `expenses.date` is TIMESTAMPTZ, so match the
+      // user's local day as an instant range rather than by date equality,
+      // which only caught rows stored at exactly midnight UTC.
+      const { start, end } = zonedDayRange(localDateString, timezone)
       const { data: expenses } = await supabase
         .from('expenses')
         .select('amount')
         .eq('user_id', pref.user_id)
-        .eq('date', localDateString)
+        .gte('date', start.toISOString())
+        .lt('date', end.toISOString())
 
       const spentToday = (expenses || []).reduce((sum, e) => sum + Number(e.amount), 0)
 

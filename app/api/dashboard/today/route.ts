@@ -1,79 +1,99 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
-import { startOfDay, endOfDay } from 'date-fns'
+import { zonedDateString, startOfZonedDay, endOfZonedDayExclusive, zonedDayStart, addDays } from '@/lib/dates'
 
 export async function GET() {
+  const t0 = performance.now()
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const tAuth = performance.now()
 
+    // All day boundaries are IST (see lib/dates.ts), not the server's UTC day.
     const now = new Date()
-    const todayStr = now.toISOString().split('T')[0]
-    const dayStart = startOfDay(now)
-    const dayEnd = endOfDay(now)
+    const todayStr = zonedDateString(now)
+    const dayStart = startOfZonedDay(now)
+    const dayEnd = endOfZonedDayExclusive(now)
 
-    // Today's total spend (across all categories)
-    const { data: todayExpenses } = await supabase
-      .from('expenses')
-      .select('amount, date')
-      .eq('user_id', user.id)
-      .gte('date', dayStart.toISOString())
-      .lte('date', dayEnd.toISOString())
+    // Streak window: consecutive days up to today/yesterday with an expense.
+    const streakWindowStart = zonedDayStart(addDays(todayStr, -364))
 
-    const spentToday = todayExpenses?.reduce((sum, e) => sum + Number(e.amount), 0) || 0
+    // These three queries are independent of each other. They used to be three
+    // sequential `await`s, so the endpoint cost three Supabase round-trips
+    // before the ring could render; now it costs one.
+    const [todayRes, categoriesRes, streakRes] = await Promise.all([
+      // Today's total spend (across all categories)
+      supabase
+        .from('expenses')
+        .select('amount')
+        .eq('user_id', user.id)
+        .gte('date', dayStart.toISOString())
+        .lt('date', dayEnd.toISOString()),
+      // Total daily budget (sum of all category daily_budget)
+      supabase
+        .from('categories')
+        .select('daily_budget')
+        .eq('user_id', user.id)
+        .not('daily_budget', 'is', null),
+      // Dates only — the payload stays small even over a full year.
+      supabase
+        .from('expenses')
+        .select('date')
+        .eq('user_id', user.id)
+        .gte('date', streakWindowStart.toISOString())
+        .order('date', { ascending: false }),
+    ])
+    const tQueries = performance.now()
 
-    // Total daily budget (sum of all category daily_budget)
-    const { data: categories } = await supabase
-      .from('categories')
-      .select('daily_budget')
-      .eq('user_id', user.id)
-      .not('daily_budget', 'is', null)
+    const spentToday = todayRes.data?.reduce((sum, e) => sum + Number(e.amount), 0) || 0
+    const totalDailyBudget = categoriesRes.data?.reduce((sum, c) => sum + Number(c.daily_budget), 0) || 0
+    const allExpenses = streakRes.data
 
-    const totalDailyBudget = categories?.reduce((sum, c) => sum + Number(c.daily_budget), 0) || 0
-
-    // Current streak — consecutive days up to today/yesterday with at least one expense
-    // Fetch last 365 days of expense dates
-    const yearAgo = new Date()
-    yearAgo.setFullYear(yearAgo.getFullYear() - 1)
-
-    const { data: allExpenses } = await supabase
-      .from('expenses')
-      .select('date')
-      .eq('user_id', user.id)
-      .gte('date', yearAgo.toISOString())
-      .order('date', { ascending: false })
-
-    // Build a set of unique date strings that have expenses
+    // Bucket each expense into the IST calendar day it belongs to.
     const datesWithExpenses = new Set<string>()
     allExpenses?.forEach(e => {
-      const d = new Date(e.date).toISOString().split('T')[0]
-      datesWithExpenses.add(d)
+      datesWithExpenses.add(zonedDateString(new Date(e.date)))
     })
 
-    // Walk backward from today, counting consecutive days
-    // If today has no expense yet (it might be early in the day), 
-    // start from yesterday — don't break the streak prematurely
+    // Walk backward from today, counting consecutive days.
+    // If today has no expense yet (it might be early in the day),
+    // start from yesterday — don't break the streak prematurely.
+    //
+    // Stepping the date *label* rather than mutating a Date avoids the previous
+    // mix of server-local `setDate` arithmetic with UTC formatting.
     let currentStreak = 0
     const checkFrom = datesWithExpenses.has(todayStr) ? 0 : 1 // start offset in days
 
     for (let i = checkFrom; i < 365; i++) {
-      const checkDate = new Date(now)
-      checkDate.setDate(now.getDate() - i)
-      const checkStr = checkDate.toISOString().split('T')[0]
-      if (datesWithExpenses.has(checkStr)) {
+      if (datesWithExpenses.has(addDays(todayStr, -i))) {
         currentStreak++
       } else {
         break
       }
     }
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       spentToday,
       totalDailyBudget,
       currentStreak,
       hasExpensesToday: datesWithExpenses.has(todayStr),
     })
+
+    // Visible in the browser's Network tab under the request's Timing panel, so
+    // the split between "waiting on Supabase auth" and "waiting on data" can be
+    // read off a real load instead of guessed at.
+    const end = performance.now()
+    res.headers.set(
+      'Server-Timing',
+      [
+        `auth;dur=${(tAuth - t0).toFixed(1)}`,
+        `queries;dur=${(tQueries - tAuth).toFixed(1)}`,
+        `streak;dur=${(end - tQueries).toFixed(1)}`,
+        `total;dur=${(end - t0).toFixed(1)}`,
+      ].join(', ')
+    )
+    return res
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

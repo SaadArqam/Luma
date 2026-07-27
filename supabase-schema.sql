@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS categories (
 );
 
 -- Disable RLS for development (or create policies)
-ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE categories DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 2. Expenses Table
 CREATE TABLE IF NOT EXISTS expenses (
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS expenses (
 );
 
 -- Disable RLS for development
-ALTER TABLE expenses DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE expenses DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 3. Balance Entries Table
 CREATE TABLE IF NOT EXISTS balance_entries (
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS balance_entries (
 );
 
 -- Disable RLS for development
-ALTER TABLE balance_entries DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE balance_entries DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- 4. Stipend Config Table (singleton)
 CREATE TABLE IF NOT EXISTS stipend_config (
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS stipend_config (
 );
 
 -- Disable RLS for development
-ALTER TABLE stipend_config DISABLE ROW LEVEL SECURITY;
+-- ALTER TABLE stipend_config DISABLE ROW LEVEL SECURITY;  -- DISABLED: see migrations/20260727_enable_rls.sql (re-enabling RLS is deliberate; do not restore this line)
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date);
