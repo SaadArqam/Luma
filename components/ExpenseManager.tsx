@@ -156,6 +156,16 @@ export function ExpenseManager({ categories, initialExpenses, accounts }: {
 
   const totalFiltered = filteredExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
 
+  // base-ui's <SelectValue> renders the RAW selected value, not the chosen
+  // item's children — so a select whose value is a category id displays the
+  // UUID unless it is handed a formatter. (The month filter looks right only
+  // because <input type="month"> formats itself.) Both category selects below
+  // pass this as `children` to resolve id → icon + name.
+  const categoryLabel = (id: string | null) => {
+    const cat = categoryList.find((c) => c.id === id)
+    return cat ? `${cat.icon} ${cat.name}` : null
+  }
+
   return (
     <div className="grid gap-8 tablet:grid-cols-3">
       <div className="min-w-0 tablet:col-span-1">
@@ -186,8 +196,10 @@ export function ExpenseManager({ categories, initialExpenses, accounts }: {
                     }
                   }}
                 >
-                  <SelectTrigger id="category" className="bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
-                    <SelectValue placeholder="Select category" />
+                  <SelectTrigger id="category" className="w-full bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
+                    <SelectValue placeholder="Select category">
+                      {(value: string | null) => categoryLabel(value) ?? 'Select category'}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {categoryList.map(cat => (
@@ -327,36 +339,48 @@ export function ExpenseManager({ categories, initialExpenses, accounts }: {
           <CardHeader className="pb-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <CardTitle className="text-header-section">Expense History</CardTitle>
-              {/* Mobile: search on its own row, month + category share the row below */}
-              <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-end gap-2">
+              {/* All three stack full-width below 640px. They previously shared a
+                  nested flex row, and `<input type="month">` has an intrinsic
+                  minimum width from its native picker that `min-w-0` cannot
+                  shrink past — so on a 375px screen the pair overflowed the card.
+                  From 640px up they sit in a row and wrap rather than squeezing
+                  each other off-screen. */}
+              <div className="w-full min-w-0 sm:w-auto flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-end gap-2">
                 <Input
                   type="text"
                   placeholder="Search expenses..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-[160px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
+                  className="w-full max-w-full sm:w-[150px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
                 />
-                <div className="flex gap-2 min-w-0">
-                  <Input
-                    type="month"
-                    value={filterMonth}
-                    onChange={(e) => setFilterMonth(e.target.value)}
-                    className="flex-1 min-w-0 sm:flex-initial sm:w-[160px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
-                  />
-                  <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val || 'all')}>
-                    <SelectTrigger className="flex-1 min-w-0 sm:flex-initial sm:w-[160px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Input
+                  type="month"
+                  value={filterMonth}
+                  onChange={(e) => setFilterMonth(e.target.value)}
+                  className="w-full max-w-full sm:w-[150px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
+                />
+                <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val || 'all')}>
+                  <SelectTrigger className="w-full max-w-full sm:w-[150px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
+                    <SelectValue placeholder="Category">
+                      {(value: string | null) =>
+                        !value || value === 'all' ? 'All Categories' : categoryLabel(value) ?? 'All Categories'
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {/* categoryList, not the `categories` prop, so a category
+                        created inline above is immediately filterable. */}
+                    {categoryList.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        <span className="flex items-center gap-2">
+                          <span>{cat.icon}</span>
+                          <span>{cat.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardHeader>

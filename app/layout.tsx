@@ -84,6 +84,13 @@ export default function RootLayout({
       className={`dark ${fraunces.variable} ${inter.variable} antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Bank logos come from logo.dev. Warming the connection means the first
+            logo doesn't pay DNS + TLS on the critical path; the images
+            themselves are lazy-loaded, so they never block a render. */}
+        <link rel="preconnect" href="https://img.logo.dev" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://img.logo.dev" />
+      </head>
       <body className="min-h-screen flex flex-col tablet:flex-row tablet:items-start bg-luma-canvas text-luma-text">
         <LenisProvider>
           <Sidebar />

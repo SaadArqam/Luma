@@ -1,13 +1,16 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { getAccountOptions, ACCOUNT_REF_SELECT } from '@/lib/accounts'
+import { BalanceCard, type AccountBalanceRow } from '@/components/BalanceCard'
+import { AccountTag } from '@/components/AccountPicker'
 import { DashboardChart } from '@/components/DashboardChart'
 import { StipendWidget } from '@/components/StipendWidget'
 import { BudgetOverview } from '@/components/BudgetOverview'
 import { TodayCard } from '@/components/TodayCard'
 import MigrationBanner from '@/components/MigrationBanner'
 import { startOfMonth, endOfMonth, format } from 'date-fns'
-import { TrendingUp, TrendingDown, Activity, Wallet } from 'lucide-react'
+import { TrendingUp, TrendingDown, Activity } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { getCategoryColor } from '@/lib/category-colors'
 
@@ -38,6 +41,9 @@ export default async function DashboardPage() {
     console.warn('[dashboard] orphan-row check skipped:', (err as Error).message)
   }
 
+  // Lightweight: names/logos only. The balances come from the aggregation below.
+  const accountOptions = await getAccountOptions(supabase, user.id)
+
   const now = new Date()
   const monthStart = startOfMonth(now)
   const monthEnd   = endOfMonth(now)
@@ -54,15 +60,20 @@ export default async function DashboardPage() {
   //   • month stats are filtered in SQL rather than by pulling all history and
   //     filtering in JS
   const [creditsRes, debitsRes, allAmountsRes, monthExpensesRes, recentExpensesRes, settingsRes, ...claimableRes] = await Promise.all([
-    supabase.from('balance_entries').select('amount').eq('user_id', user.id).eq('type', 'credit'),
-    supabase.from('balance_entries').select('amount').eq('user_id', user.id).eq('type', 'debit'),
-    supabase.from('expenses').select('amount').eq('user_id', user.id),
+    // account_id rides along on the three all-time queries so the per-account
+    // breakdown is derived from the very same rows as the headline total — no
+    // extra round-trips, and the parts always sum to the whole.
+    supabase.from('balance_entries').select('amount, account_id').eq('user_id', user.id).eq('type', 'credit'),
+    supabase.from('balance_entries').select('amount, account_id').eq('user_id', user.id).eq('type', 'debit'),
+    supabase.from('expenses').select('amount, account_id').eq('user_id', user.id),
     supabase.from('expenses')
       .select('amount, category:categories(id, name, icon)')
       .eq('user_id', user.id)
       .gte('date', monthStart.toISOString())
       .lte('date', monthEnd.toISOString()),
-    supabase.from('expenses').select('*, category:categories(*)').eq('user_id', user.id).order('date', { ascending: false }).limit(5),
+    supabase.from('expenses')
+      .select(`*, category:categories(*), ${ACCOUNT_REF_SELECT}`)
+      .eq('user_id', user.id).order('date', { ascending: false }).limit(5),
     supabase.from('user_settings').select('migration_banner_dismissed').eq('user_id', user.id).maybeSingle(),
     // Orphan-row counts drive the migration banner. They must go through
     // service-role: `user_id IS NULL` rows match no owner policy, so under RLS
@@ -84,6 +95,36 @@ export default async function DashboardPage() {
   const totalDebited   = debits?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
   const totalExpenses  = allAmountsRes.data?.reduce((sum, item) => sum + Number(item.amount), 0) || 0
   const totalBalance   = totalCredited - totalDebited - totalExpenses
+
+  // Per-account balances, from the same rows as the totals above.
+  const perAccount = new Map<string | null, number>()
+  const addRows = (rows: unknown[] | null | undefined, sign: 1 | -1) => {
+    for (const row of rows ?? []) {
+      const { amount, account_id } = row as { amount: number | string; account_id: string | null }
+      const key = account_id ?? null
+      perAccount.set(key, (perAccount.get(key) ?? 0) + sign * Number(amount))
+    }
+  }
+  addRows(credits, 1)
+  addRows(debits, -1)
+  addRows(allAmountsRes.data, -1)
+
+  const accountBalances: AccountBalanceRow[] = accountOptions.map((a) => ({
+    id: a.id,
+    name: a.name,
+    bank_name: a.bank_name,
+    bank_domain: a.bank_domain,
+    balance: perAccount.get(a.id) ?? 0,
+  }))
+
+  // Transactions written before account selection existed have no account. Show
+  // them explicitly, otherwise the rows would not add up to the total.
+  const unassigned = perAccount.get(null) ?? 0
+  if (unassigned !== 0) {
+    accountBalances.push({
+      id: null, name: 'Unassigned', bank_name: null, bank_domain: null, balance: unassigned,
+    })
+  }
 
   // Current month stats — the rows are already month-scoped by the query above.
   let totalSpentThisMonth = 0
@@ -123,26 +164,8 @@ export default async function DashboardPage() {
 
       {/* ── Stat cards (demoted — reference info) ── */}
       <div className="grid grid-cols-2 gap-3">
-        {/* Current Balance — kept prominent, full width */}
-        <div
-          className="col-span-2 glass-card p-4 rounded-[20px] relative overflow-hidden flex flex-col justify-between"
-          style={{ borderTop: '2px solid var(--luma-accent)' }}
-        >
-          {/* Decorative flourish. Kept fully inside the padding box and free of
-              any transform: a transformed child is composited separately and
-              Chrome/Android does not reliably clip it to the card's rounded,
-              backdrop-filtered box, which let it escape the right edge. */}
-          <div className="absolute right-3 top-3 opacity-[0.05] pointer-events-none">
-            <Wallet className="w-16 h-16 text-luma-text" />
-          </div>
-          <div className="flex flex-row items-center justify-between pb-1">
-            <h3 className="font-fraunces text-header-card text-luma-muted">Current Balance</h3>
-            <Wallet className="h-4 w-4 text-luma-muted" />
-          </div>
-          <div className="font-inter font-bold font-tnum text-number-card text-luma-text text-3xl mt-1">
-            ₹{totalBalance.toLocaleString('en-IN')}
-          </div>
-        </div>
+        {/* Current Balance — combined across accounts, expands to a breakdown */}
+        <BalanceCard total={totalBalance} accounts={accountBalances} />
 
         {/* Smaller reference cards */}
         <div className="glass-card p-3 rounded-[20px] flex flex-col justify-between" style={{ borderTop: '2px solid var(--luma-success)' }}>
@@ -220,7 +243,10 @@ export default async function DashboardPage() {
                       <TableCell className="text-body-muted-luma text-xs whitespace-nowrap font-inter font-tnum">
                         {format(new Date(expense.date), 'dd MMM yyyy')}
                       </TableCell>
-                      <TableCell className="max-w-[150px] truncate text-body-muted-luma text-xs">{expense.note || '-'}</TableCell>
+                      <TableCell className="max-w-[150px] truncate text-body-muted-luma text-xs">
+                        <span className="block truncate">{expense.note || '-'}</span>
+                        <AccountTag account={expense.account} />
+                      </TableCell>
                       <TableCell className="text-right font-inter font-bold font-tnum text-sm text-luma-text">
                         ₹{Number(expense.amount).toLocaleString('en-IN')}
                       </TableCell>
