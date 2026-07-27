@@ -75,6 +75,51 @@ export async function ensureDefaultAccount(
   })
 }
 
+/**
+ * Decide which account a transaction gets written to.
+ *
+ * `expenses.account_id` and `balance_entries.account_id` are NOT NULL as of
+ * migrations/20260727_backfill_account_id_not_null.sql, so a write with no
+ * account is a hard failure rather than an unassigned row. This never returns
+ * null: it prefers what the client asked for, then the user's default account,
+ * then any account, and bootstraps one as a last resort.
+ *
+ * The no-account-sent path is not hypothetical — a browser running cached JS
+ * from before the account picker shipped omits the field, and that is how the
+ * original "Unassigned" balance accumulated.
+ */
+export async function resolveAccountForWrite(
+  supabase: SupabaseServerClient,
+  userId: string,
+  requested?: string | null,
+): Promise<{ accountId: string } | { error: string }> {
+  if (requested) {
+    // Ownership check: the composite FK would reject a foreign account anyway,
+    // but this returns a readable message instead of a constraint violation.
+    const { data } = await supabase.from('accounts').select('id')
+      .eq('id', requested).eq('user_id', userId).maybeSingle()
+    if (!data) return { error: 'Account not found' }
+    return { accountId: data.id }
+  }
+
+  const pick = async (defaultOnly: boolean) => {
+    let q = supabase.from('accounts').select('id').eq('user_id', userId)
+    if (defaultOnly) q = q.eq('is_default', true)
+    const { data } = await q.order('created_at', { ascending: true }).limit(1).maybeSingle()
+    return data?.id ?? null
+  }
+
+  const preferred = (await pick(true)) ?? (await pick(false))
+  if (preferred) return { accountId: preferred }
+
+  // No accounts at all (a signup that never opened a page that bootstraps one).
+  await ensureDefaultAccount(supabase, userId)
+  const created = await pick(true)
+  if (created) return { accountId: created }
+
+  return { error: 'No account available. Add one in Settings → Accounts.' }
+}
+
 /** What a form's account picker needs — no balance maths involved. */
 export type AccountOption = AccountRef & { is_default: boolean }
 

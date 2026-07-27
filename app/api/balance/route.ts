@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
+import { resolveAccountForWrite } from '@/lib/accounts'
 
 export async function POST(request: Request) {
   try {
@@ -10,24 +11,11 @@ export async function POST(request: Request) {
     const json = await request.json()
     const { amount, note, type, date, account_id } = json
 
-    let resolvedAccountId: string | null = account_id ?? null
-
-    if (resolvedAccountId) {
-      const { data: account } = await supabase
-        .from('accounts').select('id')
-        .eq('id', resolvedAccountId).eq('user_id', user.id).maybeSingle()
-      if (!account) return NextResponse.json({ error: 'Account not found' }, { status: 400 })
-    } else {
-      // Fall back to the default account rather than writing an unassigned row
-      // (see the same note in /api/expenses).
-      const { data: fallback } = await supabase
-        .from('accounts').select('id')
-        .eq('user_id', user.id).eq('is_default', true).maybeSingle()
-      resolvedAccountId = fallback?.id ?? null
-    }
+    const resolved = await resolveAccountForWrite(supabase, user.id, account_id)
+    if ('error' in resolved) return NextResponse.json({ error: resolved.error }, { status: 400 })
 
     const insertData: Record<string, any> = {
-      amount, note, type, user_id: user.id, account_id: resolvedAccountId,
+      amount, note, type, user_id: user.id, account_id: resolved.accountId,
     }
     if (date) {
       insertData.created_at = new Date(date).toISOString()
