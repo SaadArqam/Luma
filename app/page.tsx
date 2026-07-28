@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { getAccountOptions, ACCOUNT_REF_SELECT_EXPENSES } from '@/lib/accounts'
-import { BalanceCard, type AccountBalanceRow } from '@/components/BalanceCard'
+import { AccountCardStack, type AccountCardData } from '@/components/AccountCardStack'
 import { AccountTag } from '@/components/AccountPicker'
 import { DashboardChart } from '@/components/DashboardChart'
 import { StipendWidget } from '@/components/StipendWidget'
@@ -113,12 +113,13 @@ export default async function DashboardPage() {
   addRows(debits, -1)
   addRows(allAmountsRes.data, -1)
 
-  const accountBalances: AccountBalanceRow[] = accountOptions.map((a) => ({
+  const accountBalances: { id: string | null; name: string; bank_name: string | null; bank_domain: string | null; balance: number; is_default: boolean }[] = accountOptions.map((a) => ({
     id: a.id,
     name: a.name,
     bank_name: a.bank_name,
     bank_domain: a.bank_domain,
     balance: perAccount.get(a.id) ?? 0,
+    is_default: a.is_default,
   }))
 
   // Transactions written before account selection existed have no account. Show
@@ -126,9 +127,33 @@ export default async function DashboardPage() {
   const unassigned = perAccount.get(null) ?? 0
   if (unassigned !== 0) {
     accountBalances.push({
-      id: null, name: 'Unassigned', bank_name: null, bank_domain: null, balance: unassigned,
+      id: null, name: 'Unassigned', bank_name: null, bank_domain: null, balance: unassigned, is_default: false,
     })
   }
+
+  // Same rows/order the account breakdown always used (server-sorted,
+  // is_default first, Unassigned last) — just reshaped for AccountCardStack.
+  // "Unassigned" is a bucket, not an account, so it's excluded from the count
+  // shown on the combined card, matching the old BalanceCard behaviour.
+  const realAccountCount = accountBalances.filter((a) => a.id !== null).length
+  const accountCards: AccountCardData[] = [
+    {
+      id: 'total',
+      name: 'Combined',
+      bank_name: null,
+      bank_domain: null,
+      balance: totalBalance,
+      subtitle: `${realAccountCount} ${realAccountCount === 1 ? 'account' : 'accounts'}`,
+    },
+    ...accountBalances.map((a) => ({
+      id: a.id ?? 'unassigned',
+      name: a.name,
+      bank_name: a.bank_name,
+      bank_domain: a.bank_domain,
+      balance: a.balance,
+      subtitle: a.id === null ? 'Unassigned' : a.is_default ? 'Default account' : 'Account',
+    })),
+  ]
 
   // Current month stats — the rows are already month-scoped by the query above.
   let totalSpentThisMonth = 0
@@ -169,7 +194,9 @@ export default async function DashboardPage() {
       {/* ── Stat cards (demoted — reference info) ── */}
       <div className="grid grid-cols-2 gap-3">
         {/* Current Balance — combined across accounts, expands to a breakdown */}
-        <BalanceCard total={totalBalance} accounts={accountBalances} />
+        <div className="col-span-2">
+          <AccountCardStack accounts={accountCards} variant="full" />
+        </div>
 
         {/* Smaller reference cards */}
         <div className="glass-card p-3 rounded-[20px] flex flex-col justify-between" style={{ borderTop: '2px solid var(--luma-success)' }}>
@@ -177,7 +204,7 @@ export default async function DashboardPage() {
             <h3 className="font-fraunces text-header-card text-luma-muted text-xs">Credited</h3>
             <TrendingUp className="h-3.5 w-3.5 text-luma-success" />
           </div>
-          <div className="font-inter font-bold font-tnum text-lg text-luma-text">₹{totalCredited.toLocaleString('en-IN')}</div>
+          <div className="text-number-card text-luma-text">₹{totalCredited.toLocaleString('en-IN')}</div>
         </div>
 
         <div className="glass-card p-3 rounded-[20px] flex flex-col justify-between" style={{ borderTop: '2px solid var(--luma-danger)' }}>
@@ -185,14 +212,14 @@ export default async function DashboardPage() {
             <h3 className="font-fraunces text-header-card text-luma-muted text-xs">This Month</h3>
             <TrendingDown className="h-3.5 w-3.5 text-luma-danger" />
           </div>
-          <div className="font-inter font-bold font-tnum text-lg text-luma-text">₹{totalSpentThisMonth.toLocaleString('en-IN')}</div>
+          <div className="text-number-card text-luma-text">₹{totalSpentThisMonth.toLocaleString('en-IN')}</div>
         </div>
 
         <div className="col-span-2 glass-card p-3 px-4 rounded-[20px] flex flex-row items-center gap-3" style={{ borderTop: '2px solid var(--luma-info)' }}>
           <Activity className="h-4 w-4 text-luma-info shrink-0" />
           <div>
             <p className="font-fraunces text-header-card text-luma-muted text-xs">Transactions this month</p>
-            <p className="font-inter font-bold font-tnum text-lg text-luma-text">{transactionCount}</p>
+            <p className="text-number-card text-luma-text">{transactionCount}</p>
           </div>
         </div>
       </div>
@@ -251,7 +278,7 @@ export default async function DashboardPage() {
                         <span className="block truncate">{expense.note || '-'}</span>
                         <AccountTag account={expense.account} />
                       </TableCell>
-                      <TableCell className="text-right font-inter font-bold font-tnum text-sm text-luma-text">
+                      <TableCell className="text-right text-number-card text-luma-text">
                         ₹{Number(expense.amount).toLocaleString('en-IN')}
                       </TableCell>
                     </TableRow>
