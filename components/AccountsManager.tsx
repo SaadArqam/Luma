@@ -1,20 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Plus, Star, Pencil, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { BankLogo } from '@/components/BankLogo'
+import { AccountCardStack, type AccountCardData } from '@/components/AccountCardStack'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { BANKS, ACCOUNT_TYPES, ACCOUNT_TYPE_LABELS, type AccountType } from '@/lib/banks'
 import type { AccountWithBalance } from '@/lib/accounts'
+import type { ExpenseWithCategory } from '@/types'
 
 type Account = AccountWithBalance
 
 const OTHER_BANK = '__other__'
-
-function formatINR(n: number): string {
-  const sign = n < 0 ? '-' : ''
-  return `${sign}₹${Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
-}
 
 type FormState = {
   name: string
@@ -53,6 +51,51 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
     balanceCount: number
     reassignTo: string
   } | null>(null)
+
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  // Clamp defensively so an out-of-range index (e.g. left over after deleting
+  // the last account in the list) never indexes past the array.
+  const activeAccount = accounts[Math.min(activeIndex, Math.max(accounts.length - 1, 0))]
+
+  const [transactions, setTransactions] = useState<ExpenseWithCategory[]>([])
+  // Never show a stale account's transactions once there's no active account
+  // to attribute them to (e.g. the last account was just deleted) — derived
+  // at render time so the fetch effect below never needs to call setState
+  // just to clear the list.
+  const displayedTransactions = activeAccount ? transactions : []
+
+  useEffect(() => {
+    if (!activeAccount) return
+    let cancelled = false
+    fetch(`/api/expenses?account_id=${activeAccount.id}`)
+      .then((r) => r.json())
+      .then((data) => { if (!cancelled) setTransactions(Array.isArray(data) ? data : []) })
+      .catch(() => { if (!cancelled) toast.error('Could not load transactions') })
+    return () => { cancelled = true }
+  }, [activeAccount])
+
+  const cardData: AccountCardData[] = useMemo(
+    () => accounts.map((a) => ({
+      id: a.id,
+      name: a.name,
+      bank_name: a.bank_name,
+      bank_domain: a.bank_domain,
+      balance: a.balance,
+      // Folded into subtitle (below the balance) rather than maskedLabel
+      // (above the balance, between name and balance) — maskedLabel's slot
+      // visually competes with the hero balance number, while subtitle is
+      // already the card's "metadata line" for account type.
+      subtitle: [
+        a.is_default ? 'Default' : null,
+        ACCOUNT_TYPE_LABELS[a.account_type],
+        `${a.txCount} txn${a.txCount === 1 ? '' : 's'}`,
+      ].filter(Boolean).join(' · '),
+    })),
+    [accounts]
+  )
+
+  const handleActiveIndexChange = useCallback((_id: string, index: number) => setActiveIndex(index), [])
 
   const load = async () => {
     try {
@@ -164,6 +207,7 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
         ? `Account deleted, ${data.reassigned} transaction${data.reassigned === 1 ? '' : 's'} moved`
         : 'Account deleted')
       setPendingDelete(null)
+      setSheetOpen(false)
       await load()
     } finally {
       setBusyId(null)
@@ -172,110 +216,107 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
 
   return (
     <div className="space-y-3">
-      {accounts.map((a) => {
-        const isEditing = editingId === a.id
-        return (
-          <div key={a.id} className="glass-card rounded-[20px] p-4">
-            {!isEditing ? (
-              <>
-                <div className="flex items-center gap-3">
-                  <BankLogo name={a.bank_name || a.name} domain={a.bank_domain} size={40} />
+      <AccountCardStack
+        accounts={cardData}
+        variant="full"
+        onActiveIndexChange={handleActiveIndexChange}
+        onActiveCardAction={(id) => {
+          const index = accounts.findIndex((a) => a.id === id)
+          if (index >= 0) setActiveIndex(index)
+          setSheetOpen(true)
+        }}
+      />
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-fraunces text-header-card text-luma-text truncate">{a.name}</span>
-                      {a.is_default && (
-                        <span className="text-caption-luma px-2 py-0.5 rounded-full bg-luma-accent-glow text-luma-accent">
-                          Default
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-body-muted-luma text-xs truncate">
-                      {[a.bank_name, ACCOUNT_TYPE_LABELS[a.account_type]].filter(Boolean).join(' · ')}
-                    </p>
-                  </div>
+      <div className="solid-list-card">
+        {displayedTransactions.length === 0 ? (
+          <div className="h-24 flex items-center justify-center text-body-muted-luma">No transactions yet</div>
+        ) : (
+          displayedTransactions.map((t) => (
+            <div key={t.id} className="px-3 py-3 border-b border-luma-hairline-strong last:border-b-0 flex items-center justify-between">
+              <span className="text-sm text-luma-text truncate">{t.category?.icon} {t.category?.name}</span>
+              <span className="text-number-inline text-luma-text">₹{Number(t.amount).toLocaleString('en-IN')}</span>
+            </div>
+          ))
+        )}
+      </div>
 
-                  <div className="text-right shrink-0">
-                    <div className="font-inter font-bold font-tnum text-luma-text">{formatINR(a.balance)}</div>
-                    <div className="text-caption-luma text-luma-muted">
-                      {a.txCount} {a.txCount === 1 ? 'txn' : 'txns'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 mt-3 pt-3 border-t border-luma-specular">
-                  {!a.is_default && (
-                    <button
-                      onClick={() => makeDefault(a.id)}
-                      disabled={busyId === a.id}
-                      className="flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-caption-luma text-luma-muted hover:text-luma-text transition-colors disabled:opacity-50"
-                    >
-                      <Star className="w-3.5 h-3.5" /> Make default
-                    </button>
-                  )}
-                  <button
-                    onClick={() => startEdit(a)}
-                    className="flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-caption-luma text-luma-muted hover:text-luma-text transition-colors"
-                  >
-                    <Pencil className="w-3.5 h-3.5" /> Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(a)}
-                    disabled={busyId === a.id}
-                    className="flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-caption-luma text-luma-danger hover:bg-luma-danger-glow transition-colors ml-auto disabled:opacity-50"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" /> Delete
-                  </button>
-                </div>
-
-                {pendingDelete?.account.id === a.id && (
-                  <div className="mt-3 pt-3 border-t border-luma-hairline space-y-3">
-                    <p className="text-body-muted-luma text-xs">
-                      This account has{' '}
-                      {pendingDelete.expenseCount > 0 && <>{pendingDelete.expenseCount} expense{pendingDelete.expenseCount === 1 ? '' : 's'}</>}
-                      {pendingDelete.expenseCount > 0 && pendingDelete.balanceCount > 0 && ' and '}
-                      {pendingDelete.balanceCount > 0 && <>{pendingDelete.balanceCount} balance entr{pendingDelete.balanceCount === 1 ? 'y' : 'ies'}</>}
-                      . Move them to another account first — nothing is deleted.
-                    </p>
-                    <select
-                      value={pendingDelete.reassignTo}
-                      onChange={(e) => setPendingDelete({ ...pendingDelete, reassignTo: e.target.value })}
-                      className="input-luma cursor-pointer"
-                    >
-                      {accounts.filter((x) => x.id !== a.id).map((x) => (
-                        <option key={x.id} value={x.id} className="bg-luma-surface text-luma-text">
-                          Move to {x.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleDelete(a, pendingDelete.reassignTo)}
-                        disabled={busyId === a.id || !pendingDelete.reassignTo}
-                        className="btn-primary-luma flex-1 disabled:opacity-50"
-                      >
-                        {busyId === a.id ? 'Moving…' : 'Move and delete'}
-                      </button>
-                      <button onClick={() => setPendingDelete(null)} className="btn-secondary-luma">
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <AccountForm
-                form={editForm}
-                setForm={setEditForm}
-                saving={saving}
-                submitLabel="Save changes"
-                onSubmit={() => handleEditSave(a.id)}
-                onCancel={() => setEditingId(null)}
-              />
-            )}
-          </div>
-        )
-      })}
+      <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{activeAccount?.name}</DialogTitle>
+          </DialogHeader>
+          {activeAccount && !editingId && (
+            <div className="flex items-center gap-1">
+              {!activeAccount.is_default && (
+                <button
+                  onClick={() => makeDefault(activeAccount.id)}
+                  disabled={busyId === activeAccount.id}
+                  className="flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-caption-luma text-luma-muted hover:text-luma-text transition-colors disabled:opacity-50"
+                >
+                  <Star className="w-3.5 h-3.5" /> Make default
+                </button>
+              )}
+              <button
+                onClick={() => startEdit(activeAccount)}
+                className="flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-caption-luma text-luma-muted hover:text-luma-text transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" /> Edit
+              </button>
+              <button
+                onClick={() => handleDelete(activeAccount)}
+                disabled={busyId === activeAccount.id}
+                className="flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-caption-luma text-luma-danger hover:bg-luma-danger-glow transition-colors ml-auto disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Delete
+              </button>
+            </div>
+          )}
+          {activeAccount && editingId === activeAccount.id && (
+            <AccountForm
+              form={editForm}
+              setForm={setEditForm}
+              saving={saving}
+              submitLabel="Save changes"
+              onSubmit={() => handleEditSave(activeAccount.id)}
+              onCancel={() => setEditingId(null)}
+            />
+          )}
+          {activeAccount && pendingDelete?.account.id === activeAccount.id && (
+            <div className="pt-3 border-t border-luma-hairline-strong space-y-3">
+              <p className="text-body-muted-luma text-xs">
+                This account has{' '}
+                {pendingDelete.expenseCount > 0 && <>{pendingDelete.expenseCount} expense{pendingDelete.expenseCount === 1 ? '' : 's'}</>}
+                {pendingDelete.expenseCount > 0 && pendingDelete.balanceCount > 0 && ' and '}
+                {pendingDelete.balanceCount > 0 && <>{pendingDelete.balanceCount} balance entr{pendingDelete.balanceCount === 1 ? 'y' : 'ies'}</>}
+                . Move them to another account first — nothing is deleted.
+              </p>
+              <select
+                value={pendingDelete.reassignTo}
+                onChange={(e) => setPendingDelete({ ...pendingDelete, reassignTo: e.target.value })}
+                className="input-luma cursor-pointer"
+              >
+                {accounts.filter((x) => x.id !== activeAccount.id).map((x) => (
+                  <option key={x.id} value={x.id} className="bg-luma-surface text-luma-text">
+                    Move to {x.name}
+                  </option>
+                ))}
+              </select>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleDelete(activeAccount, pendingDelete.reassignTo)}
+                  disabled={busyId === activeAccount.id || !pendingDelete.reassignTo}
+                  className="btn-primary-luma flex-1 disabled:opacity-50"
+                >
+                  {busyId === activeAccount.id ? 'Moving…' : 'Move and delete'}
+                </button>
+                <button onClick={() => setPendingDelete(null)} className="btn-secondary-luma">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {!showAdd ? (
         <button

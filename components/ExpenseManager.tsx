@@ -313,19 +313,22 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                   className="input-luma"
                 />
               </div>
-              <AccountCardStack
-                accounts={accounts.map((a) => ({
-                  id: a.id,
-                  name: a.name,
-                  bank_name: a.bank_name,
-                  bank_domain: a.bank_domain,
-                  balance: 0,
-                  subtitle: a.name,
-                }))}
-                variant="mini"
-                selectedId={accountId}
-                onSelect={setAccountId}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="expense-account">Account</Label>
+                <AccountCardStack
+                  accounts={accounts.map((a) => ({
+                    id: a.id,
+                    name: a.name,
+                    bank_name: a.bank_name,
+                    bank_domain: a.bank_domain,
+                    balance: 0,
+                    subtitle: a.name,
+                  }))}
+                  variant="mini"
+                  selectedId={accountId}
+                  onSelect={setAccountId}
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="note">Note (Optional)</Label>
                 <input
@@ -376,7 +379,14 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                   className="w-full max-w-full sm:w-[150px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
                 />
                 <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val || 'all')}>
-                  <SelectTrigger className="w-full max-w-full sm:w-[150px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
+                  <SelectTrigger
+                    className="w-full max-w-full sm:w-[150px] border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
+                    style={
+                      filterCategory !== 'all'
+                        ? { backgroundColor: getCategoryChipColors(categoryList.find((c) => c.id === filterCategory)?.name ?? '').bg }
+                        : undefined
+                    }
+                  >
                     <SelectValue placeholder="Category">
                       {(value: string | null) =>
                         !value || value === 'all' ? 'All Categories' : categoryLabel(value) ?? 'All Categories'
@@ -387,14 +397,17 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                     <SelectItem value="all">All Categories</SelectItem>
                     {/* categoryList, not the `categories` prop, so a category
                         created inline above is immediately filterable. */}
-                    {categoryList.map(cat => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        <span className="flex items-center gap-2">
-                          <span>{cat.icon}</span>
-                          <span>{cat.name}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
+                    {categoryList.map(cat => {
+                      const chip = getCategoryChipColors(cat.name)
+                      return (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          <span className="flex items-center gap-2 rounded-full px-2 py-0.5" style={{ backgroundColor: chip.bg, color: chip.text }}>
+                            <span>{cat.icon}</span>
+                            <span>{cat.name}</span>
+                          </span>
+                        </SelectItem>
+                      )
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -407,7 +420,7 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                 filteredExpenses.map((expense) => (
                   <div
                     key={expense.id}
-                    className="px-3 py-3 border-b border-luma-hairline last:border-b-0"
+                    className="px-3 py-3 border-b border-luma-hairline-strong last:border-b-0"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
@@ -458,7 +471,7 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
             <div className="solid-list-card hidden sm:block">
               <Table>
                 <TableHeader className="bg-luma-raised">
-                  <TableRow className="border-b border-luma-hairline">
+                  <TableRow className="border-b border-luma-hairline-strong">
                     <TableHead className="font-fraunces text-luma-muted">Date</TableHead>
                     <TableHead className="font-fraunces text-luma-muted">Category</TableHead>
                     <TableHead className="font-fraunces text-luma-muted">Note</TableHead>

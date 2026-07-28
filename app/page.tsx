@@ -248,7 +248,7 @@ export default async function DashboardPage() {
           <div className="solid-list-card rounded-[20px] border border-luma-hairline">
             <Table>
               <TableHeader className="bg-luma-raised">
-                <TableRow className="border-b border-luma-hairline">
+                <TableRow className="border-b border-luma-hairline-strong">
                   <TableHead className="font-fraunces text-luma-muted">Category</TableHead>
                   <TableHead className="font-fraunces text-luma-muted">Date</TableHead>
                   <TableHead className="font-fraunces text-luma-muted">Note</TableHead>

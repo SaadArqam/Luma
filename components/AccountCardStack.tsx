@@ -16,7 +16,7 @@ export type AccountCardData = {
 }
 
 const GRADIENTS = ['var(--gradient-primary)', 'var(--gradient-secondary)', 'var(--gradient-tertiary)']
-const FALLBACK_GRADIENT = 'linear-gradient(135deg, #2A2A2E 0%, #1a1a20 100%)'
+const FALLBACK_GRADIENT = 'var(--gradient-neutral)'
 
 function formatINR(n: number): string {
   return `${n < 0 ? '-' : ''}₹${Math.abs(n).toLocaleString('en-IN')}`
@@ -32,6 +32,7 @@ export function AccountCardStack({
   selectedId,
   onSelect,
   onActiveCardAction,
+  onActiveIndexChange,
 }: {
   accounts: AccountCardData[]
   variant: 'full' | 'mini'
@@ -40,10 +41,23 @@ export function AccountCardStack({
   onSelect?: (id: string) => void
   /** called when the user taps/clicks the currently-active card (Phase 4's edit/delete/make-default sheet trigger) */
   onActiveCardAction?: (id: string) => void
+  /** called whenever the active card changes — by swipe/scroll settling OR by click navigation — not just on tap-while-already-active like onActiveCardAction. Fires for both variants; mini-variant consumers typically don't need it since onSelect already covers their case. */
+  onActiveIndexChange?: (id: string, index: number) => void
 }) {
   const trackRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
+
+  // Latest `accounts` without needing it in effect/callback dependency arrays —
+  // ExpenseManager passes a brand-new array literal on every render, so a
+  // dependency on `accounts` itself would re-fire on every keystroke elsewhere
+  // in that form. Refs can't be written during render (React flags it), so
+  // the sync happens in an unconditional effect — it runs after every commit,
+  // before any effect declared below it gets to read `accountsRef.current`.
+  const accountsRef = useRef(accounts)
+  useEffect(() => {
+    accountsRef.current = accounts
+  })
 
   // Cards are narrower than the track (the "peek" design) and separated by a
   // flex gap, so neither the forward (index -> scrollLeft) nor the reverse
@@ -77,10 +91,19 @@ export function AccountCardStack({
     return () => el.removeEventListener('scroll', syncActiveFromScroll)
   }, [syncActiveFromScroll])
 
-  const scrollToIndex = (index: number) => {
+  useEffect(() => {
+    const account = accounts[activeIndex]
+    if (account) onActiveIndexChange?.(account.id, activeIndex)
+  }, [activeIndex, accounts, onActiveIndexChange])
+
+  // `opts.focus` defaults to true for the user-initiated click/keyboard paths
+  // below. The mount/selectedId-sync effect passes `focus: false` explicitly —
+  // stealing DOM focus on mount (not from a user gesture) would be an
+  // unexpected a11y surprise.
+  const scrollToIndex = useCallback((index: number, opts?: { focus?: boolean }) => {
     const el = trackRef.current
     if (!el) return
-    const clamped = Math.max(0, Math.min(index, accounts.length - 1))
+    const clamped = Math.max(0, Math.min(index, accountsRef.current.length - 1))
     const card = cardRefs.current[clamped]
     if (card) {
       const trackRect = el.getBoundingClientRect()
@@ -91,8 +114,19 @@ export function AccountCardStack({
     // Move DOM focus to the newly-active card so repeated arrow presses (or
     // clicks) advance from the new position instead of re-targeting from a
     // stale index closed over by the previous keydown handler.
-    card?.focus()
-  }
+    if (opts?.focus !== false) card?.focus()
+  }, [])
+
+  // Scroll the mini carousel to the externally-selected account on mount, and
+  // whenever selectedId changes from outside (e.g. a different account
+  // becomes default). Without this, a pre-selected account that isn't the
+  // first card renders dimmed/scaled-down with no visible indication it's
+  // selected until the user manually scrolls.
+  useEffect(() => {
+    if (variant !== 'mini' || !selectedId) return
+    const index = accountsRef.current.findIndex((a) => a.id === selectedId)
+    if (index >= 0) scrollToIndex(index, { focus: false })
+  }, [variant, selectedId, scrollToIndex])
 
   const handleCardClick = (account: AccountCardData, index: number) => {
     if (variant === 'mini') {
