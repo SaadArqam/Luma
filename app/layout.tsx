@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Unbounded, Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import BottomNav from '@/components/BottomNav';
@@ -7,8 +7,9 @@ import LenisProvider from '@/components/LenisProvider';
 import { QuickAddSheet } from '@/components/QuickAddSheet';
 import { Toaster } from "sonner";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const unbounded = Unbounded({
+  variable: "--font-unbounded",
+  weight: ["500", "700", "800", "900"],
   subsets: ["latin"],
 });
 
@@ -22,8 +23,8 @@ export const viewport: Viewport = {
   // does not resolve here. Keep in sync with --luma-canvas in app/globals.css
   // (and with manifest.ts, which has the same constraint).
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#1B1C21" },
-    { media: "(prefers-color-scheme: light)", color: "#1B1C21" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B0B0F" },
+    { media: "(prefers-color-scheme: light)", color: "#0B0B0F" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -81,7 +82,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${fraunces.variable} ${inter.variable} antialiased`}
+      className={`dark ${unbounded.variable} ${inter.variable} antialiased`}
       suppressHydrationWarning
     >
       <head>
