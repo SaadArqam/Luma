@@ -45,3 +45,25 @@ export function getCategoryColor(key: string): string {
   const index = Math.abs(hash) % CATEGORY_PALETTE.length
   return CATEGORY_PALETTE[index]
 }
+
+/**
+ * Curated bg/text pairs for the category CHIP UI (Add Expense category
+ * select, Expenses filter) — distinct from CATEGORY_PALETTE above, which is
+ * for data-viz/avatar single-hex fills. Keyed by category name (case-
+ * insensitive); anything not listed falls back to a neutral gray so a
+ * newly-created category never renders unstyled.
+ */
+export const CATEGORY_CHIP_COLORS: Record<string, { bg: string; text: string }> = {
+  food: { bg: '#412402', text: '#FAC775' },
+  transport: { bg: '#04342C', text: '#5DCAA5' },
+  travel: { bg: '#0B2A4B', text: '#6FA8DC' },
+  tiffin: { bg: '#4B1528', text: '#ED93B1' },
+  shopping: { bg: '#26215C', text: '#AFA9EC' },
+}
+
+const CATEGORY_CHIP_FALLBACK = { bg: '#2A2A2E', text: '#9C9CA3' }
+
+export function getCategoryChipColors(name: string): { bg: string; text: string } {
+  if (!name) return CATEGORY_CHIP_FALLBACK
+  return CATEGORY_CHIP_COLORS[name.trim().toLowerCase()] ?? CATEGORY_CHIP_FALLBACK
+}
