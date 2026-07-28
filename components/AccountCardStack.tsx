@@ -42,13 +42,32 @@ export function AccountCardStack({
   onActiveCardAction?: (id: string) => void
 }) {
   const trackRef = useRef<HTMLDivElement>(null)
+  const cardRefs = useRef<(HTMLButtonElement | null)[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
 
+  // Cards are narrower than the track (the "peek" design) and separated by a
+  // flex gap, so neither the forward (index -> scrollLeft) nor the reverse
+  // (scrollLeft -> index) math can assume one card == one full container
+  // width. We measure the actual card elements instead.
   const syncActiveFromScroll = useCallback(() => {
     const el = trackRef.current
-    if (!el || el.clientWidth === 0) return
-    const index = Math.round(el.scrollLeft / el.clientWidth)
-    setActiveIndex((prev) => (prev === index ? prev : index))
+    if (!el) return
+    const containerRect = el.getBoundingClientRect()
+    if (containerRect.width === 0) return
+    const containerCenter = containerRect.left + containerRect.width / 2
+    let closestIndex = 0
+    let closestDistance = Infinity
+    cardRefs.current.forEach((card, i) => {
+      if (!card) return
+      const rect = card.getBoundingClientRect()
+      const cardCenter = rect.left + rect.width / 2
+      const distance = Math.abs(cardCenter - containerCenter)
+      if (distance < closestDistance) {
+        closestDistance = distance
+        closestIndex = i
+      }
+    })
+    setActiveIndex((prev) => (prev === closestIndex ? prev : closestIndex))
   }, [])
 
   useEffect(() => {
@@ -62,7 +81,17 @@ export function AccountCardStack({
     const el = trackRef.current
     if (!el) return
     const clamped = Math.max(0, Math.min(index, accounts.length - 1))
-    el.scrollTo({ left: clamped * el.clientWidth, behavior: 'smooth' })
+    const card = cardRefs.current[clamped]
+    if (card) {
+      const trackRect = el.getBoundingClientRect()
+      const cardRect = card.getBoundingClientRect()
+      const targetLeft = el.scrollLeft + (cardRect.left - trackRect.left)
+      el.scrollTo({ left: targetLeft, behavior: 'smooth' })
+    }
+    // Move DOM focus to the newly-active card so repeated arrow presses (or
+    // clicks) advance from the new position instead of re-targeting from a
+    // stale index closed over by the previous keydown handler.
+    card?.focus()
   }
 
   const handleCardClick = (account: AccountCardData, index: number) => {
@@ -74,7 +103,7 @@ export function AccountCardStack({
     scrollToIndex(index)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
     if (e.key === 'ArrowRight') { e.preventDefault(); scrollToIndex(index + 1) }
     if (e.key === 'ArrowLeft') { e.preventDefault(); scrollToIndex(index - 1) }
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(accounts[index], index) }
@@ -96,16 +125,16 @@ export function AccountCardStack({
           return (
             <button
               key={account.id}
+              ref={(el) => { cardRefs.current[index] = el }}
               type="button"
               role={variant === 'mini' ? 'radio' : undefined}
               aria-checked={variant === 'mini' ? isSelected : undefined}
               tabIndex={0}
               onClick={() => handleCardClick(account, index)}
               onKeyDown={(e) => handleKeyDown(e, index)}
-              className="shrink-0 rounded-[20px] p-4 text-left tablet:w-[320px]"
+              className={`shrink-0 rounded-[20px] p-4 text-left tablet:w-[320px] ${variant === 'mini' ? 'w-[calc(60%-12px)]' : 'w-[calc(100%-48px)]'}`}
               style={{
                 scrollSnapAlign: 'center',
-                width: variant === 'mini' ? 'calc(60% - 12px)' : 'calc(100% - 48px)',
                 height: cardHeight,
                 background: gradientForIndex(index),
                 opacity: variant === 'mini' && !isSelected ? 0.55 : 1,
@@ -115,20 +144,20 @@ export function AccountCardStack({
             >
               <div className="flex items-center gap-2">
                 <BankLogo name={account.bank_name || account.name} domain={account.bank_domain} size={variant === 'full' ? 28 : 20} />
-                <span className="font-display text-sm font-medium truncate" style={{ color: '#0B0B0F' }}>
+                <span className="font-display text-sm font-medium truncate" style={{ color: 'var(--luma-canvas)' }}>
                   {account.name}
                 </span>
               </div>
               {account.maskedLabel && variant === 'full' && (
-                <div className="text-xs mt-1" style={{ color: 'rgba(11,11,15,0.65)' }}>{account.maskedLabel}</div>
+                <div className="text-xs mt-1" style={{ color: 'var(--luma-canvas)', opacity: 0.65 }}>{account.maskedLabel}</div>
               )}
               {variant === 'full' && (
-                <div className="text-number-hero" style={{ color: '#0B0B0F', marginTop: 8 }}>
+                <div className="text-number-hero" style={{ color: 'var(--luma-canvas)', marginTop: 8 }}>
                   {formatINR(account.balance)}
                 </div>
               )}
               {variant === 'full' && (
-                <div className="text-xs mt-1" style={{ color: 'rgba(11,11,15,0.65)' }}>{account.subtitle}</div>
+                <div className="text-xs mt-1" style={{ color: 'var(--luma-canvas)', opacity: 0.65 }}>{account.subtitle}</div>
               )}
             </button>
           )
