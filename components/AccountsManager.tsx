@@ -198,6 +198,7 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
       <AccountCardStack
         accounts={cardData}
         variant="full"
+        onActiveIndexChange={(_id, index) => setActiveIndex(index)}
         onActiveCardAction={(id) => {
           const index = accounts.findIndex((a) => a.id === id)
           if (index >= 0) setActiveIndex(index)

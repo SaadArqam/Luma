@@ -32,6 +32,7 @@ export function AccountCardStack({
   selectedId,
   onSelect,
   onActiveCardAction,
+  onActiveIndexChange,
 }: {
   accounts: AccountCardData[]
   variant: 'full' | 'mini'
@@ -40,6 +41,8 @@ export function AccountCardStack({
   onSelect?: (id: string) => void
   /** called when the user taps/clicks the currently-active card (Phase 4's edit/delete/make-default sheet trigger) */
   onActiveCardAction?: (id: string) => void
+  /** called whenever the active card changes — by swipe/scroll settling OR by click navigation — not just on tap-while-already-active like onActiveCardAction. Fires for both variants; mini-variant consumers typically don't need it since onSelect already covers their case. */
+  onActiveIndexChange?: (id: string, index: number) => void
 }) {
   const trackRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -76,6 +79,11 @@ export function AccountCardStack({
     el.addEventListener('scroll', syncActiveFromScroll, { passive: true })
     return () => el.removeEventListener('scroll', syncActiveFromScroll)
   }, [syncActiveFromScroll])
+
+  useEffect(() => {
+    const account = accounts[activeIndex]
+    if (account) onActiveIndexChange?.(account.id, activeIndex)
+  }, [activeIndex, accounts, onActiveIndexChange])
 
   const scrollToIndex = (index: number) => {
     const el = trackRef.current
