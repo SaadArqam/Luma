@@ -1,7 +1,7 @@
 ---
 version: alpha
 name: Luma-design-system
-description: A deep-graphite, terracotta-accented daily-use interface for a personal finance/life OS. Liquid Glass chrome (blurred, translucent nav and cards) sits over a warm-editorial content layer — bold tabular numbers paired with a humanist serif for headers. Minimal but never pastel, and never pure black; elevation comes from lightness steps within the same cool-graphite family, never a jump to a light surface.
+description: A deep-graphite, terracotta-accented daily-use interface for a personal finance/life OS. Liquid Glass chrome (blurred, translucent nav and cards) sits over a warm-editorial content layer — Unbounded display family reserved for headers and balance figures (headlines, stat values), while Inter handles all body and meta text. Minimal but never pastel, and never pure black; elevation comes from lightness steps within the same cool-graphite family, never a jump to a light surface.
 
 colors:
   canvas: "#0B0B0F"
@@ -152,14 +152,14 @@ components:
     description: "Inline, low-emphasis. Flame icon in {colors.accent}, text {typography.caption} in {colors.text-muted}. Only rendered when streak ≥ 3 days — never a loud banner."
 
   stat-card:
-    description: "Compact secondary card (Balance, Credited, Spent, Transactions on Home). Label in {typography.header-card} (serif, small), value in {typography.number-card} (bold tabular sans). Demoted visual weight vs. the Today card — smaller padding (16px vs 24px)."
+    description: "Compact secondary card (Balance, Credited, Spent, Transactions on Home). Label in {typography.header-card} (Unbounded, small), value in {typography.number-card} (Unbounded, bold tabular). Demoted visual weight vs. the Today card — smaller padding (16px vs 24px)."
 
 ## Do's and Don'ts
 
 ### Do
 - Keep every surface in the cool-dark family — elevation is a lightness step (`{colors.canvas}` → `{colors.surface-solid}` → `{colors.surface-solid-raised}`), never a jump to a pale/light surface.
 - Use `{colors.accent}` (terracotta) as the only accent color for interactive/active states — same single-accent discipline as the Apple reference doc.
-- Pair serif headers with sans numbers on every card — this contrast is the core identity, don't let one creep into the other's territory.
+- Reserve the Unbounded display family for headers and numbers only — this consistent typographic anchor across all stat values and headlines is the core identity, don't let it drift into body-text roles.
 - Use tabular figures (`font-feature-settings: 'tnum' 1`) on every number that can change, so digit changes don't cause layout shift.
 - Reserve `backdrop-filter` for nav and a handful of hero cards — never apply it to long scrolling lists (perf on mid-range Android).
 
@@ -167,7 +167,7 @@ components:
 - Don't use pure white (`#FFFFFF`) anywhere — text-primary is warm off-white (`#F5F1EA`), and there is no light-mode surface in this system.
 - Don't use pure black (`#000000`) as canvas — `{colors.canvas}` is a deep cool graphite (`#0B0B0F`), chosen deliberately over true black so the base reads as a color, not an absence of one.
 - Don't use neon/saturated versions of success/warning/danger — they're deliberately muted (sage, amber, brick) to sit quietly next to terracotta rather than compete with it.
-- Don't set header text in the sans family or number text in the serif — the serif/sans split by role (words vs. figures) is the rule, not a suggestion.
+- Don't set headers or numbers in Inter, and don't set body text in Unbounded — the role-based family split (Unbounded for display/numbers, Inter for body/meta) is the rule, not a suggestion.
 - Don't add a second accent color for "variety" — every colored dot/border/glow in the category system is a desaturated neutral, not a rainbow; terracotta stays the only saturated color in the UI.
 - Gradients (`{colors.gradient-primary/secondary/tertiary}`) are reserved for money surfaces — the account card stack and primary CTA/save buttons — not general UI chrome. Everything else still uses the single flat `{colors.accent}`, unchanged from the single-accent rule above.
 
