@@ -376,7 +376,14 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                   className="w-full max-w-full sm:w-[150px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
                 />
                 <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val || 'all')}>
-                  <SelectTrigger className="w-full max-w-full sm:w-[150px] bg-luma-raised border-luma-hairline text-luma-text focus-visible:border-luma-accent-border">
+                  <SelectTrigger
+                    className="w-full max-w-full sm:w-[150px] border-luma-hairline text-luma-text focus-visible:border-luma-accent-border"
+                    style={
+                      filterCategory !== 'all'
+                        ? { backgroundColor: getCategoryChipColors(categoryList.find((c) => c.id === filterCategory)?.name ?? '').bg }
+                        : undefined
+                    }
+                  >
                     <SelectValue placeholder="Category">
                       {(value: string | null) =>
                         !value || value === 'all' ? 'All Categories' : categoryLabel(value) ?? 'All Categories'
@@ -387,14 +394,17 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                     <SelectItem value="all">All Categories</SelectItem>
                     {/* categoryList, not the `categories` prop, so a category
                         created inline above is immediately filterable. */}
-                    {categoryList.map(cat => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        <span className="flex items-center gap-2">
-                          <span>{cat.icon}</span>
-                          <span>{cat.name}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
+                    {categoryList.map(cat => {
+                      const chip = getCategoryChipColors(cat.name)
+                      return (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          <span className="flex items-center gap-2 rounded-full px-2 py-0.5" style={{ backgroundColor: chip.bg, color: chip.text }}>
+                            <span>{cat.icon}</span>
+                            <span>{cat.name}</span>
+                          </span>
+                        </SelectItem>
+                      )
+                    })}
                   </SelectContent>
                 </Select>
               </div>
