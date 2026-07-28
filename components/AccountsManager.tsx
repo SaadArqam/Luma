@@ -71,6 +71,7 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
     fetch(`/api/expenses?account_id=${activeAccount.id}`)
       .then((r) => r.json())
       .then((data) => { if (!cancelled) setTransactions(Array.isArray(data) ? data : []) })
+      .catch(() => { if (!cancelled) toast.error('Could not load transactions') })
     return () => { cancelled = true }
   }, [activeAccount])
 
@@ -81,7 +82,15 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
       bank_name: a.bank_name,
       bank_domain: a.bank_domain,
       balance: a.balance,
-      subtitle: ACCOUNT_TYPE_LABELS[a.account_type],
+      // Folded into subtitle (below the balance) rather than maskedLabel
+      // (above the balance, between name and balance) — maskedLabel's slot
+      // visually competes with the hero balance number, while subtitle is
+      // already the card's "metadata line" for account type.
+      subtitle: [
+        a.is_default ? 'Default' : null,
+        ACCOUNT_TYPE_LABELS[a.account_type],
+        `${a.txCount} txn${a.txCount === 1 ? '' : 's'}`,
+      ].filter(Boolean).join(' · '),
     })),
     [accounts]
   )
@@ -223,7 +232,7 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
           <div className="h-24 flex items-center justify-center text-body-muted-luma">No transactions yet</div>
         ) : (
           displayedTransactions.map((t) => (
-            <div key={t.id} className="px-3 py-3 border-b border-luma-hairline last:border-b-0 flex items-center justify-between">
+            <div key={t.id} className="px-3 py-3 border-b border-luma-hairline-strong last:border-b-0 flex items-center justify-between">
               <span className="text-sm text-luma-text truncate">{t.category?.icon} {t.category?.name}</span>
               <span className="text-number-inline text-luma-text">₹{Number(t.amount).toLocaleString('en-IN')}</span>
             </div>
@@ -273,7 +282,7 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
             />
           )}
           {activeAccount && pendingDelete?.account.id === activeAccount.id && (
-            <div className="pt-3 border-t border-luma-hairline space-y-3">
+            <div className="pt-3 border-t border-luma-hairline-strong space-y-3">
               <p className="text-body-muted-luma text-xs">
                 This account has{' '}
                 {pendingDelete.expenseCount > 0 && <>{pendingDelete.expenseCount} expense{pendingDelete.expenseCount === 1 ? '' : 's'}</>}

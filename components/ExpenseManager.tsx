@@ -313,19 +313,22 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                   className="input-luma"
                 />
               </div>
-              <AccountCardStack
-                accounts={accounts.map((a) => ({
-                  id: a.id,
-                  name: a.name,
-                  bank_name: a.bank_name,
-                  bank_domain: a.bank_domain,
-                  balance: 0,
-                  subtitle: a.name,
-                }))}
-                variant="mini"
-                selectedId={accountId}
-                onSelect={setAccountId}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="expense-account">Account</Label>
+                <AccountCardStack
+                  accounts={accounts.map((a) => ({
+                    id: a.id,
+                    name: a.name,
+                    bank_name: a.bank_name,
+                    bank_domain: a.bank_domain,
+                    balance: 0,
+                    subtitle: a.name,
+                  }))}
+                  variant="mini"
+                  selectedId={accountId}
+                  onSelect={setAccountId}
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="note">Note (Optional)</Label>
                 <input
@@ -417,7 +420,7 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                 filteredExpenses.map((expense) => (
                   <div
                     key={expense.id}
-                    className="px-3 py-3 border-b border-luma-hairline last:border-b-0"
+                    className="px-3 py-3 border-b border-luma-hairline-strong last:border-b-0"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
@@ -468,7 +471,7 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
             <div className="solid-list-card hidden sm:block">
               <Table>
                 <TableHeader className="bg-luma-raised">
-                  <TableRow className="border-b border-luma-hairline">
+                  <TableRow className="border-b border-luma-hairline-strong">
                     <TableHead className="font-fraunces text-luma-muted">Date</TableHead>
                     <TableHead className="font-fraunces text-luma-muted">Category</TableHead>
                     <TableHead className="font-fraunces text-luma-muted">Note</TableHead>

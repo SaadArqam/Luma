@@ -16,7 +16,13 @@ export async function GET(request: Request) {
       .eq('user_id', user.id)
       .order('date', { ascending: false })
 
-    if (accountId) query = query.eq('account_id', accountId)
+    // Scoped-by-account lookups (the Accounts page's per-card transaction
+    // list) are a "recent transactions" preview, not a full history — cap it.
+    // The unfiltered call (e.g. the Expenses page, which actually queries
+    // Supabase directly rather than this route, plus any future caller) must
+    // keep returning everything, so the limit only applies when account_id
+    // is present.
+    if (accountId) query = query.eq('account_id', accountId).limit(20)
 
     const { data, error } = await query
 
