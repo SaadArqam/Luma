@@ -22,11 +22,20 @@ Resolved with the user as follows — these decisions are binding for all phases
    user-created category names all get a stable, distinct color). Categories are
    per-user rows (`categories` table), not a fixed enum; only 3 are seeded by default
    (Food, Travel, Shopping — not "Transport"/"Tiffin" as the prompt assumed, those are
-   categories that exist in the requesting user's own account). Decision: **replace**
-   `lib/category-colors.ts`'s implementation with a curated map (one file, existing
-   filename, not a second `lib/categoryColors.ts`), covering Food/Travel/Shopping/
-   Transport/Tiffin/Shopping by name, gray fallback for anything else. Colors stay raw
-   hex (not CSS vars) because recharts needs literal `fill`/`stroke` values.
+   categories that exist in the requesting user's own account).
+   **Correction found during plan-writing** (enumerating call sites surfaced a
+   conflict the earlier "replace" decision didn't account for): `getCategoryColor(key)`
+   is also called from `components/DashboardChart.tsx:29` (recharts `fill`, needs one
+   raw hex) and `components/BankLogo.tsx:66` (bank-avatar background — not a category at
+   all, just reusing the hash for a stable per-name color). Neither can take a `{bg,
+   text}` pair. Decision: **keep `getCategoryColor(key): string` exactly as-is** for
+   those two call sites, and **add** `getCategoryChipColors(name): {bg, text}` in the
+   same file — a curated lookup (Food/Travel/Shopping/Transport/Tiffin by name, gray
+   fallback for anything else) used only by the category chip UI the prompt actually
+   targets (Add Expense category select, Expenses filter). `components/CategoryList.tsx:109`
+   keeps using the untouched hash function — it's not one of the four phases' named
+   screens. Colors stay raw hex (not CSS vars) because recharts needs literal
+   `fill`/`stroke` values.
 4. **Account selector**: the prompt describes replacing an "account dropdown," but
    `AccountPicker.tsx` is already a pill-row selector, not a `<select>`. It gets replaced
    by `AccountCardStack variant="mini"` instead, same behavior contract.
@@ -86,24 +95,29 @@ Phase 1 so Phase 3/4 don't hit unstyled headers.
 Update the shadcn semantic alias block (`:root, .dark { --background: var(--luma-canvas); ... }`)
 to point at the new token names instead of the retired `--luma-*` ones.
 
-**Category color map**: rewrite `lib/category-colors.ts` to export a
-`{ [categoryName]: { bg, text, icon } }`-shaped map (function signature can stay
-`getCategoryColor(key)` for call-site compatibility, but its return shape/behavior
-changes from "single hex" to "bg/text pair," so every call site needs updating in the
-same commit — enumerate them: `app/page.tsx`, `components/ExpenseManager.tsx`, and any
-chart/legend usage). Entries: Food `#412402`/`#FAC775`, Transport `#04342C`/`#5DCAA5`,
+**Category color map**: add to `lib/category-colors.ts` (not replace) a new export
+`getCategoryChipColors(name: string): { bg: string; text: string }`, leaving the
+existing `getCategoryColor(key): string` and `CATEGORY_PALETTE` untouched (still used
+by `DashboardChart.tsx:29` and `BankLogo.tsx:66`, neither of which can take a bg/text
+pair). `getCategoryChipColors` call sites are Phase 3/4 work
+(`ExpenseManager.tsx` category select and Expenses filter) — Phase 1 only adds the
+function and its map. Entries: Food `#412402`/`#FAC775`, Transport `#04342C`/`#5DCAA5`,
 Tiffin `#4B1528`/`#ED93B1`, Shopping `#26215C`/`#AFA9EC`, Travel `#0B2A4B`/`#6FA8DC`
 (existing seed default, not in the original prompt's list — assigned a blue-family tone
 distinct from Transport's teal-green, same saturation/lightness pattern as the other four:
 dark desaturated bg, light saturated text). Gray fallback (e.g. `#2A2A2E`/`#9C9CA3`) for
 anything unmatched.
 
-**`DESIGN-luma.md` rewrite**: update `colors:`, `typography:` (Fraunces → Unbounded
-references), and the `chart-categorical` section to describe the curated map instead of
-the hash approach. Keep the doc's existing structure/format (component keys, Do's/Don'ts,
-Iteration Guide) since other parts of the app (glass-dock, glass-sidebar, quick-add-sheet,
-today-ring, streak-badge) aren't in scope for this redesign and their descriptions should
-only change insofar as they reference retired color/font tokens by name.
+**`DESIGN-luma.md` rewrite**: update `colors:` and `typography:` (Fraunces → Unbounded
+references) to match the new tokens. Leave the `chart-categorical` section describing
+the djb2-hash approach as-is — it still governs `DashboardChart`/`BankLogo`/`CategoryList`
+and hasn't changed — but add a new `category-chip` entry documenting the curated
+Food/Travel/Shopping/Transport/Tiffin map and its gray fallback, so both color systems
+are documented and a future editor knows which one governs which component. Keep the
+doc's existing structure/format (component keys, Do's/Don'ts, Iteration Guide) since
+other parts of the app (glass-dock, glass-sidebar, quick-add-sheet, today-ring,
+streak-badge) aren't in scope for this redesign and their descriptions should only
+change insofar as they reference retired color/font tokens by name.
 
 **Responsive**: token file itself has no layout, but headline sizes (`number-hero`,
 `header-display` equivalents) must be defined using `clamp()` in the new typography
@@ -147,8 +161,8 @@ Ships with mock data for review — real data wiring is Phase 3.
    Selecting a card sets `accountId` — same state variable, same preservation of the
    existing `is_default`-first / first-in-list pre-selection logic from
    `ExpenseManager.tsx` (not "most recently used").
-3. **Category pills on this form**: pull from the rewritten `lib/category-colors.ts`
-   bg/text map instead of the current plain-dot treatment.
+3. **Category pills on this form**: pull from `getCategoryChipColors` (added in Phase 1)
+   instead of the current plain-dot treatment.
 
 **Responsive**: re-test the full page (not just the isolated component) at 375/768/1440/2560px
 — stat card grid and quick-actions row must wrap rather than squish at narrow widths;
