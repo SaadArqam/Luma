@@ -4,23 +4,23 @@ name: Luma-design-system
 description: A deep-graphite, terracotta-accented daily-use interface for a personal finance/life OS. Liquid Glass chrome (blurred, translucent nav and cards) sits over a warm-editorial content layer — bold tabular numbers paired with a humanist serif for headers. Minimal but never pastel, and never pure black; elevation comes from lightness steps within the same cool-graphite family, never a jump to a light surface.
 
 colors:
-  canvas: "#1B1C21"
-  surface-glass: "rgba(46, 47, 56, 0.75)"
-  surface-glass-thin: "rgba(46, 47, 56, 0.48)"
-  surface-glass-thick: "rgba(46, 47, 56, 0.88)"
-  surface-solid: "#2A2B32"
-  surface-solid-raised: "#35363F"
-  border-hairline: "rgba(255, 255, 255, 0.14)"
-  border-hairline-strong: "rgba(255, 255, 255, 0.22)"
+  canvas: "#0B0B0F"
+  surface-glass: "rgba(22, 22, 29, 0.75)"
+  surface-glass-thin: "rgba(22, 22, 29, 0.48)"
+  surface-glass-thick: "rgba(22, 22, 29, 0.88)"
+  surface-solid: "#16161D"
+  surface-solid-raised: "#1E1E26"
+  border-hairline: "#1a1a20"
+  border-hairline-strong: "#26262E"
   specular-highlight: "rgba(255, 255, 255, 0.09)"
   text-primary: "#F5F1EA"
   text-muted: "#9C99A2"
   text-faint: "#6C6A73"
-  accent: "#ED7D3F"
-  accent-pressed: "#D4652B"
-  accent-glow: "rgba(237, 125, 63, 0.28)"
-  accent-border: "rgba(237, 125, 63, 0.55)"
-  accent-shadow: "rgba(237, 125, 63, 0.45)"
+  accent: "#FF6B35"
+  accent-pressed: "#E0552A"
+  accent-glow: "rgba(255, 107, 53, 0.28)"
+  accent-border: "rgba(255, 107, 53, 0.55)"
+  accent-shadow: "rgba(255, 107, 53, 0.45)"
   success: "#6FC49B"
   success-glow: "rgba(111, 196, 155, 0.22)"
   warning: "#EFA84A"
@@ -28,6 +28,9 @@ colors:
   danger: "#D65458"
   danger-glow: "rgba(214, 84, 88, 0.22)"
   info: "#8AA9C4"
+  gradient-primary: "linear-gradient(135deg, #FF6B35 0%, #FF3D8A 100%)"
+  gradient-secondary: "linear-gradient(135deg, #4361EE 0%, #7B2FF7 100%)"
+  gradient-tertiary: "linear-gradient(135deg, #FFB800 0%, #FF8A00 100%)"
 
 chart-categorical:
   description: "Reserved for data visualization (donut/bar charts, category legends, category chips) ONLY — not UI chrome. Unlike the single-accent rule for buttons/nav/borders, categorical charts need real hue variation to be scannable at a glance. Each tone is muted/desaturated to stay consistent with the graphite identity, but spans distinct hue families rather than shades of one gray. Assign by a proper string hash (e.g. djb2) of category id/name mod tones.length, not array index or a weak/collision-prone hash — verify no two categories in actual use resolve to the same tone. A category keeps the same color everywhere (chart, legend, chips) even as other categories are added/removed."
@@ -47,39 +50,39 @@ chart-categorical:
 
 typography:
   header-display:
-    fontFamily: "Fraunces, Georgia, serif"
-    fontSize: 32px
-    fontWeight: 600
+    fontFamily: "Unbounded, system-ui, sans-serif"
+    fontSize: "clamp(28px, 24px + 1vw, 36px)"
+    fontWeight: 800
     lineHeight: 1.15
     letterSpacing: -0.2px
   header-section:
-    fontFamily: "Fraunces, Georgia, serif"
-    fontSize: 22px
-    fontWeight: 600
+    fontFamily: "Unbounded, system-ui, sans-serif"
+    fontSize: "clamp(20px, 18.4px + 0.5vw, 24px)"
+    fontWeight: 700
     lineHeight: 1.2
     letterSpacing: -0.1px
   header-card:
-    fontFamily: "Fraunces, Georgia, serif"
+    fontFamily: "Unbounded, system-ui, sans-serif"
     fontSize: 15px
     fontWeight: 500
     lineHeight: 1.3
     letterSpacing: 0
   number-hero:
-    fontFamily: "Inter, system-ui, sans-serif"
-    fontSize: 44px
+    fontFamily: "Unbounded, system-ui, sans-serif"
+    fontSize: "clamp(32px, 25.6px + 2vw, 44px)"
     fontWeight: 800
     lineHeight: 1.0
     letterSpacing: -0.5px
     fontFeatureSettings: "'tnum' 1"
   number-card:
-    fontFamily: "Inter, system-ui, sans-serif"
-    fontSize: 26px
+    fontFamily: "Unbounded, system-ui, sans-serif"
+    fontSize: "clamp(20px, 17.6px + 0.75vw, 26px)"
     fontWeight: 700
     lineHeight: 1.1
     letterSpacing: -0.3px
     fontFeatureSettings: "'tnum' 1"
   number-inline:
-    fontFamily: "Inter, system-ui, sans-serif"
+    fontFamily: "Unbounded, system-ui, sans-serif"
     fontSize: 15px
     fontWeight: 600
     lineHeight: 1.3
@@ -143,7 +146,7 @@ components:
     description: "SVG circular progress on the Today card. Track color {colors.border-hairline-strong}. Fill color: {colors.success} under 70% of daily budget, {colors.warning} 70-100%, {colors.danger} over 100%. Center number in {typography.number-hero}, sub-label in {typography.body-muted}."
 
   category-chip:
-    description: "Pill-shaped, used in category grids and the expense-form category select. Default: background {colors.surface-solid-raised}, border 1px solid {colors.border-hairline}. Selected: border 2px solid {colors.accent}, background {colors.accent-glow}."
+    description: "Pill-shaped, used in category grids and the expense-form category select. Colors come from lib/category-colors.ts's getCategoryChipColors(name) — a curated {bg, text} map (Food/Transport/Travel/Tiffin/Shopping), gray fallback for any other category name. This is separate from chart-categorical below: that one is the hash-based getCategoryColor(key), still used for chart fills and bank-avatar backgrounds, which need a single raw hex rather than a bg/text pair."
 
   streak-badge:
     description: "Inline, low-emphasis. Flame icon in {colors.accent}, text {typography.caption} in {colors.text-muted}. Only rendered when streak ≥ 3 days — never a loud banner."
@@ -161,11 +164,12 @@ components:
 - Reserve `backdrop-filter` for nav and a handful of hero cards — never apply it to long scrolling lists (perf on mid-range Android).
 
 ### Don't
-- Don't use pure white (`#FFFFFF`) anywhere — text-primary is warm off-white (`#F2EFEA`), and there is no light-mode surface in this system.
-- Don't use pure black (`#000000`) as canvas — `{colors.canvas}` is a deep cool graphite (`#1B1C21`), chosen deliberately over true black so the base reads as a color, not an absence of one.
+- Don't use pure white (`#FFFFFF`) anywhere — text-primary is warm off-white (`#F5F1EA`), and there is no light-mode surface in this system.
+- Don't use pure black (`#000000`) as canvas — `{colors.canvas}` is a deep cool graphite (`#0B0B0F`), chosen deliberately over true black so the base reads as a color, not an absence of one.
 - Don't use neon/saturated versions of success/warning/danger — they're deliberately muted (sage, amber, brick) to sit quietly next to terracotta rather than compete with it.
 - Don't set header text in the sans family or number text in the serif — the serif/sans split by role (words vs. figures) is the rule, not a suggestion.
 - Don't add a second accent color for "variety" — every colored dot/border/glow in the category system is a desaturated neutral, not a rainbow; terracotta stays the only saturated color in the UI.
+- Gradients (`{colors.gradient-primary/secondary/tertiary}`) are reserved for money surfaces — the account card stack and primary CTA/save buttons — not general UI chrome. Everything else still uses the single flat `{colors.accent}`, unchanged from the single-accent rule above.
 
 ## Iteration Guide
 
