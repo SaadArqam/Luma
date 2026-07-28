@@ -13,9 +13,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { format } from 'date-fns'
 import { Category, ExpenseWithCategory } from '@/types'
 import { toast } from 'sonner'
-import { getCategoryColor } from '@/lib/category-colors'
+import { getCategoryColor, getCategoryChipColors } from '@/lib/category-colors'
 import { zonedDateString } from '@/lib/dates'
-import { AccountPicker, AccountTag } from '@/components/AccountPicker'
+import { AccountTag } from '@/components/AccountPicker'
+import { AccountCardStack } from '@/components/AccountCardStack'
 import type { AccountOption } from '@/lib/accounts'
 
 export function ExpenseManager({ categories, initialExpenses, accounts, loadError = null }: {
@@ -204,14 +205,20 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {categoryList.map(cat => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        <span className="flex items-center gap-2">
-                          <span>{cat.icon}</span>
-                          <span>{cat.name}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
+                    {categoryList.map(cat => {
+                      const chip = getCategoryChipColors(cat.name)
+                      return (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          <span
+                            className="flex items-center gap-2 rounded-full px-2 py-0.5"
+                            style={{ backgroundColor: chip.bg, color: chip.text }}
+                          >
+                            <span>{cat.icon}</span>
+                            <span>{cat.name}</span>
+                          </span>
+                        </SelectItem>
+                      )
+                    })}
                     <SelectItem value="__new__">
                       <span style={{ color: 'var(--luma-accent)', fontWeight: 600 }}>+ Create new category</span>
                     </SelectItem>
@@ -306,11 +313,18 @@ export function ExpenseManager({ categories, initialExpenses, accounts, loadErro
                   className="input-luma"
                 />
               </div>
-              <AccountPicker
-                id="expense-account"
-                accounts={accounts}
-                value={accountId}
-                onChange={setAccountId}
+              <AccountCardStack
+                accounts={accounts.map((a) => ({
+                  id: a.id,
+                  name: a.name,
+                  bank_name: a.bank_name,
+                  bank_domain: a.bank_domain,
+                  balance: 0,
+                  subtitle: a.name,
+                }))}
+                variant="mini"
+                selectedId={accountId}
+                onSelect={setAccountId}
               />
               <div className="space-y-2">
                 <Label htmlFor="note">Note (Optional)</Label>
