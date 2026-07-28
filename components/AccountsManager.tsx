@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Plus, Star, Pencil, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { BankLogo } from '@/components/BankLogo'
@@ -59,22 +59,34 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
   const activeAccount = accounts[Math.min(activeIndex, Math.max(accounts.length - 1, 0))]
 
   const [transactions, setTransactions] = useState<ExpenseWithCategory[]>([])
+  // Never show a stale account's transactions once there's no active account
+  // to attribute them to (e.g. the last account was just deleted) — derived
+  // at render time so the fetch effect below never needs to call setState
+  // just to clear the list.
+  const displayedTransactions = activeAccount ? transactions : []
 
   useEffect(() => {
     if (!activeAccount) return
+    let cancelled = false
     fetch(`/api/expenses?account_id=${activeAccount.id}`)
       .then((r) => r.json())
-      .then((data) => setTransactions(Array.isArray(data) ? data : []))
+      .then((data) => { if (!cancelled) setTransactions(Array.isArray(data) ? data : []) })
+    return () => { cancelled = true }
   }, [activeAccount])
 
-  const cardData: AccountCardData[] = accounts.map((a) => ({
-    id: a.id,
-    name: a.name,
-    bank_name: a.bank_name,
-    bank_domain: a.bank_domain,
-    balance: a.balance,
-    subtitle: ACCOUNT_TYPE_LABELS[a.account_type],
-  }))
+  const cardData: AccountCardData[] = useMemo(
+    () => accounts.map((a) => ({
+      id: a.id,
+      name: a.name,
+      bank_name: a.bank_name,
+      bank_domain: a.bank_domain,
+      balance: a.balance,
+      subtitle: ACCOUNT_TYPE_LABELS[a.account_type],
+    })),
+    [accounts]
+  )
+
+  const handleActiveIndexChange = useCallback((_id: string, index: number) => setActiveIndex(index), [])
 
   const load = async () => {
     try {
@@ -198,7 +210,7 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
       <AccountCardStack
         accounts={cardData}
         variant="full"
-        onActiveIndexChange={(_id, index) => setActiveIndex(index)}
+        onActiveIndexChange={handleActiveIndexChange}
         onActiveCardAction={(id) => {
           const index = accounts.findIndex((a) => a.id === id)
           if (index >= 0) setActiveIndex(index)
@@ -207,10 +219,10 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: Account[
       />
 
       <div className="solid-list-card">
-        {transactions.length === 0 ? (
+        {displayedTransactions.length === 0 ? (
           <div className="h-24 flex items-center justify-center text-body-muted-luma">No transactions yet</div>
         ) : (
-          transactions.map((t) => (
+          displayedTransactions.map((t) => (
             <div key={t.id} className="px-3 py-3 border-b border-luma-hairline last:border-b-0 flex items-center justify-between">
               <span className="text-sm text-luma-text truncate">{t.category?.icon} {t.category?.name}</span>
               <span className="text-number-inline text-luma-text">₹{Number(t.amount).toLocaleString('en-IN')}</span>
